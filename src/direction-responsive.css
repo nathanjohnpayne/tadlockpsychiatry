@@ -70,22 +70,32 @@
     font-size: clamp(20px, 5vw, 28px) !important;
   }
 
-  /* Practice portrait used in About sections — cap so it doesn't
-   * dominate small screens. */
-  .d-root img[src*="sterling-tadlock"],
-  .d-root img[src^="blob:"] {
+  /* Practice portrait — direction components render it as a <div> with
+   * `background: url(${P.portrait}) ...` (verified in direction-1.jsx
+   * line 262 + 442, direction-2.jsx line 371, direction-3.jsx line
+   * 352). The loader replaces P.portrait with a blob: URL before
+   * mounting, so the rendered DOM has `url(blob:...)` in the style
+   * attribute. Match on that. */
+  .d-root [style*="url(blob:"] {
     max-height: 60vh !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: cover;
   }
 
-  /* Touch-target floor. Anchors and the inline-styled "buttons" in
-   * the prototypes get a 44px min-height. */
+  /* Touch-target floor. Inline anchors don't honor min-height without
+   * display: inline-flex (or block), so set both. The !important guards
+   * against the prototypes' inline display: flex / inline overrides. */
   .d-root a,
+  .d-root button,
   .d-root [style*="cursor: pointer"],
   .d-root [style*="cursor:pointer"] {
-    min-height: 44px;
+    min-height: 44px !important;
+  }
+  .d-root nav a,
+  .d-root nav [style*="cursor: pointer"],
+  .d-root nav [style*="cursor:pointer"] {
+    display: inline-flex !important;
+    align-items: center;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
   }
 
   /* Sticky nav: keep the brand mark + CTA visible, but tighten padding
