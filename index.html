@@ -136,6 +136,33 @@
       animation: drift 38s linear infinite;
     }
     @keyframes drift { 0% { transform: translateX(-50%) translateX(20vw); } 100% { transform: translateX(-50%) translateX(-20vw); } }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 720px) {
+      .frame { inset: 14px; }
+      .corner { font-size: 9px; letter-spacing: 1.2px; }
+      .corner.tl { top: 24px; left: 22px; }
+      .corner.tr { top: 24px; right: 22px; }
+      .corner.bl { bottom: 24px; left: 22px; }
+      .corner.br { bottom: 24px; right: 22px; }
+      .wordmark-row { top: 22px; font-size: 9px; gap: 8px; }
+      .stage { padding: 0 28px; }
+      .display { font-size: clamp(36px, 11vw, 56px); line-height: 1.0; }
+      .lede { font-size: 14px; max-width: 320px; }
+      .seal { font-size: 9.5px; padding: 6px 12px; margin-bottom: 28px; }
+      .auth { margin-top: 36px; }
+      .gbtn { padding: 14px 22px; font-size: 11px; }
+      .drift { font-size: 9px; bottom: 26px; letter-spacing: 1.8px; }
+      .denied-msg { max-width: calc(100vw - 80px); }
+    }
+    @media (max-width: 420px) {
+      .corner.tr, .corner.br { display: none; }
+      .display { font-size: 38px; }
+    }
+    /* Hide drift on very short screens so it doesn't crowd */
+    @media (max-height: 620px) {
+      .drift { display: none; }
+    }
   </style>
 </head>
 <body>
