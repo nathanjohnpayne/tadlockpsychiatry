@@ -242,9 +242,11 @@
       .card.noir .typeglyph { font-size: 200px; }
       .card.arch .typestamp span { font-size: 140px; letter-spacing: -7px; }
       .footrow { padding: 18px 20px 28px; flex-direction: column; gap: 6px; }
-
-      /* On touch, hover doesn't fire — keep cards in their resting glimpse-ready state
-         but show a subtle motion loop on the visual so users know it's interactive. */
+    }
+    /* Touch / hover-less devices — capability, not size. A narrow desktop
+       window keeps full hover; large touchscreens (iPads, foldables) get
+       the resting glimpse-ready state and hide the hover-revealed peek. */
+    @media (hover: none) {
       .card .vis { transform: scale(1.02); }
       .card .peek { display: none; }
     }
