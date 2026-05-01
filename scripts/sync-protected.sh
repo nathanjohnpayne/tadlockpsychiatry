@@ -50,9 +50,10 @@ fi
 # --recursive so nested files (none today, but future-safe) are picked
 # up. The -- after rsync prevents flag-parsing surprises.
 echo "[sync-protected] gcloud storage rsync $SRC_DIR/ gs://$BUCKET/protected/"
+# `${arr[@]+"${arr[@]}"}` expands safely under `set -u` when arr is empty.
 gcloud storage rsync "$SRC_DIR" "gs://$BUCKET/protected" \
   --recursive \
   --delete-unmatched-destination-objects \
-  "${DRY_FLAG[@]}"
+  ${DRY_FLAG[@]+"${DRY_FLAG[@]}"}
 
 echo "[sync-protected] done"
