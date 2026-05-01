@@ -29,39 +29,28 @@
   <a class="menu-back" href="/menu">← MENU</a>
   <div id="root"></div>
 
+  <!-- React + Babel are public. The protected JSX (content.jsx, direction-1.jsx)
+       and the practice portrait are fetched with an Authorization: Bearer header
+       through Hosting rewrites that route to the protectedFile Cloud Function. -->
   <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
-  <script type="text/babel" src="/src/content.jsx"></script>
-  <script type="text/babel" src="/src/direction-1.jsx"></script>
 
-  <script type="text/babel">
-    // Mount fn is exposed for the auth guard to invoke once it resolves.
-    window._mountDirection = function () {
-      const tweaks = {
+  <script type="module">
+    import { bootDirection } from "/src/direction-loader.js";
+    bootDirection({
+      id: "1",
+      tweaks: {
         dark: true,
         accent: "#C9A876",
         heroVariant: "monogram",
         serif: '"Cormorant Garamond", Georgia, serif',
         sans:  '"Inter", -apple-system, system-ui, sans-serif',
         mono:  '"JetBrains Mono", ui-monospace, monospace',
-      };
-      ReactDOM.createRoot(document.getElementById("root")).render(<D1 tweaks={tweaks} />);
-    };
-  </script>
-
-  <script type="module">
-    import { guardOrRedirect } from "/src/auth.js";
-    await guardOrRedirect();
-    document.body.classList.add("ready");
-    // Babel transforms <script type="text/babel"> tags asynchronously after
-    // DOMContentLoaded; window._mountDirection may not exist yet. Poll briefly.
-    let attempts = 0;
-    (function tryMount() {
-      if (window._mountDirection) return window._mountDirection();
-      if (attempts++ > 200) return console.error("[d/1] mount timeout");
-      setTimeout(tryMount, 30);
-    })();
+      },
+    }).catch((err) => {
+      console.error("[d/1] boot failed", err);
+    });
   </script>
 </body>
 </html>

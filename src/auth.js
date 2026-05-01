@@ -21,10 +21,12 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
+import { getStorage, ref as storageRef, getBlob } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const storage = getStorage(app);
 
 // Initialize Firebase Analytics on every page that imports auth.js (which is
 // every page in this preview). Wrapped in isSupported() so SSR / non-browser
@@ -92,4 +94,18 @@ export function guardOrRedirect() {
 export async function signOutAndGoHome() {
   try { await signOut(auth); } catch (_) {}
   location.replace("/");
+}
+
+// Fetch a file from the protected/ prefix of the project's default
+// Storage bucket. The Storage SDK signs the request with the current
+// user's Firebase Auth token; Storage Rules (storage.rules) enforce the
+// allowlist server-side. Returns a Blob.
+//
+// Used by src/direction-loader.js to pull /protected/content.jsx,
+// /protected/direction-{1,2,3}.jsx, and /protected/sterling-tadlock.png
+// for any signed-in allowlisted user. An anonymous fetch from `gsutil
+// cp` or a `curl` of the bucket URL returns 403 because the rules
+// require an authenticated email on the allowlist.
+export async function getProtectedBlob(filename) {
+  return getBlob(storageRef(storage, `protected/${filename}`));
 }

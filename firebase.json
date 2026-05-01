@@ -1,8 +1,14 @@
 {
+  "storage": {
+    "rules": "storage.rules"
+  },
   "hosting": {
     "public": ".",
     "cleanUrls": true,
     "trailingSlash": false,
+    "predeploy": [
+      "bash scripts/sync-protected.sh"
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -33,7 +39,9 @@
       "docs/**",
       "bugs/**",
       "functions/**",
-      "packaging/**"
+      "packaging/**",
+      "protected/**",
+      "storage.rules"
     ],
     "headers": [
       {
