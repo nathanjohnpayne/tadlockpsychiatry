@@ -38,7 +38,7 @@ const D2 = ({ tweaks = {} }) => {
   }, []);
 
   return (
-    <div ref={rootRef} style={{
+    <div ref={rootRef} className="d-root" style={{
       width: "100%", height: "100%", overflow: "auto",
       background: bg, color: fg, fontFamily: sans,
       scrollbarWidth: "thin", scrollbarColor: `${faint} transparent`,
