@@ -51,9 +51,19 @@ fi
 # up. The -- after rsync prevents flag-parsing surprises.
 echo "[sync-protected] gcloud storage rsync $SRC_DIR/ gs://$BUCKET/protected/"
 # `${arr[@]+"${arr[@]}"}` expands safely under `set -u` when arr is empty.
+#
+# `--impersonate-service-account=""` drops any impersonation set in the
+# active gcloud config. This script gets called from a Hosting predeploy
+# hook where the active config may belong to a different project (e.g.
+# the developer's last `firebase use` was a different repo), and the
+# project-specific deployer SA from that config has no storage.* access
+# on this bucket. Using the user's underlying ADC credentials directly
+# is portable and matches what an interactive `gcloud storage cp`
+# would do without an active impersonation override.
 gcloud storage rsync "$SRC_DIR" "gs://$BUCKET/protected" \
   --recursive \
   --delete-unmatched-destination-objects \
+  --impersonate-service-account="" \
   ${DRY_FLAG[@]+"${DRY_FLAG[@]}"}
 
 echo "[sync-protected] done"
