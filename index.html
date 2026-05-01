@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tadlock Psychiatry</title>
+    <meta
+      name="description"
+      content="Tadlock Psychiatry — compassionate psychiatric care."
+    />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Tadlock Psychiatry</h1>
+        <p class="tagline">Compassionate psychiatric care.</p>
+      </header>
+
+      <section aria-label="Coming soon">
+        <p>
+          Our website is coming soon. To inquire about an appointment,
+          please reach out directly.
+        </p>
+      </section>
+
+      <footer>
+        <p>&copy; <span id="year"></span> Tadlock Psychiatry</p>
+      </footer>
+    </main>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+    <script type="module" src="/src/firebase-init.js"></script>
+  </body>
+</html>
