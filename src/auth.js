@@ -20,10 +20,19 @@ import {
   signOut,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+
+// Initialize Firebase Analytics on every page that imports auth.js (which is
+// every page in this preview). Wrapped in isSupported() so SSR / non-browser
+// environments / browsers without IndexedDB don't throw.
+isAnalyticsSupported()
+  .then((ok) => { if (ok) getAnalytics(app); })
+  .catch(() => {});
+
 export const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 
@@ -40,7 +49,9 @@ export { signOut, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRe
 
 // Used by the gate. Tries popup first; on browsers that block popups
 // (Safari with strict settings, some embedded webviews), falls back
-// to redirect.
+// to redirect. `auth/popup-closed-by-user` is intentionally NOT in the
+// fallback set: closing the popup is an intentional cancel, and
+// re-launching as a full-page redirect would steal that cancel signal.
 export async function startSignIn() {
   try {
     const cred = await signInWithPopup(auth, provider);
@@ -49,7 +60,6 @@ export async function startSignIn() {
     const code = err && err.code;
     const popupBlocked =
       code === "auth/popup-blocked" ||
-      code === "auth/popup-closed-by-user" ||
       code === "auth/operation-not-supported-in-this-environment";
     if (popupBlocked) {
       await signInWithRedirect(auth, provider);
