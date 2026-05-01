@@ -6,6 +6,9 @@
     "public": ".",
     "cleanUrls": true,
     "trailingSlash": false,
+    "predeploy": [
+      "bash scripts/sync-protected.sh"
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",
