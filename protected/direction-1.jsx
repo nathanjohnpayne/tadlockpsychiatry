@@ -80,7 +80,7 @@ const D1 = ({ tweaks = {} }) => {
   };
 
   return (
-    <div ref={rootRef} style={styles.root}>
+    <div ref={rootRef} className="d-root" style={styles.root}>
       <div ref={spotRef} style={styles.spot} />
       <div style={styles.grain} />
 
