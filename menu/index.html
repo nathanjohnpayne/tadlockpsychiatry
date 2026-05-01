@@ -26,6 +26,7 @@
     body { -webkit-font-smoothing: antialiased; visibility: hidden; }
     body.ready { visibility: visible; }
 
+    /* Top bar — same vocabulary as the gate */
     .topbar {
       position: sticky; top: 0; z-index: 10;
       display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
@@ -41,19 +42,30 @@
     .ident { display: flex; align-items: center; gap: 10px; color: var(--fg); }
     .ident em { font-style: normal; color: var(--dim); }
 
+    /* Header */
     .header {
       padding: 88px 40px 56px;
       max-width: 1280px; margin: 0 auto;
       display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: end;
     }
-    .header .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); display: flex; align-items: center; gap: 12px; }
+    .header .eyebrow {
+      font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim);
+      display: flex; align-items: center; gap: 12px;
+    }
     .header .eyebrow i { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
-    .header h1 { font-family: var(--sans); font-weight: 200; font-size: clamp(40px, 5.6vw, 80px); letter-spacing: -0.035em; line-height: 0.98; margin: 18px 0 0; }
+    .header h1 {
+      font-family: var(--sans); font-weight: 200; font-size: clamp(36px, 5.6vw, 80px);
+      letter-spacing: -0.035em; line-height: 0.98; margin: 18px 0 0;
+    }
     .header h1 em { font-style: italic; font-weight: 300; color: var(--fg); }
-    .header h1 .dim { color: var(--dim); }
-    .header .note { font-family: var(--sans); font-size: 14.5px; line-height: 1.6; color: var(--dim); max-width: 420px; justify-self: end; text-align: left; }
+    .header h1 .dim { color: var(--dim); display: block; margin-top: 8px; font-size: 0.6em; letter-spacing: -0.025em; }
+    .header .note {
+      font-family: var(--sans); font-size: 14.5px; line-height: 1.6; color: var(--dim);
+      max-width: 420px; justify-self: end; text-align: left;
+    }
     .header .note b { color: var(--fg); font-weight: 500; }
 
+    /* Cards row */
     .cards {
       max-width: 1280px; margin: 0 auto; padding: 0 40px 88px;
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
@@ -67,24 +79,58 @@
       text-decoration: none; color: inherit;
       display: flex; flex-direction: column; justify-content: space-between;
     }
-    .card:hover { border-color: var(--fg); }
-    .card .vis { position: absolute; inset: 0; z-index: 0; pointer-events: none; transition: transform .9s ease, opacity .6s ease, filter .6s ease; }
-    .card:hover .vis { transform: scale(1.04); }
-    .card .scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(10,10,10,0.0) 0%, rgba(10,10,10,0.45) 60%, rgba(10,10,10,0.92) 100%); }
+    .card:hover { border-color: var(--fg); transform: translateY(-3px); }
+    .card .vis {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      transition: transform .7s cubic-bezier(.2,.8,.2,1), opacity .5s ease, filter .5s ease;
+      transform: scale(1);
+    }
+    .card:hover .vis { transform: scale(1.12); }
+    .card .scrim {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(180deg, rgba(10,10,10,0.0) 0%, rgba(10,10,10,0.45) 60%, rgba(10,10,10,0.92) 100%);
+      transition: opacity .5s ease;
+    }
+    .card:hover .scrim { opacity: 0.65; }
+    .card .peek {
+      position: absolute; top: 22px; left: 50%; transform: translate(-50%, -8px);
+      z-index: 3; opacity: 0; pointer-events: none;
+      font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--bg); background: var(--accent); padding: 6px 10px;
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    .card:hover .peek { opacity: 1; transform: translate(-50%, 0); }
     .card .top, .card .bot { position: relative; z-index: 2; padding: 22px 22px; }
-    .card .top { display: flex; justify-content: space-between; align-items: flex-start; font-family: var(--mono); font-size: 10.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--fg); }
+    .card .top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      font-family: var(--mono); font-size: 10.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--fg);
+    }
     .card .top .num { font-weight: 600; }
     .card .top .meta { color: rgba(240,237,230,0.7); text-align: right; line-height: 1.5; }
     .card .bot { display: flex; flex-direction: column; gap: 14px; }
-    .card .name { font-family: var(--sans); font-weight: 300; font-size: 32px; line-height: 1.05; letter-spacing: -0.02em; color: var(--fg); }
+    .card .name {
+      font-family: var(--sans); font-weight: 300; font-size: 32px; line-height: 1.05;
+      letter-spacing: -0.02em; color: var(--fg);
+    }
     .card .name em { font-style: italic; font-weight: 400; }
-    .card .tag { font-family: var(--sans); font-size: 14px; line-height: 1.55; color: var(--dim); max-width: 22ch; }
-    .card .enter { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--dim); transition: color .35s ease, gap .35s ease; }
+    .card .tag {
+      font-family: var(--sans); font-size: 14px; line-height: 1.55; color: var(--dim);
+      max-width: 22ch;
+    }
+    .card .enter {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--mono); font-size: 10.5px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--dim);
+      transition: color .35s ease, gap .35s ease;
+    }
     .card:hover .enter { color: var(--accent); gap: 16px; }
     .card .enter .arrow { width: 24px; height: 1px; background: currentColor; position: relative; transition: width .35s ease; }
     .card:hover .enter .arrow { width: 36px; }
-    .card .enter .arrow::after { content: ""; position: absolute; right: 0; top: -3px; width: 7px; height: 7px; border-top: 1px solid currentColor; border-right: 1px solid currentColor; transform: rotate(45deg); }
+    .card .enter .arrow::after {
+      content: ""; position: absolute; right: 0; top: -3px;
+      width: 7px; height: 7px; border-top: 1px solid currentColor; border-right: 1px solid currentColor; transform: rotate(45deg);
+    }
 
+    /* Card 1: Editorial Noir */
     .card.noir { background: #0E0F12; }
     .card.noir .vis {
       background:
@@ -101,9 +147,12 @@
       letter-spacing: -0.02em;
       transition: transform .9s ease, color .6s ease;
     }
-    .card.noir:hover .typeglyph { color: rgba(196,160,90,0.32); transform: translate(-4px, -6px); }
+    .card.noir:hover .typeglyph { color: rgba(196,160,90,0.55); transform: translate(-8px, -10px) scale(1.08); }
+    .card.noir:hover .vis { filter: brightness(1.15); }
+    .card.noir .peek { background: #C4A05A; color: #0E0F12; }
     .card.noir .name em { color: #C4A05A; }
 
+    /* Card 2: Quiet Clinical */
     .card.clinical { background: #F4F1EA; }
     .card.clinical .top, .card.clinical .name, .card.clinical .enter { color: #14171C; }
     .card.clinical .top .meta { color: rgba(20,23,28,0.6); }
@@ -115,16 +164,30 @@
         repeating-linear-gradient(0deg, rgba(20,23,28,0.05) 0 1px, transparent 1px 56px),
         #F4F1EA;
     }
-    .card.clinical .wire { position: absolute; inset: 16% 12% 22%; border: 1px solid rgba(20,23,28,0.18); border-radius: 8px; transition: transform .9s ease, border-color .6s ease; }
-    .card.clinical .wire::before, .card.clinical .wire::after { content: ""; position: absolute; left: 16px; right: 16px; height: 1px; background: rgba(20,23,28,0.14); }
+    .card.clinical .wire {
+      position: absolute; inset: 16% 12% 22%; border: 1px solid rgba(20,23,28,0.18); border-radius: 8px;
+      transition: transform .9s ease, border-color .6s ease;
+    }
+    .card.clinical .wire::before, .card.clinical .wire::after {
+      content: ""; position: absolute; left: 16px; right: 16px; height: 1px; background: rgba(20,23,28,0.14);
+    }
     .card.clinical .wire::before { top: 56px; }
     .card.clinical .wire::after { top: 88px; right: 50%; }
-    .card.clinical .wire .row { position: absolute; left: 16px; top: 16px; width: 80px; height: 22px; background: rgba(94,128,168,0.20); border-radius: 3px; }
-    .card.clinical .wire .pill { position: absolute; right: 16px; top: 16px; width: 56px; height: 22px; background: #5E80A8; border-radius: 3px; }
-    .card.clinical:hover .wire { transform: translateY(-4px); border-color: rgba(20,23,28,0.32); }
+    .card.clinical .wire .row {
+      position: absolute; left: 16px; top: 16px; width: 80px; height: 22px; background: rgba(94,128,168,0.20); border-radius: 3px;
+    }
+    .card.clinical .wire .pill {
+      position: absolute; right: 16px; top: 16px; width: 56px; height: 22px; background: #5E80A8; border-radius: 3px;
+    }
+    .card.clinical:hover .wire { transform: translateY(-10px) scale(1.04); border-color: rgba(20,23,28,0.45); box-shadow: 0 12px 32px rgba(20,23,28,0.10); }
+    .card.clinical:hover .wire .row { width: 110px; transition: width .6s ease; }
+    .card.clinical:hover .wire .pill { background: #4A6B92; transition: background .5s ease; }
+    .card.clinical .wire .row, .card.clinical .wire .pill { transition: width .6s ease, background .5s ease; }
+    .card.clinical .peek { background: #5E80A8; color: #F4F1EA; }
     .card.clinical .name em { color: #5E80A8; }
     .card.clinical:hover { border-color: #14171C; }
 
+    /* Card 3: Architectural */
     .card.arch { background: #0A0A0A; }
     .card.arch .vis {
       background:
@@ -132,13 +195,26 @@
         repeating-linear-gradient(90deg, rgba(240,237,230,0.05) 0 1px, transparent 1px 32px),
         #0A0A0A;
     }
-    .card.arch .block { position: absolute; left: 22px; right: 22px; top: 32%; height: 36%; background: var(--accent); transition: transform .9s ease, height .6s ease; }
-    .card.arch:hover .block { transform: translateY(-6px); height: 42%; }
-    .card.arch .typestamp { position: absolute; left: 22px; right: 22px; top: 32%; display: grid; place-items: center; height: 36%; transition: top .9s ease, height .6s ease; }
-    .card.arch:hover .typestamp { top: 30%; }
-    .card.arch .typestamp span { font-family: var(--sans); font-weight: 800; font-size: 200px; letter-spacing: -10px; color: #0A0A0A; line-height: 1; mix-blend-mode: normal; }
+    .card.arch .block {
+      position: absolute; left: 22px; right: 22px; top: 32%;
+      height: 36%;
+      background: var(--accent);
+      transition: transform .9s ease, height .6s ease;
+    }
+    .card.arch:hover .block { transform: translateY(-12px) scale(1.02); height: 46%; }
+    .card.arch .typestamp {
+      position: absolute; left: 22px; right: 22px; top: 32%;
+      display: grid; place-items: center; height: 36%;
+      transition: top .7s ease, height .6s ease, transform .7s ease;
+    }
+    .card.arch:hover .typestamp { top: 26%; transform: scale(1.04); }
+    .card.arch .typestamp span {
+      font-family: var(--sans); font-weight: 800; font-size: 200px; letter-spacing: -10px;
+      color: #0A0A0A; line-height: 1; mix-blend-mode: normal;
+    }
     .card.arch .name em { color: var(--accent); }
 
+    /* Footer rule */
     .footrow {
       max-width: 1280px; margin: 0 auto; padding: 24px 40px 40px;
       border-top: 1px solid var(--hair);
@@ -151,6 +227,35 @@
     .cards > *:nth-child(1) { animation-delay: 0.05s; }
     .cards > *:nth-child(2) { animation-delay: 0.18s; }
     .cards > *:nth-child(3) { animation-delay: 0.31s; }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 960px) {
+      .topbar { padding: 14px 20px; grid-template-columns: 1fr auto; gap: 12px; font-size: 9.5px; }
+      .topbar > div:nth-child(2) { display: none; }
+      .topbar .r { font-size: 9.5px; gap: 12px; }
+      .topbar .r > span:first-child { display: none; }
+      .header { padding: 56px 20px 32px; grid-template-columns: 1fr; gap: 24px; }
+      .header .note { justify-self: start; max-width: none; }
+      .cards { grid-template-columns: 1fr; gap: 16px; padding: 0 20px 56px; }
+      .card { aspect-ratio: 16/11; min-height: 360px; }
+      .card .name { font-size: 26px; }
+      .card.noir .typeglyph { font-size: 200px; }
+      .card.arch .typestamp span { font-size: 140px; letter-spacing: -7px; }
+      .footrow { padding: 18px 20px 28px; flex-direction: column; gap: 6px; }
+    }
+    /* Touch / hover-less devices — capability, not size. A narrow desktop
+       window keeps full hover; large touchscreens (iPads, foldables) get
+       the resting glimpse-ready state and hide the hover-revealed peek. */
+    @media (hover: none) {
+      .card .vis { transform: scale(1.02); }
+      .card .peek { display: none; }
+    }
+    @media (max-width: 480px) {
+      .header h1 { font-size: 32px; line-height: 1.0; }
+      .header h1 .dim { font-size: 0.65em; }
+      .topbar .ident em { display: none; }
+      .card { aspect-ratio: 4/3; min-height: 280px; }
+    }
   </style>
 </head>
 <body>
@@ -169,7 +274,7 @@
   <header class="header">
     <div>
       <div class="eyebrow"><i></i> Three concepts · choose one to enter</div>
-      <h1>Three takes on the<br/><em>same practice</em>. <span class="dim">Pick a way in.</span></h1>
+      <h1>Three takes on the<br/><em>same practice.</em><span class="dim">Pick a way in.</span></h1>
     </div>
     <p class="note">
       Each direction is a complete, working concept of the site — same content, three different design vocabularies. <b>Hover to glimpse, click to enter.</b>
@@ -180,6 +285,7 @@
     <a class="card noir" href="/d/1">
       <div class="vis"><div class="typeglyph">T</div></div>
       <div class="scrim"></div>
+      <div class="peek">Glimpse · 01</div>
       <div class="top">
         <div class="num">01 / 03</div>
         <div class="meta">DARK · SERIF<br/>GOLD ACCENT</div>
@@ -194,6 +300,7 @@
     <a class="card clinical" href="/d/2">
       <div class="vis"><div class="wire"><div class="row"></div><div class="pill"></div></div></div>
       <div class="scrim"></div>
+      <div class="peek">Glimpse · 02</div>
       <div class="top">
         <div class="num">02 / 03</div>
         <div class="meta">PAPER · SANS<br/>SLATE BLUE</div>
@@ -210,6 +317,7 @@
       <div class="block"></div>
       <div class="typestamp"><span>ST</span></div>
       <div class="scrim"></div>
+      <div class="peek">Glimpse · 03</div>
       <div class="top">
         <div class="num">03 / 03</div>
         <div class="meta">OFF-BLACK · MONO<br/>RED-ORANGE</div>
