@@ -1,0 +1,22 @@
+[
+  {
+    "origin": [
+      "https://tadlockpsychiatry.com",
+      "https://www.tadlockpsychiatry.com",
+      "https://tadlockpsychiatry.web.app",
+      "https://tadlockpsychiatry.firebaseapp.com",
+      "http://localhost:5000",
+      "http://localhost:8080"
+    ],
+    "method": ["GET", "HEAD"],
+    "responseHeader": [
+      "Content-Type",
+      "Content-Length",
+      "Content-Range",
+      "ETag",
+      "Authorization",
+      "X-Goog-Resumable"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]
