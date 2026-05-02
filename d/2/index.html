@@ -14,15 +14,21 @@
     body { background: #F4F2ED; color: #14171C; font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif; visibility: hidden; }
     body.ready { visibility: visible; }
     * { box-sizing: border-box; }
+    /* See d/1/index.html for the rationale on the chip-with-backdrop pattern. */
     .menu-back {
-      position: fixed; top: 16px; left: 24px; z-index: 9999;
+      position: fixed; top: 12px; left: 12px; z-index: 9999;
       font-family: "JetBrains Mono", ui-monospace, monospace;
       font-size: 10.5px; letter-spacing: 1.6px; text-transform: uppercase;
-      color: #ffffff; mix-blend-mode: difference;
-      text-decoration: none; padding: 6px 8px;
-      transition: opacity .25s ease;
+      color: #ffffff;
+      background: rgba(0,0,0,0.62);
+      backdrop-filter: blur(10px) saturate(140%);
+      -webkit-backdrop-filter: blur(10px) saturate(140%);
+      border: 1px solid rgba(255,255,255,0.14);
+      text-decoration: none; padding: 8px 12px;
+      border-radius: 999px;
+      transition: opacity .25s ease, transform .25s ease, background .25s ease;
     }
-    .menu-back:hover { opacity: 0.65; }
+    .menu-back:hover { background: rgba(0,0,0,0.82); transform: translateY(-1px); }
   </style>
 </head>
 <body>

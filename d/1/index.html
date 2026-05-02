@@ -14,16 +14,27 @@
     body { background: #0E0F12; color: #E8E4DC; font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif; visibility: hidden; }
     body.ready { visibility: visible; }
     * { box-sizing: border-box; }
-    /* Return-to-menu affordance — neutral on any direction via difference blend. */
+    /* Return-to-menu affordance. Earlier version used mix-blend-mode: difference
+       to read on any direction background, but it visibly overlapped each
+       direction's nav brand text (gross checkered look). Switched to a small
+       translucent dark pill with backdrop-blur — it sits on top of whatever's
+       behind it as its own UI chip, doesn't blend with the nav text, and the
+       white label reads on every direction (dark, paper, off-black) because
+       the dark backdrop carries the contrast. */
     .menu-back {
-      position: fixed; top: 16px; left: 24px; z-index: 9999;
+      position: fixed; top: 12px; left: 12px; z-index: 9999;
       font-family: "JetBrains Mono", ui-monospace, monospace;
       font-size: 10.5px; letter-spacing: 1.6px; text-transform: uppercase;
-      color: #ffffff; mix-blend-mode: difference;
-      text-decoration: none; padding: 6px 8px;
-      transition: opacity .25s ease;
+      color: #ffffff;
+      background: rgba(0,0,0,0.62);
+      backdrop-filter: blur(10px) saturate(140%);
+      -webkit-backdrop-filter: blur(10px) saturate(140%);
+      border: 1px solid rgba(255,255,255,0.14);
+      text-decoration: none; padding: 8px 12px;
+      border-radius: 999px;
+      transition: opacity .25s ease, transform .25s ease, background .25s ease;
     }
-    .menu-back:hover { opacity: 0.65; }
+    .menu-back:hover { background: rgba(0,0,0,0.82); transform: translateY(-1px); }
   </style>
 </head>
 <body>

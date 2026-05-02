@@ -1,4 +1,4 @@
-// Shared content for Dr. Sterling Tadlock — Psychiatry
+// Shared content for Dr. Sterling Tadlock—Psychiatry
 // All three directions read from this single source so copy stays consistent.
 
 const PRACTICE = {
@@ -10,7 +10,7 @@ const PRACTICE = {
   established: "Est. 2026",
   status: "Now accepting a limited number of new patients",
 
-  // Hero phrasing — declarative, evidence-forward, restrained.
+  // Hero phrasing—declarative, evidence-forward, restrained.
   heroEyebrow: "Psychiatry · San Francisco",
   heroLeads: [
     "Psychiatry for people whose work depends on a clear mind.",
@@ -18,13 +18,13 @@ const PRACTICE = {
     "Clinical psychiatry, applied to the architecture of high performance.",
   ],
   heroSub:
-    "A private practice integrating evidence-based psychiatry with performance psychology — built for athletes, artists, executives, and the people whose work doesn't allow for a foggy day.",
+    "A private practice integrating evidence-based psychiatry with performance psychology—built for athletes, artists, executives, and the people whose work doesn't allow for a foggy day.",
 
   positioning: [
     {
       k: "01",
       h: "Beyond symptom management",
-      p: "Most psychiatry stops at the absence of distress. We treat that as the floor — and build from there toward sustained cognitive performance, emotional regulation, and resilience under load.",
+      p: "Most psychiatry stops at the absence of distress. We treat that as the floor—and build from there toward sustained cognitive performance, emotional regulation, and resilience under load.",
     },
     {
       k: "02",
@@ -34,13 +34,13 @@ const PRACTICE = {
     {
       k: "03",
       h: "Integrative by design",
-      p: "Psychiatric evaluation, medication management when indicated, and tailored therapeutic technique — combined, not stacked. Each modality earns its place in the plan.",
+      p: "Psychiatric evaluation, medication management when indicated, and tailored therapeutic technique—combined, not stacked. Each modality earns its place in the plan.",
     },
   ],
 
-  // About — bio + credentials.
+  // About—bio + credentials.
   bio: [
-    "Dr. Sterling Tadlock is a psychiatrist practicing in San Francisco. His work sits at the intersection of clinical psychiatry and performance psychology — a discipline focused on the cognitive, emotional, and physiological systems that determine how people perform when the stakes are highest.",
+    "Dr. Sterling Tadlock is a psychiatrist practicing in San Francisco. His work sits at the intersection of clinical psychiatry and performance psychology—a discipline focused on the cognitive, emotional, and physiological systems that determine how people perform when the stakes are highest.",
     "He trained at Duke, the University of North Carolina School of Medicine, and the University of California, San Francisco. His practice integrates traditional psychiatric care with performance-oriented modalities to address burnout, anxiety, attention, and the long arc of sustained high output.",
   ],
   credentials: [
@@ -60,13 +60,13 @@ const PRACTICE = {
     {
       n: "02",
       title: "Performance Psychiatry",
-      body: "For athletes, performers, founders, and operators. Mental agility, emotional regulation, and recovery — engineered against the demands of competition and the public-facing edge of a career.",
+      body: "For athletes, performers, founders, and operators. Mental agility, emotional regulation, and recovery—engineered against the demands of competition and the public-facing edge of a career.",
       tags: ["Pre-event preparation", "Recovery cycles", "Identity & role"],
     },
     {
       n: "03",
       title: "Burnout & Resilience",
-      body: "Burnout is rarely just exhaustion. It's a structural mismatch between demand and recovery. The work is to redesign the system, not patch the symptoms — clinically, behaviorally, and where useful, pharmacologically.",
+      body: "Burnout is rarely just exhaustion. It's a structural mismatch between demand and recovery. The work is to redesign the system, not patch the symptoms—clinically, behaviorally, and where useful, pharmacologically.",
       tags: ["Sustained output", "Recovery design", "Anxiety"],
     },
     {
@@ -77,13 +77,13 @@ const PRACTICE = {
     },
   ],
 
-  // What to expect — first-session walkthrough.
+  // What to expect—first-session walkthrough.
   process: [
     {
       n: "I",
       title: "Initial consultation",
       duration: "75 min",
-      body: "An unhurried first session. We map history, current functioning, the demands of your work, and what 'good' would actually look like — measured against your life, not a textbook.",
+      body: "An unhurried first session. We map history, current functioning, the demands of your work, and what 'good' would actually look like—measured against your life, not a textbook.",
     },
     {
       n: "II",
@@ -95,7 +95,7 @@ const PRACTICE = {
       n: "III",
       title: "Treatment & calibration",
       duration: "Ongoing",
-      body: "Sessions cadenced to the work — weekly, biweekly, or as the plan calls for. Medication, therapy, and performance modalities are revised based on data, not inertia.",
+      body: "Sessions cadenced to the work—weekly, biweekly, or as the plan calls for. Medication, therapy, and performance modalities are revised based on data, not inertia.",
     },
     {
       n: "IV",

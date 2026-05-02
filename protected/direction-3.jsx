@@ -121,7 +121,7 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
     }}>
       <div style={{ padding: "60px 40px 40px", borderRight: `1px solid ${fg}` }}>
         <div style={{ fontFamily: mono, fontSize: 11, color: dim, letterSpacing: 1, textTransform: "uppercase", marginBottom: 28, display: "flex", justifyContent: "space-between" }}>
-          <span>FILE — INTRODUCTION / V0.1</span>
+          <span>FILE—INTRODUCTION / V0.1</span>
           <span>{P.established}</span>
         </div>
         <h1 style={{
@@ -456,7 +456,7 @@ const FooterD3 = ({ P, fg, dim, faint, accent, mono }) => (
       </div>
     </div>
     <div style={{ borderTop: `1px solid ${fg}`, paddingTop: 18, display: "flex", justifyContent: "space-between", textTransform: "uppercase", letterSpacing: 1, color: dim }}>
-      <span>© 2026 — TADLOCK PSYCHIATRY, LLC</span>
+      <span>© 2026—TADLOCK PSYCHIATRY, LLC</span>
       <span>SITE V0.1 / {P.established}</span>
     </div>
   </footer>
