@@ -79,27 +79,16 @@
       text-decoration: none; color: inherit;
       display: flex; flex-direction: column; justify-content: space-between;
     }
-    .card:hover { border-color: var(--fg); transform: translateY(-3px); }
+    .card:hover { border-color: var(--fg); }
     .card .vis {
       position: absolute; inset: 0; z-index: 0; pointer-events: none;
-      transition: transform .7s cubic-bezier(.2,.8,.2,1), opacity .5s ease, filter .5s ease;
-      transform: scale(1);
+      transition: transform .9s ease, opacity .6s ease, filter .6s ease;
     }
-    .card:hover .vis { transform: scale(1.12); }
+    .card:hover .vis { transform: scale(1.04); }
     .card .scrim {
       position: absolute; inset: 0; z-index: 1; pointer-events: none;
       background: linear-gradient(180deg, rgba(10,10,10,0.0) 0%, rgba(10,10,10,0.45) 60%, rgba(10,10,10,0.92) 100%);
-      transition: opacity .5s ease;
     }
-    .card:hover .scrim { opacity: 0.65; }
-    .card .peek {
-      position: absolute; top: 22px; left: 50%; transform: translate(-50%, -8px);
-      z-index: 3; opacity: 0; pointer-events: none;
-      font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--bg); background: var(--accent); padding: 6px 10px;
-      transition: opacity .35s ease, transform .35s ease;
-    }
-    .card:hover .peek { opacity: 1; transform: translate(-50%, 0); }
     .card .top, .card .bot { position: relative; z-index: 2; padding: 22px 22px; }
     .card .top {
       display: flex; justify-content: space-between; align-items: flex-start;
@@ -147,9 +136,7 @@
       letter-spacing: -0.02em;
       transition: transform .9s ease, color .6s ease;
     }
-    .card.noir:hover .typeglyph { color: rgba(196,160,90,0.55); transform: translate(-8px, -10px) scale(1.08); }
-    .card.noir:hover .vis { filter: brightness(1.15); }
-    .card.noir .peek { background: #C4A05A; color: #0E0F12; }
+    .card.noir:hover .typeglyph { color: rgba(196,160,90,0.32); transform: translate(-4px, -6px); }
     .card.noir .name em { color: #C4A05A; }
 
     /* Card 2: Quiet Clinical */
@@ -179,11 +166,7 @@
     .card.clinical .wire .pill {
       position: absolute; right: 16px; top: 16px; width: 56px; height: 22px; background: #5E80A8; border-radius: 3px;
     }
-    .card.clinical:hover .wire { transform: translateY(-10px) scale(1.04); border-color: rgba(20,23,28,0.45); box-shadow: 0 12px 32px rgba(20,23,28,0.10); }
-    .card.clinical:hover .wire .row { width: 110px; transition: width .6s ease; }
-    .card.clinical:hover .wire .pill { background: #4A6B92; transition: background .5s ease; }
-    .card.clinical .wire .row, .card.clinical .wire .pill { transition: width .6s ease, background .5s ease; }
-    .card.clinical .peek { background: #5E80A8; color: #F4F1EA; }
+    .card.clinical:hover .wire { transform: translateY(-4px); border-color: rgba(20,23,28,0.32); }
     .card.clinical .name em { color: #5E80A8; }
     .card.clinical:hover { border-color: #14171C; }
 
@@ -201,13 +184,13 @@
       background: var(--accent);
       transition: transform .9s ease, height .6s ease;
     }
-    .card.arch:hover .block { transform: translateY(-12px) scale(1.02); height: 46%; }
+    .card.arch:hover .block { transform: translateY(-6px); height: 42%; }
     .card.arch .typestamp {
       position: absolute; left: 22px; right: 22px; top: 32%;
       display: grid; place-items: center; height: 36%;
-      transition: top .7s ease, height .6s ease, transform .7s ease;
+      transition: top .9s ease, height .6s ease;
     }
-    .card.arch:hover .typestamp { top: 26%; transform: scale(1.04); }
+    .card.arch:hover .typestamp { top: 30%; }
     .card.arch .typestamp span {
       font-family: var(--sans); font-weight: 800; font-size: 200px; letter-spacing: -10px;
       color: #0A0A0A; line-height: 1; mix-blend-mode: normal;
@@ -245,10 +228,10 @@
     }
     /* Touch / hover-less devices — capability, not size. A narrow desktop
        window keeps full hover; large touchscreens (iPads, foldables) get
-       the resting glimpse-ready state and hide the hover-revealed peek. */
+       a slightly-engaged resting state on the visual so users still see
+       the cards as interactive. */
     @media (hover: none) {
       .card .vis { transform: scale(1.02); }
-      .card .peek { display: none; }
     }
     @media (max-width: 480px) {
       .header h1 { font-size: 32px; line-height: 1.0; }
@@ -285,7 +268,6 @@
     <a class="card noir" href="/d/1">
       <div class="vis"><div class="typeglyph">T</div></div>
       <div class="scrim"></div>
-      <div class="peek">Glimpse · 01</div>
       <div class="top">
         <div class="num">01 / 03</div>
         <div class="meta">DARK · SERIF<br/>GOLD ACCENT</div>
@@ -300,7 +282,6 @@
     <a class="card clinical" href="/d/2">
       <div class="vis"><div class="wire"><div class="row"></div><div class="pill"></div></div></div>
       <div class="scrim"></div>
-      <div class="peek">Glimpse · 02</div>
       <div class="top">
         <div class="num">02 / 03</div>
         <div class="meta">PAPER · SANS<br/>SLATE BLUE</div>
@@ -317,7 +298,6 @@
       <div class="block"></div>
       <div class="typestamp"><span>ST</span></div>
       <div class="scrim"></div>
-      <div class="peek">Glimpse · 03</div>
       <div class="top">
         <div class="num">03 / 03</div>
         <div class="meta">OFF-BLACK · MONO<br/>RED-ORANGE</div>
