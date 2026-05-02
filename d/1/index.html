@@ -37,6 +37,30 @@
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 
+  <!-- Surface any pre-mount script error visibly. Without this, a module
+       import 404 or a syntax error inside a /src/* file would leave the
+       page on `body { visibility: hidden }` forever — the in-loader
+       error fallback only fires for thrown exceptions inside
+       bootDirection(), not for module-load failures. -->
+  <script>
+    (function () {
+      function showFatal(label, detail) {
+        document.body.classList.add("ready");
+        document.body.style.cssText += "background:#0E0F12; color:#fff; font-family:'JetBrains Mono', ui-monospace, monospace;";
+        var pre = document.createElement("pre");
+        pre.style.cssText = "position:fixed; inset:0; padding:32px; margin:0; white-space:pre-wrap; overflow:auto; font-size:12px; color:#FF5C2A;";
+        pre.textContent = "[d/1] " + label + "\n\n" + detail + "\n\n← back to /menu";
+        document.body.appendChild(pre);
+      }
+      window.addEventListener("error", function (e) {
+        showFatal("script error", (e.error && e.error.stack) || e.message || "(no detail)");
+      });
+      window.addEventListener("unhandledrejection", function (e) {
+        showFatal("unhandled promise rejection", (e.reason && e.reason.stack) || String(e.reason));
+      });
+    })();
+  </script>
+
   <script type="module">
     import { bootDirection } from "/src/direction-loader.js";
     bootDirection({

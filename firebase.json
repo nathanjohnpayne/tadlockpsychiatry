@@ -41,7 +41,8 @@
       "functions/**",
       "packaging/**",
       "protected/**",
-      "storage.rules"
+      "storage.rules",
+      "storage.cors.json"
     ],
     "headers": [
       {

@@ -66,4 +66,25 @@ gcloud storage rsync "$SRC_DIR" "gs://$BUCKET/protected" \
   --impersonate-service-account="" \
   ${DRY_FLAG[@]+"${DRY_FLAG[@]}"}
 
+# Apply CORS configuration on every deploy so the bucket's allowed
+# origins stay in sync with storage.cors.json. Without this, the
+# custom-domain origin (tadlockpsychiatry.com) can't make
+# XMLHttpRequest calls to the bucket — the Firebase Storage SDK
+# attaches the user's auth token but the browser blocks the
+# response on the CORS preflight. Caught in the wild on PR #14.
+CORS_FILE="${CORS_FILE:-storage.cors.json}"
+if [[ -f "$CORS_FILE" ]]; then
+  echo "[sync-protected] applying CORS from $CORS_FILE"
+  if [[ "${DRY_RUN:-}" == "1" ]]; then
+    echo "[sync-protected] DRY_RUN=1 — skipping CORS apply"
+  else
+    gcloud storage buckets update "gs://$BUCKET" \
+      --cors-file="$CORS_FILE" \
+      --impersonate-service-account="" >/dev/null
+    echo "[sync-protected] CORS applied"
+  fi
+else
+  echo "[sync-protected] no $CORS_FILE — skipping CORS sync"
+fi
+
 echo "[sync-protected] done"
