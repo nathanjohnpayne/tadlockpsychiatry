@@ -19,7 +19,7 @@
 // storage.rules and the PR-3 body for the org-policy issue that
 // blocked the Cloud Function approach. With Storage, the SDK handles
 // auth header attachment; we don't have to manage tokens manually.
-import { guardOrRedirect, getProtectedBlob } from "/src/auth.js";
+import { guardOrRedirect, getProtectedBlob, signOutAndGoHome } from "/src/auth.js";
 
 // Hard timeout on any single Storage / parse step. If `getBlob()` or
 // `Babel.transform` ever hangs without throwing (CORS preflight that
@@ -62,6 +62,26 @@ async function loadAsBlobUrl(filename) {
   return URL.createObjectURL(blob);
 }
 
+// Populate the preview bar's Signed-in-as field and wire its Sign-out
+// link. Mirrors the menu's topbar wiring (menu/index.html). Tolerant
+// of the elements being absent — if a future direction shell drops
+// the bar, this becomes a no-op.
+function wirePreviewBar(user) {
+  const who = document.getElementById("who");
+  if (who && user) {
+    const email = (user.email || "").toLowerCase();
+    const local = email.split("@")[0];
+    who.textContent = local || user.displayName || email;
+  }
+  const out = document.getElementById("signout");
+  if (out) {
+    out.addEventListener("click", (e) => {
+      e.preventDefault();
+      signOutAndGoHome();
+    });
+  }
+}
+
 // Render a visible failure state and reveal the body. Without this, a
 // failed protected fetch / Babel transform / mount would leave the body
 // hidden indefinitely (since `.ready` only gets added on success), and
@@ -98,8 +118,12 @@ export async function bootDirection({ id, tweaks }) {
     // Storage request, so we never see a 403 in the console for the
     // expected case.
     console.log(`[direction-loader] d/${id}: awaiting auth guard`);
-    await withTimeout(guardOrRedirect(), `auth guard for d/${id}`);
+    const user = await withTimeout(guardOrRedirect(), `auth guard for d/${id}`);
     console.log(`[direction-loader] d/${id}: auth guard cleared`);
+
+    // Wire the embedded preview bar: populate "Signed in as <name>"
+    // and the Sign-out link. Same shape as the menu's topbar.
+    wirePreviewBar(user);
 
     // Order matters:
     //  - content.jsx defines window.PRACTICE first

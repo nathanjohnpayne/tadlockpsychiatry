@@ -3,46 +3,64 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tadlock Psychiatry — 03 · Architectural Performance</title>
+  <title>Tadlock Psychiatry—03 · Architectural Performance</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/direction-responsive.css" />
   <style>
-    html, body, #root { margin: 0; padding: 0; height: 100%; width: 100%; }
-    body { background: #EFEDE7; color: #0A0A0A; font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif; visibility: hidden; }
+    html, body, #root { margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; }
+    body { background: #EFEDE7; color: #0A0A0A; font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif; visibility: hidden; display: flex; flex-direction: column; }
     body.ready { visibility: visible; }
     * { box-sizing: border-box; }
-    /* See d/1/index.html for the iteration history on this pattern. */
-    .menu-back {
-      position: fixed; top: 12px; left: 12px; z-index: 9999;
-      width: 32px; height: 32px;
-      display: inline-flex; align-items: center; justify-content: center;
+    #root { flex: 1; min-height: 0; overflow: hidden; }
+
+    /* Preview bar — see d/1/index.html for the rationale. */
+    .preview-bar {
+      flex: none;
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+      padding: 18px 40px; border-bottom: 1px solid rgba(240,237,230,0.22);
+      background: #0A0A0A; color: #F0EDE6;
       font-family: "JetBrains Mono", ui-monospace, monospace;
-      font-size: 15px; line-height: 1; color: #ffffff;
-      background: rgba(0,0,0,0.68);
-      backdrop-filter: blur(10px) saturate(140%);
-      -webkit-backdrop-filter: blur(10px) saturate(140%);
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 50%;
-      text-decoration: none;
-      transition: background .25s ease, transform .25s ease;
+      font-size: 10.5px; letter-spacing: 1.6px; text-transform: uppercase;
     }
-    .menu-back:hover { background: rgba(0,0,0,0.88); transform: translateY(-1px); }
+    .preview-bar .l, .preview-bar .r { display: flex; gap: 18px; align-items: center; }
+    .preview-bar .r { justify-content: flex-end; color: rgba(240,237,230,0.55); }
+    .preview-bar .sep { color: rgba(240,237,230,0.55); }
+    .preview-bar a { color: rgba(240,237,230,0.55); text-decoration: none; cursor: pointer; }
+    .preview-bar a:hover { color: #F0EDE6; }
+    .preview-bar .back { color: rgba(240,237,230,0.55); }
+    .preview-bar .back:hover { color: #F0EDE6; }
+    .preview-bar .ident { display: flex; align-items: center; gap: 10px; color: #F0EDE6; }
+    .preview-bar .ident em { font-style: normal; color: rgba(240,237,230,0.55); }
+    .preview-bar #who { color: #F0EDE6; }
+
+    @media (max-width: 720px) {
+      .preview-bar { padding: 12px 16px; grid-template-columns: 1fr auto; gap: 12px; font-size: 9.5px; }
+      .preview-bar > div:nth-child(2) { display: none; }
+      .preview-bar .r > span:first-child { display: none; }
+      .preview-bar .ident em { display: none; }
+    }
   </style>
 </head>
 <body>
-  <a class="menu-back" href="/menu" title="Back to menu" aria-label="Back to menu">←</a>
+  <header class="preview-bar">
+    <div class="l">
+      <a href="/menu" class="back">← MENU</a>
+      <span class="sep">·</span>
+      <span class="ident">TADLOCK / PSYCHIATRY <em>· Private Preview</em></span>
+    </div>
+    <div></div>
+    <div class="r">
+      <span>Signed in as <span id="who">…</span></span>
+      <a id="signout">Sign out</a>
+    </div>
+  </header>
+
   <div id="root"></div>
 
-  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
-
-  <!-- See d/1/index.html for the rationale on the global error / rejection
-       handlers. Mirrored here so a module-load failure is visible
-       instead of leaving body { visibility: hidden } forever. -->
   <script>
     (function () {
       function showFatal(label, detail) {
@@ -61,6 +79,10 @@
       });
     })();
   </script>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 
   <script type="module">
     import { bootDirection } from "/src/direction-loader.js";
