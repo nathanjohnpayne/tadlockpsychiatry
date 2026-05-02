@@ -9,6 +9,9 @@
     "predeploy": [
       "bash scripts/sync-protected.sh"
     ],
+    "postdeploy": [
+      "bash scripts/cf-purge.sh"
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",
