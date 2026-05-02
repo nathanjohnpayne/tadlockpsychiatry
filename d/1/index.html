@@ -3,63 +3,74 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tadlock Psychiatry — 01 · Editorial Noir</title>
+  <title>Tadlock Psychiatry—01 · Editorial Noir</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/direction-responsive.css" />
   <style>
-    html, body, #root { margin: 0; padding: 0; height: 100%; width: 100%; }
-    body { background: #0E0F12; color: #E8E4DC; font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif; visibility: hidden; }
+    /* Body becomes a flex column so the preview bar takes its natural
+       height at the top and #root flexes to fill the remaining space.
+       The direction's React component has its own `overflow: auto`
+       inside #root, so its sticky NavBarD1 sticks BELOW the preview
+       bar (relative to #root's scroll container) rather than sliding
+       under the preview bar. */
+    html, body, #root { margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; }
+    body { background: #0E0F12; color: #E8E4DC; font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif; visibility: hidden; display: flex; flex-direction: column; }
     body.ready { visibility: visible; }
     * { box-sizing: border-box; }
-    /* Return-to-menu affordance. Iterations:
-         v1: plain mono text "← MENU", mix-blend-mode: difference. Read
-             everywhere but visibly overlapped each direction's nav brand
-             text (checkered look).
-         v2: pill with "← MENU" text + backdrop-blur. Cleaner visual
-             container but ~95px wide—still obscured the first chunk
-             of "Tadlock Psychiatry" / "TADLOCK / PSYCHIATRY".
-         v3 (this): 32x32 circular icon-only button. Just the ← arrow on
-             a translucent dark backdrop. Small enough that even where
-             it overlaps the nav (well clear at left:12-44px vs nav
-             brand starting at left:56px), it reads as its own "system"
-             UI element rather than competing with brand typography.
-             aria-label + title carry the "Back to menu" semantic. */
-    .menu-back {
-      position: fixed; top: 12px; left: 12px; z-index: 9999;
-      width: 32px; height: 32px;
-      display: inline-flex; align-items: center; justify-content: center;
+    #root { flex: 1; min-height: 0; overflow: hidden; }
+
+    /* Embedded preview bar — same vocabulary as the menu's topbar, on
+       every gated page so "← MENU", brand mark, and Sign out have a
+       permanent home that doesn't overlap the direction's chrome. */
+    .preview-bar {
+      flex: none;
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+      padding: 18px 40px; border-bottom: 1px solid rgba(240,237,230,0.22);
+      background: #0A0A0A; color: #F0EDE6;
       font-family: "JetBrains Mono", ui-monospace, monospace;
-      font-size: 15px; line-height: 1; color: #ffffff;
-      background: rgba(0,0,0,0.68);
-      backdrop-filter: blur(10px) saturate(140%);
-      -webkit-backdrop-filter: blur(10px) saturate(140%);
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 50%;
-      text-decoration: none;
-      transition: background .25s ease, transform .25s ease;
+      font-size: 10.5px; letter-spacing: 1.6px; text-transform: uppercase;
     }
-    .menu-back:hover { background: rgba(0,0,0,0.88); transform: translateY(-1px); }
+    .preview-bar .l, .preview-bar .r { display: flex; gap: 18px; align-items: center; }
+    .preview-bar .r { justify-content: flex-end; color: rgba(240,237,230,0.55); }
+    .preview-bar .sep { color: rgba(240,237,230,0.55); }
+    .preview-bar a { color: rgba(240,237,230,0.55); text-decoration: none; cursor: pointer; }
+    .preview-bar a:hover { color: #F0EDE6; }
+    .preview-bar .back { color: rgba(240,237,230,0.55); }
+    .preview-bar .back:hover { color: #F0EDE6; }
+    .preview-bar .ident { display: flex; align-items: center; gap: 10px; color: #F0EDE6; }
+    .preview-bar .ident em { font-style: normal; color: rgba(240,237,230,0.55); }
+    .preview-bar #who { color: #F0EDE6; }
+
+    @media (max-width: 720px) {
+      .preview-bar { padding: 12px 16px; grid-template-columns: 1fr auto; gap: 12px; font-size: 9.5px; }
+      .preview-bar > div:nth-child(2) { display: none; }
+      .preview-bar .r > span:first-child { display: none; }
+      .preview-bar .ident em { display: none; }
+    }
   </style>
 </head>
 <body>
-  <a class="menu-back" href="/menu" title="Back to menu" aria-label="Back to menu">←</a>
+  <header class="preview-bar">
+    <div class="l">
+      <a href="/menu" class="back">← MENU</a>
+      <span class="sep">·</span>
+      <span class="ident">TADLOCK / PSYCHIATRY <em>· Private Preview</em></span>
+    </div>
+    <div></div>
+    <div class="r">
+      <span>Signed in as <span id="who">…</span></span>
+      <a id="signout">Sign out</a>
+    </div>
+  </header>
+
   <div id="root"></div>
 
-  <!-- React + Babel are public. The protected JSX (content.jsx, direction-1.jsx)
-       and the practice portrait are fetched with an Authorization: Bearer header
-       through Hosting rewrites that route to the protectedFile Cloud Function. -->
-  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
-
-  <!-- Surface any pre-mount script error visibly. Without this, a module
-       import 404 or a syntax error inside a /src/* file would leave the
-       page on `body { visibility: hidden }` forever — the in-loader
-       error fallback only fires for thrown exceptions inside
-       bootDirection(), not for module-load failures. -->
+  <!-- See d/1/index.html for the rationale on the global error / rejection
+       handlers. -->
   <script>
     (function () {
       function showFatal(label, detail) {
@@ -78,6 +89,10 @@
       });
     })();
   </script>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 
   <script type="module">
     import { bootDirection } from "/src/direction-loader.js";
