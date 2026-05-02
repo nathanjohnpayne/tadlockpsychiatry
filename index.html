@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tadlock Psychiatry — Preview Access</title>
+  <title>Tadlock Psychiatry—Preview Access</title>
   <meta name="description" content="A private preview of a forthcoming San Francisco psychiatry practice." />
   <meta name="robots" content="noindex, nofollow" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -174,7 +174,7 @@
 
   <div class="wordmark-row"><span class="dot"></span> TADLOCK / PSYCHIATRY</div>
 
-  <div class="corner tl">PRIVATE PREVIEW<br/><b>RECORD 001 — 2026</b></div>
+  <div class="corner tl">PRIVATE PREVIEW<br/><b>RECORD 001—2026</b></div>
   <div class="corner tr">SAN FRANCISCO<br/><b>37.7951° N · 122.4036° W</b></div>
   <div class="corner bl"><span class="blink"></span>ACCESS GATE / ACTIVE</div>
   <div class="corner br">VERSION 0.1<br/><b>TADLOCKPSYCHIATRY.COM</b></div>
@@ -213,7 +213,7 @@
     </div>
   </main>
 
-  <div class="drift">··· INDEX 01 — 02 — 03 ··· OBSERVATION ··· FORMULATION ··· CALIBRATION ··· MAINTENANCE ··· INDEX 01 — 02 — 03 ···</div>
+  <div class="drift">··· INDEX 01—02—03 ··· OBSERVATION ··· FORMULATION ··· CALIBRATION ··· MAINTENANCE ··· INDEX 01—02—03 ···</div>
 
   <script>
     // Generative line grid that responds to cursor.
@@ -313,7 +313,7 @@
         return;
       }
       try { await signOut(auth); } catch (_) {}
-      // The user just landed here signed in but not on the list — show the
+      // The user just landed here signed in but not on the list—show the
       // denied panel without a redirect loop.
       showDenied();
     });
@@ -329,7 +329,7 @@
       setBusy(true, "Signing in…");
       try {
         const user = await startSignIn();
-        if (!user) return; // redirect flow — page will reload
+        if (!user) return; // redirect flow—page will reload
         if (isAllowed(user)) {
           location.replace("/menu");
           return;

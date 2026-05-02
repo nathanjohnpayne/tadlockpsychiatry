@@ -1,4 +1,4 @@
-// Direction 1 — Editorial Noir
+// Direction 1—Editorial Noir
 // Dark obsidian + warm gold accent. Serif display (Fraunces alt, but we use
 // a tighter contemporary serif), clinical sans body. Cinematic ambient
 // grain, cursor-tracked spotlight, parallax scroll on hero glyph.
@@ -406,7 +406,7 @@ const ProcessD1 = ({ P, fg, dim, faint, veryFaint, accent, serif, mono }) => (
         fontFamily: serif, fontWeight: 300,
         fontSize: "clamp(40px, 4.4vw, 64px)", lineHeight: 1.05, letterSpacing: -1, margin: 0, textWrap: "balance",
       }}>
-        Care moves through <em style={{ fontStyle: "italic", color: accent }}>structured phases</em> — each with explicit hypotheses, decision points, and a written plan.
+        Care moves through <em style={{ fontStyle: "italic", color: accent }}>structured phases</em>—each with explicit hypotheses, decision points, and a written plan.
       </h2>
     </div>
 
@@ -448,7 +448,7 @@ const AboutD1 = ({ P, fg, dim, faint, accent, serif, mono }) => (
           </div>
         </div>
         <div style={{ fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 1, textTransform: "uppercase" }}>
-          Fig. I — S. Tadlock, M.D.
+          Fig. I—S. Tadlock, M.D.
         </div>
       </div>
 
@@ -457,7 +457,7 @@ const AboutD1 = ({ P, fg, dim, faint, accent, serif, mono }) => (
           fontFamily: serif, fontWeight: 300,
           fontSize: "clamp(36px, 4vw, 60px)", lineHeight: 1.05, letterSpacing: -1, margin: "0 0 40px", textWrap: "balance",
         }}>
-          A psychiatrist trained at <em style={{ fontStyle: "italic", color: accent }}>Duke, UNC, and UCSF</em> — practicing at the intersection of medicine and performance.
+          A psychiatrist trained at <em style={{ fontStyle: "italic", color: accent }}>Duke, UNC, and UCSF</em>—practicing at the intersection of medicine and performance.
         </h2>
         {P.bio.map((b, i) => (
           <p key={i} style={{ fontSize: 16, lineHeight: 1.7, color: dim, margin: "0 0 24px" }}>{b}</p>
@@ -524,7 +524,7 @@ const WaitlistD1 = ({ P, fg, dim, faint, bg, accent, serif, mono }) => {
             marginTop: 56, padding: "24px 32px", border: `1px solid ${accent}`,
             display: "inline-block", fontFamily: mono, fontSize: 12.5, color: accent, letterSpacing: 1, textTransform: "uppercase",
           }}>
-            ✓ Application received — we'll be in touch within two business days.
+            ✓ Application received—we'll be in touch within two business days.
           </div>
         )}
 
@@ -556,7 +556,7 @@ const FooterD1 = ({ P, fg, dim, faint, accent, serif, mono }) => (
       display: "flex", justifyContent: "space-between", alignItems: "center",
       fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 1, textTransform: "uppercase",
     }}>
-      <div>© 2026 — Tadlock Psychiatry, LLC</div>
+      <div>© 2026—Tadlock Psychiatry, LLC</div>
       <div>CA Lic · Pending</div>
       <div>Site v0.1 · {P.established}</div>
     </div>

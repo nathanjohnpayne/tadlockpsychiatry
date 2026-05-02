@@ -80,7 +80,7 @@ function showBootError(id, err) {
     ].join(";");
     wrap.innerHTML =
       `<div>` +
-      `<div style="opacity:0.7; letter-spacing:1.6px; text-transform:uppercase; font-size:10.5px; margin-bottom:14px;">DIRECTION ${id} — LOAD FAILED</div>` +
+      `<div style="opacity:0.7; letter-spacing:1.6px; text-transform:uppercase; font-size:10.5px; margin-bottom:14px;">DIRECTION ${id}—LOAD FAILED</div>` +
       `<div style="opacity:0.55; max-width:480px; line-height:1.6;">${(err && err.message) ? String(err.message).replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c])) : "Unknown error"}</div>` +
       `<div style="margin-top:24px;"><a href="/menu" style="color:inherit;">← BACK TO MENU</a></div>` +
       `</div>`;

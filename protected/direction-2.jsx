@@ -1,4 +1,4 @@
-// Direction 2 — Quiet Clinical
+// Direction 2—Quiet Clinical
 // Off-white, near-black, single muted accent. Mono + sans pairing,
 // data-confident layout, parallax depth on scroll, hover-driven micro-
 // interactions.
@@ -96,7 +96,7 @@ const HeroD2Metrics = ({ P, fg, dim, faint, accent, mono, card, bg, scrollY, mou
   const ay = (mouse.y - 0.5) * 24;
   return (
     <section style={{ position: "relative", padding: "96px 48px 80px", overflow: "hidden", minHeight: "94vh" }}>
-      {/* Layered parallax background — ambient depth */}
+      {/* Layered parallax background—ambient depth */}
       <div style={{
         position: "absolute", top: 80 + scrollY * -0.2 + ay, right: -160 + ax,
         width: 720, height: 720, pointerEvents: "none", opacity: dark ? 0.18 : 0.12, zIndex: 0,
@@ -331,7 +331,7 @@ const ProcessD2 = ({ P, fg, dim, faint, accent, mono, card }) => (
         ◇ What to expect<br /><span style={{ color: dim, marginTop: 6, display: "block" }}>Four phases of care</span>
       </div>
       <h2 style={{ fontWeight: 500, fontSize: "clamp(34px, 3.8vw, 56px)", lineHeight: 1.05, letterSpacing: -1.4, margin: 0, textWrap: "balance" }}>
-        Care moves through structured phases — each with explicit hypotheses, decision points, and a written plan.
+        Care moves through structured phases—each with explicit hypotheses, decision points, and a written plan.
       </h2>
     </div>
 
@@ -381,7 +381,7 @@ const AboutD2 = ({ P, fg, dim, faint, accent, mono, card }) => (
           ◇ About the practice
         </div>
         <h2 style={{ fontWeight: 500, fontSize: "clamp(32px, 3.6vw, 52px)", lineHeight: 1.05, letterSpacing: -1.2, margin: "0 0 32px", textWrap: "balance" }}>
-          A psychiatrist trained at Duke, UNC, and UCSF — practicing where medicine and performance meet.
+          A psychiatrist trained at Duke, UNC, and UCSF—practicing where medicine and performance meet.
         </h2>
         {P.bio.map((b, i) => (
           <p key={i} style={{ fontSize: 16, lineHeight: 1.7, color: dim, margin: "0 0 22px" }}>{b}</p>
@@ -449,7 +449,7 @@ const WaitlistD2 = ({ P, fg, dim, faint, accent, mono, card }) => {
                   fontSize: 14.5, fontWeight: 500, cursor: "pointer", borderRadius: 4, letterSpacing: -0.1,
                 }}>Begin application →</button>
                 <div style={{ fontSize: 11.5, color: dim, marginTop: 12, lineHeight: 1.5 }}>
-                  By submitting, you'll receive a brief intake form. Not for emergencies — if in crisis, call 988.
+                  By submitting, you'll receive a brief intake form. Not for emergencies—if in crisis, call 988.
                 </div>
               </form>
             ) : (
@@ -486,7 +486,7 @@ const FooterD2 = ({ P, fg, dim, faint, accent, mono }) => (
       display: "flex", justifyContent: "space-between",
       fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 1, textTransform: "uppercase",
     }}>
-      <div>© 2026 — Tadlock Psychiatry, LLC</div>
+      <div>© 2026—Tadlock Psychiatry, LLC</div>
       <div>Site v0.1 · {P.established}</div>
     </div>
   </footer>
