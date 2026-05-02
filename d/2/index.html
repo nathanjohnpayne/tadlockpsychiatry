@@ -33,6 +33,28 @@
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 
+  <!-- See d/1/index.html for the rationale on the global error / rejection
+       handlers. Mirrored here so a module-load failure is visible
+       instead of leaving body { visibility: hidden } forever. -->
+  <script>
+    (function () {
+      function showFatal(label, detail) {
+        document.body.classList.add("ready");
+        document.body.style.cssText += "background:#F4F2ED; color:#14171C; font-family:'JetBrains Mono', ui-monospace, monospace;";
+        var pre = document.createElement("pre");
+        pre.style.cssText = "position:fixed; inset:0; padding:32px; margin:0; white-space:pre-wrap; overflow:auto; font-size:12px; color:#3E5C7A;";
+        pre.textContent = "[d/2] " + label + "\n\n" + detail + "\n\n← back to /menu";
+        document.body.appendChild(pre);
+      }
+      window.addEventListener("error", function (e) {
+        showFatal("script error", (e.error && e.error.stack) || e.message || "(no detail)");
+      });
+      window.addEventListener("unhandledrejection", function (e) {
+        showFatal("unhandled promise rejection", (e.reason && e.reason.stack) || String(e.reason));
+      });
+    })();
+  </script>
+
   <script type="module">
     import { bootDirection } from "/src/direction-loader.js";
     bootDirection({

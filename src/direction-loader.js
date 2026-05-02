@@ -21,8 +21,27 @@
 // auth header attachment; we don't have to manage tokens manually.
 import { guardOrRedirect, getProtectedBlob } from "/src/auth.js";
 
+// Hard timeout on any single Storage / parse step. If `getBlob()` or
+// `Babel.transform` ever hangs without throwing (CORS preflight that
+// stalls, network promise that never settles, etc.), users would
+// stare at a blank page forever — `body { visibility: hidden }` only
+// flips on `.ready`, which we add only on success or on the
+// showBootError fallback. The timeout converts a hang into a visible
+// error.
+const STEP_TIMEOUT_MS = 15000;
+
+function withTimeout(promise, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${STEP_TIMEOUT_MS}ms`)), STEP_TIMEOUT_MS)
+    ),
+  ]);
+}
+
 async function loadAndExec(filename) {
-  const blob = await getProtectedBlob(filename);
+  console.log(`[direction-loader] fetching protected/${filename}`);
+  const blob = await withTimeout(getProtectedBlob(filename), `protected/${filename} fetch`);
   const code = await blob.text();
   // @babel/standalone exposes Babel.transform synchronously. The 'react'
   // preset handles JSX; we don't need 'env' because the source already
@@ -38,7 +57,8 @@ async function loadAndExec(filename) {
 }
 
 async function loadAsBlobUrl(filename) {
-  const blob = await getProtectedBlob(filename);
+  console.log(`[direction-loader] fetching protected/${filename} as blob`);
+  const blob = await withTimeout(getProtectedBlob(filename), `protected/${filename} fetch`);
   return URL.createObjectURL(blob);
 }
 
@@ -77,7 +97,9 @@ export async function bootDirection({ id, tweaks }) {
     // Guard runs first — unauthorized users never trigger any protected
     // Storage request, so we never see a 403 in the console for the
     // expected case.
-    await guardOrRedirect();
+    console.log(`[direction-loader] d/${id}: awaiting auth guard`);
+    await withTimeout(guardOrRedirect(), `auth guard for d/${id}`);
+    console.log(`[direction-loader] d/${id}: auth guard cleared`);
 
     // Order matters:
     //  - content.jsx defines window.PRACTICE first
