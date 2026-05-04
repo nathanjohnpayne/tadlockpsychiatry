@@ -1,5 +1,6 @@
 # Build artifacts — regenerate through build system
 dist/
+dist-protected/
 build/
 .next/
 .out/

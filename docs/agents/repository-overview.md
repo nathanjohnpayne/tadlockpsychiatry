@@ -20,15 +20,19 @@ Firebase Hosting serves).
 - The build is wired in as a Hosting predeploy hook
   (`firebase.json` → `hosting.predeploy`), so `firebase deploy --only
   hosting` runs `npm run build` before uploading.
-- The migration is in progress per #20. Phases 1 (#21, toolchain) and
-  2 (#22, TS port + npm-resolved `firebase@^11`) are merged: the
-  public-surface modules are `src/auth.ts` / `src/firebase-config.ts` /
-  `src/direction-loader.ts` plus `src/types.ts` and `src/global.d.ts`.
-  Vite bundles Firebase into the auth chunk, so the only external CDN
-  imports left are the unpkg React/Babel UMD scripts loaded by the
-  direction shells and the Google Fonts CSS. Phases 3–6 port the
-  protected content to TS, replace the runtime Babel loader with built
-  ESM, and ship #11's responsive refinements.
+- The migration is in progress per #20. Phases 1 (#21, toolchain),
+  2 (#22, TS port + npm-resolved `firebase@^11`), and 3 (#23,
+  protected sources to TypeScript + esbuild build to
+  `dist-protected/`) are merged. Public modules: `src/auth.ts` /
+  `src/firebase-config.ts` / `src/direction-loader.ts` /
+  `src/types.ts` / `src/global.d.ts`. Protected sources:
+  `protected-src/{content,direction-{1,2,3}}.tsx` plus
+  `protected-src/assets/sterling-tadlock.png`. Vite bundles
+  Firebase into the auth chunk; the only external CDN imports left
+  are the unpkg React/Babel UMD scripts loaded by the direction
+  shells and the Google Fonts CSS. Phases 4–6 swap the runtime Babel
+  loader for built ESM dynamic import and ship #11's responsive
+  refinements.
 - Firebase Hosting + Firebase Storage (storage.rules gates
   `protected/`).
 - Firebase Analytics (GA4 measurement id `G-R8TK2SVVS0`).

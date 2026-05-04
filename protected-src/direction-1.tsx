@@ -2,9 +2,20 @@
 // Dark obsidian + warm gold accent. Serif display (Fraunces alt, but we use
 // a tighter contemporary serif), clinical sans body. Cinematic ambient
 // grain, cursor-tracked spotlight, parallax scroll on hero glyph.
+//
+// Phase 3 (#23) port from protected/direction-1.jsx. The runtime
+// contract via window.D1 / window.PRACTICE / window.React is unchanged
+// — esbuild strips TypeScript types and emits dist-protected/
+// direction-1.jsx that the existing Babel-runtime loader fetches and
+// indirect-evals. Phase 5 (#25) replaces the inline-styled sub-
+// components with typed-prop versions and a useViewport() hook;
+// internal sub-components are deliberately typed `: any` here to
+// minimise churn in this PR.
+import type { Practice, Tweaks } from "../src/types";
+declare const React: typeof import("react");
 
-const D1 = ({ tweaks = {} }) => {
-  const P = window.PRACTICE;
+const D1 = ({ tweaks = {} }: { tweaks?: Tweaks }) => {
+  const P = window.PRACTICE as Practice;
   const dark = tweaks.dark !== false;
   const accent = tweaks.accent || "#C9A876";
   const serif = tweaks.serif || '"Cormorant Garamond", "Tiempos", Georgia, serif';
@@ -18,16 +29,16 @@ const D1 = ({ tweaks = {} }) => {
   const faint = dark ? "rgba(232,228,220,0.12)" : "rgba(26,24,21,0.12)";
   const veryFaint = dark ? "rgba(232,228,220,0.06)" : "rgba(26,24,21,0.06)";
 
-  const rootRef = React.useRef(null);
-  const spotRef = React.useRef(null);
-  const glyphRef = React.useRef(null);
+  const rootRef = React.useRef<any>(null);
+  const spotRef = React.useRef<any>(null);
+  const glyphRef = React.useRef<any>(null);
   const [scrollY, setScrollY] = React.useState(0);
 
   // Cursor-tracked spotlight + parallax on the monogram glyph.
   React.useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const onMove = (e) => {
+    const onMove = (e: any) => {
       const r = root.getBoundingClientRect();
       const x = e.clientX - r.left;
       const y = e.clientY - r.top;
@@ -49,7 +60,7 @@ const D1 = ({ tweaks = {} }) => {
     };
   }, [accent]);
 
-  const styles = {
+  const styles: Record<string, React.CSSProperties> = {
     root: {
       width: "100%",
       height: "100%",
@@ -108,7 +119,7 @@ const D1 = ({ tweaks = {} }) => {
   );
 };
 
-const NavBarD1 = ({ fg, dim, faint, accent, mono }) => (
+const NavBarD1 = ({ fg, dim, faint, accent, mono }: any) => (
   <nav style={{
     position: "sticky", top: 0, zIndex: 10,
     padding: "20px 56px",
@@ -138,20 +149,20 @@ const NavBarD1 = ({ fg, dim, faint, accent, mono }) => (
       fontSize: 12.5, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase",
       cursor: "pointer", transition: "all 0.2s",
     }}
-    onMouseEnter={(e) => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#0E0F12"; }}
-    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = accent; }}>
+    onMouseEnter={(e: any) => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#0E0F12"; }}
+    onMouseLeave={(e: any) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = accent; }}>
       Request consult
     </div>
   </nav>
 );
 
-const HeroD1 = ({ P, fg, dim, faint, bg, accent, serif, mono, scrollY, glyphRef, variant }) => {
+const HeroD1 = ({ P, fg, dim, faint, bg, accent, serif, mono, scrollY, glyphRef, variant }: any) => {
   if (variant === "split") return <HeroD1Split P={P} fg={fg} dim={dim} faint={faint} accent={accent} serif={serif} mono={mono} scrollY={scrollY} />;
   if (variant === "marquee") return <HeroD1Marquee P={P} fg={fg} dim={dim} faint={faint} accent={accent} serif={serif} mono={mono} scrollY={scrollY} />;
   return <HeroD1Monogram P={P} fg={fg} dim={dim} faint={faint} bg={bg} accent={accent} serif={serif} mono={mono} scrollY={scrollY} glyphRef={glyphRef} />;
 };
 
-const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyphRef }) => (
+const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyphRef }: any) => (
   <section style={{
     position: "relative", padding: "120px 56px 140px",
     minHeight: "92vh", display: "flex", flexDirection: "column", justifyContent: "center",
@@ -233,7 +244,7 @@ const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyph
   </section>
 );
 
-const HeroD1Split = ({ P, fg, dim, faint, accent, serif, mono }) => (
+const HeroD1Split = ({ P, fg, dim, faint, accent, serif, mono }: any) => (
   <section style={{
     padding: "100px 56px",
     display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 64,
@@ -273,7 +284,7 @@ const HeroD1Split = ({ P, fg, dim, faint, accent, serif, mono }) => (
   </section>
 );
 
-const HeroD1Marquee = ({ P, fg, dim, faint, accent, serif, mono }) => (
+const HeroD1Marquee = ({ P, fg, dim, faint, accent, serif, mono }: any) => (
   <section style={{ padding: "100px 0 80px", position: "relative", zIndex: 3, minHeight: "82vh" }}>
     <div style={{ padding: "0 56px", marginBottom: 64 }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase" }}>
@@ -307,7 +318,7 @@ const HeroD1Marquee = ({ P, fg, dim, faint, accent, serif, mono }) => (
   </section>
 );
 
-const PositioningD1 = ({ P, fg, dim, faint, accent, serif, mono }) => (
+const PositioningD1 = ({ P, fg, dim, faint, accent, serif, mono }: any) => (
   <section style={{ padding: "140px 56px 120px", borderTop: `0.5px solid ${faint}`, position: "relative", zIndex: 3 }}>
     <div style={{ display: "grid", gridTemplateColumns: "1fr 2.4fr", gap: 80, marginBottom: 80, alignItems: "start" }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase" }}>
@@ -335,7 +346,7 @@ const PositioningD1 = ({ P, fg, dim, faint, accent, serif, mono }) => (
   </section>
 );
 
-const SpecialtiesD1 = ({ P, fg, dim, faint, accent, serif, mono }) => {
+const SpecialtiesD1 = ({ P, fg, dim, faint, accent, serif, mono }: any) => {
   const [hover, setHover] = React.useState(null);
   return (
     <section style={{ padding: "120px 56px 140px", borderTop: `0.5px solid ${faint}`, position: "relative", zIndex: 3 }}>
@@ -391,7 +402,7 @@ const SpecialtiesD1 = ({ P, fg, dim, faint, accent, serif, mono }) => {
   );
 };
 
-const ProcessD1 = ({ P, fg, dim, faint, veryFaint, accent, serif, mono }) => (
+const ProcessD1 = ({ P, fg, dim, faint, veryFaint, accent, serif, mono }: any) => (
   <section style={{ padding: "140px 56px", borderTop: `0.5px solid ${faint}`, background: veryFaint, position: "relative", zIndex: 3 }}>
     <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 80, marginBottom: 80, alignItems: "start" }}>
       <div>
@@ -429,7 +440,7 @@ const ProcessD1 = ({ P, fg, dim, faint, veryFaint, accent, serif, mono }) => (
   </section>
 );
 
-const AboutD1 = ({ P, fg, dim, faint, accent, serif, mono }) => (
+const AboutD1 = ({ P, fg, dim, faint, accent, serif, mono }: any) => (
   <section style={{ padding: "140px 56px", borderTop: `0.5px solid ${faint}`, position: "relative", zIndex: 3 }}>
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: 96, alignItems: "start" }}>
       <div>
@@ -485,7 +496,7 @@ const AboutD1 = ({ P, fg, dim, faint, accent, serif, mono }) => (
   </section>
 );
 
-const WaitlistD1 = ({ P, fg, dim, faint, bg, accent, serif, mono }) => {
+const WaitlistD1 = ({ P, fg, dim, faint, bg, accent, serif, mono }: any) => {
   const [email, setEmail] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
   return (
@@ -505,10 +516,10 @@ const WaitlistD1 = ({ P, fg, dim, faint, bg, accent, serif, mono }) => {
         </p>
 
         {!submitted ? (
-          <form onSubmit={(e) => { e.preventDefault(); if (email) setSubmitted(true); }}
+          <form onSubmit={(e: any) => { e.preventDefault(); if (email) setSubmitted(true); }}
             style={{ marginTop: 56, display: "flex", maxWidth: 540, marginInline: "auto", border: `1px solid ${faint}`, borderRadius: 0 }}>
             <input type="email" placeholder="you@domain.com" required
-              value={email} onChange={(e) => setEmail(e.target.value)}
+              value={email} onChange={(e: any) => setEmail(e.target.value)}
               style={{
                 flex: 1, padding: "18px 22px", border: "none", background: "transparent",
                 color: fg, fontSize: 15, fontFamily: mono, outline: "none",
@@ -536,7 +547,7 @@ const WaitlistD1 = ({ P, fg, dim, faint, bg, accent, serif, mono }) => {
   );
 };
 
-const FooterD1 = ({ P, fg, dim, faint, accent, serif, mono }) => (
+const FooterD1 = ({ P, fg, dim, faint, accent, serif, mono }: any) => (
   <footer style={{ padding: "56px 56px 36px", borderTop: `0.5px solid ${faint}`, position: "relative", zIndex: 3 }}>
     <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40, marginBottom: 64, alignItems: "start" }}>
       <div>
@@ -563,7 +574,7 @@ const FooterD1 = ({ P, fg, dim, faint, accent, serif, mono }) => (
   </footer>
 );
 
-const FooterCol = ({ mono, dim, faint, fg, title, items }) => (
+const FooterCol = ({ mono, dim, faint, fg, title, items }: any) => (
   <div>
     <div style={{ fontFamily: mono, fontSize: 10, color: dim, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>{title}</div>
     {items.map((it, i) => (

@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    // Phase 3 (#23) relaxation. Protected sources are inline-styled
+    // prototype components scheduled for refactor in phase 5 (#25);
+    // the typing value here is the typed Practice/Tweaks contract,
+    // not strict checking of every .map callback param or every
+    // inline CSS literal. noImplicitAny: false skips the (s, i) =>
+    // implicit-any errors on map callbacks; phase 5 tightens this
+    // when the components are rewritten with useViewport() and a
+    // proper theme object.
+    "noImplicitAny": false,
+    "noEmit": true
+  },
+  "include": ["protected-src", "src/types.ts", "src/global.d.ts"]
+}

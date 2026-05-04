@@ -9,7 +9,7 @@ rules_version = '2';
 // `protected/` and are only readable by an allowlisted Firebase Auth
 // session. The Hosting gate / menu / direction routes themselves are
 // still gated client-side by the in-page allowlist guard in
-// `src/auth.js`; this is the *server-side* enforcement that follows.
+// `src/auth.ts`; this is the *server-side* enforcement that follows.
 //
 // Why Storage Rules instead of a Cloud Function (which issue #3
 // originally proposed): the GCP organization's Domain Restricted
@@ -24,7 +24,7 @@ service firebase.storage {
   match /b/{bucket}/o {
 
     // Protected design-preview content. Mirrors the allowlist in
-    // src/auth.js (kept in sync by hand for v1; the obvious follow-up
+    // src/auth.ts (kept in sync by hand for v1; the obvious follow-up
     // is to move the list into Firestore + a small admin tool so the
     // two locations can share a single source of truth). Lower-cased
     // compare matches the client-side check.
