@@ -86,7 +86,6 @@ one-time service account configuration.
 | `dist/` | Vite public build output (gitignored; what Hosting serves) |
 | `dist-protected/` | esbuild protected build output (gitignored; uploaded to Firebase Storage by `scripts/sync-protected.sh`) |
 | `rules/` | Binding repository constraints |
-| `specs/` | Intended system behavior |
-| `tests/` | Automated validation |
+| `tests/` | Vitest unit tests (`tests/unit/`) + shell-based fixture tests for `scripts/` |
 | `scripts/` | Build, CI, and automation tooling |
 | `docs/` | Architecture and design documentation |
