@@ -59,10 +59,12 @@ one-time service account configuration.
 |---|---|
 | `index.html` | Gate page (Vite entry) |
 | `menu/index.html`, `d/{1,2,3}/index.html` | Other Vite entries |
-| `src/firebase-config.js` | Firebase web SDK config (apiKey, projectId, etc.) |
-| `src/auth.js` | Auth + allowlist guard + protected-blob fetch |
-| `src/direction-loader.js` | Runtime loader for the gated direction prototypes |
-| `vite.config.ts` | Multi-page Vite config (externalizes gstatic + unpkg URLs) |
+| `src/firebase-config.ts` | Firebase web SDK config (apiKey, projectId, etc.) |
+| `src/auth.ts` | Auth + allowlist guard + protected-blob fetch |
+| `src/direction-loader.ts` | Runtime loader for the gated direction prototypes |
+| `src/types.ts` | Shared types (`Practice`, `Tweaks`, `DirectionComponent`) |
+| `src/global.d.ts` | Ambient `window.PRACTICE` / `D1..D3` / `Babel` types for the Babel-runtime loader |
+| `vite.config.ts` | Multi-page Vite config (externalizes unpkg + Google Fonts URLs only) |
 | `firebase.json` | Hosting config (`public: dist`, predeploy build hook) |
 | `storage.rules` | Server-side allowlist for the protected/ prefix |
 | `.firebaserc` | Firebase project pointer |

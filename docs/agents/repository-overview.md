@@ -18,11 +18,15 @@ surface is a hand-rolled static site at the repo root.
 - The build is wired in as a Hosting predeploy hook
   (`firebase.json` → `hosting.predeploy`), so `firebase deploy --only
   hosting` runs `npm run build` before uploading.
-- The migration is in progress per #20. Phase 1 (#21) sits at the
-  toolchain level only; `src/*.js` remain JavaScript and continue to
-  import the Firebase SDK from `gstatic.com` URLs (marked external in
-  the Vite config). Phases 2–6 port the public surface and protected
-  prototypes to TS and replace the runtime Babel loader with built ESM.
+- The migration is in progress per #20. Phases 1 (#21, toolchain) and
+  2 (#22, TS port + npm-resolved `firebase@^11`) are merged: the
+  public-surface modules are `src/auth.ts` / `src/firebase-config.ts` /
+  `src/direction-loader.ts` plus `src/types.ts` and `src/global.d.ts`.
+  Vite bundles Firebase into the auth chunk, so the only external CDN
+  imports left are the unpkg React/Babel UMD scripts loaded by the
+  direction shells and the Google Fonts CSS. Phases 3–6 port the
+  protected content to TS, replace the runtime Babel loader with built
+  ESM, and ship #11's responsive refinements.
 - Firebase Hosting + Firebase Storage (storage.rules gates
   `protected/`).
 - Firebase Analytics (GA4 measurement id `G-R8TK2SVVS0`).
