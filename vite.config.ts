@@ -39,12 +39,17 @@ const ALLOWED_EXTERNAL_HOSTS = new Set([
 ]);
 
 function isAllowedExternalUrl(id: string): boolean {
-  if (!/^https?:\/\//.test(id)) return false;
+  let url: URL;
   try {
-    return ALLOWED_EXTERNAL_HOSTS.has(new URL(id).hostname);
+    url = new URL(id);
   } catch {
     return false;
   }
+  // Require https — http imports are not used today, and allowing them
+  // would let an http:// URL on a permitted host pass the gate (a
+  // mixed-content / downgrade vector). Locking to https closes that.
+  if (url.protocol !== "https:") return false;
+  return ALLOWED_EXTERNAL_HOSTS.has(url.hostname);
 }
 //
 // Multi-page mode: the gate (/), /menu, and the three direction shells
