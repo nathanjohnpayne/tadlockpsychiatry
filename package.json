@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "build:protected": "node scripts/build-protected.mjs",
+    "smoke:protected": "npm run build:protected && node scripts/smoke-protected.mjs",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.protected.json"
   },
   "dependencies": {
