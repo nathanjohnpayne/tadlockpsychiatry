@@ -21,18 +21,19 @@ Firebase Hosting serves).
   (`firebase.json` → `hosting.predeploy`), so `firebase deploy --only
   hosting` runs `npm run build` before uploading.
 - The migration is in progress per #20. Phases 1 (#21, toolchain),
-  2 (#22, TS port + npm-resolved `firebase@^11`), and 3 (#23,
-  protected sources to TypeScript + esbuild build to
-  `dist-protected/`) are merged. Public modules: `src/auth.ts` /
-  `src/firebase-config.ts` / `src/direction-loader.ts` /
-  `src/types.ts` / `src/global.d.ts`. Protected sources:
-  `protected-src/{content,direction-{1,2,3}}.tsx` plus
-  `protected-src/assets/sterling-tadlock.png`. Vite bundles
-  Firebase into the auth chunk; the only external CDN imports left
-  are the unpkg React/Babel UMD scripts loaded by the direction
-  shells and the Google Fonts CSS. Phases 4–6 swap the runtime Babel
-  loader for built ESM dynamic import and ship #11's responsive
-  refinements.
+  2 (#22, TS port + npm-resolved `firebase@^11`), 3 (#23, protected
+  sources to TypeScript + esbuild build to `dist-protected/`), and
+  4 (#24, loader swapped to blob-URL dynamic import + unpkg
+  React/Babel UMD scripts retired) are merged. Public modules:
+  `src/auth.ts` / `src/firebase-config.ts` / `src/direction-loader.ts`
+  / `src/types.ts`. Protected sources: `protected-src/{content,
+  direction-{1,2,3}}.tsx` plus `protected-src/assets/sterling-
+  tadlock.png`. Firebase is bundled into the auth chunk; React +
+  react-dom are bundled into the direction-loader chunk; React (no
+  react-dom) is bundled into each protected module. The only external
+  CDN imports left are the Google Fonts stylesheets. Phases 5–6
+  refactor the inline-styled prototypes onto `useViewport()` + a
+  theme object and ship #11's responsive refinements.
 - Firebase Hosting + Firebase Storage (storage.rules gates
   `protected/`).
 - Firebase Analytics (GA4 measurement id `G-R8TK2SVVS0`).

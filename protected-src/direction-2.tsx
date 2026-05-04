@@ -3,14 +3,13 @@
 // data-confident layout, parallax depth on scroll, hover-driven micro-
 // interactions.
 //
-// Phase 3 (#23) port from protected/direction-2.jsx — see direction-1.tsx
-// header for the runtime contract and the rationale for `: any` on
-// internal sub-components.
-import type { Practice, Tweaks } from "../src/types";
-declare const React: typeof import("react");
+// Phase 4 (#24) port — see direction-1.tsx header for the dynamic-
+// import + DirectionMount contract and the `: any` deferral.
+import React, { createElement } from "react";
+import { createRoot } from "react-dom/client";
+import type { DirectionComponent, DirectionMount } from "../src/types";
 
-const D2 = ({ tweaks = {} }: { tweaks?: Tweaks }) => {
-  const P = window.PRACTICE as Practice;
+const D2: DirectionComponent = ({ tweaks, practice: P }) => {
   const dark = tweaks.dark === true;
   const accent = tweaks.accent || "#3E5C7A";
   const sans = tweaks.sans || '"Söhne", "Inter", -apple-system, system-ui, sans-serif';
@@ -505,4 +504,8 @@ const FootCol = ({ mono, dim, title, items }: any) => (
   </div>
 );
 
-window.D2 = D2;
+const mount: DirectionMount = (rootEl, props) => {
+  createRoot(rootEl).render(createElement(D2, props));
+};
+
+export default mount;

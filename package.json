@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "build:protected": "node scripts/build-protected.mjs",
+    "smoke:protected": "npm run build:protected && node scripts/smoke-protected.mjs",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.protected.json"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "@types/react-dom": "18.3.1",
     "@vitejs/plugin-react": "4.3.4",
     "esbuild": "^0.28.0",
+    "happy-dom": "^20.9.0",
     "typescript": "5.7.2",
     "vite": "6.4.2"
   }

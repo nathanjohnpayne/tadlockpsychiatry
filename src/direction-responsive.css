@@ -71,11 +71,10 @@
   }
 
   /* Practice portrait — direction components render it as a <div> with
-   * `background: url(${P.portrait}) ...` (verified in direction-1.jsx
-   * line 262 + 442, direction-2.jsx line 371, direction-3.jsx line
-   * 352). The loader replaces P.portrait with a blob: URL before
-   * mounting, so the rendered DOM has `url(blob:...)` in the style
-   * attribute. Match on that. */
+   * `background: url(${P.portrait}) ...` (see protected-src/direction-
+   * {1,2,3}.tsx). The loader replaces P.portrait with a blob: URL
+   * before mounting, so the rendered DOM has `url(blob:...)` in the
+   * style attribute. Match on that. */
   .d-root [style*="url(blob:"] {
     max-height: 60vh !important;
   }

@@ -14,5 +14,5 @@
     "noImplicitAny": false,
     "noEmit": true
   },
-  "include": ["protected-src", "src/types.ts", "src/global.d.ts"]
+  "include": ["protected-src", "src/types.ts"]
 }

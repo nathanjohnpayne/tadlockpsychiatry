@@ -3,42 +3,59 @@
 // Each direction page calls bootDirection({ id, tweaks }). This function:
 //   1. Runs the auth guard (redirects unauth/unallowlisted before any
 //      protected fetch).
-//   2. Pulls protected/content.jsx from the project's Storage bucket
+//   2. Pulls protected/content.js from the project's Storage bucket
 //      (Storage SDK signs the request with the user's Firebase Auth
 //      token; storage.rules enforces the allowlist server-side).
-//      Babel-transforms the JSX and indirect-evals it so
-//      `window.PRACTICE = PRACTICE` lands in the global scope.
+//      Mints a blob URL and dynamic-imports it; reads the default
+//      export as the typed Practice object.
 //   3. Pulls protected/sterling-tadlock.png the same way, mints an
-//      object URL, and overrides window.PRACTICE.portrait so direction
-//      components can use <img src={P.portrait}/> normally.
-//   4. Pulls the per-direction JSX (e.g. protected/direction-1.jsx),
-//      transforms, evals (defines window.D{id}).
-//   5. Mounts the React component into #root and reveals the body.
+//      object URL, and overrides practice.portrait so direction
+//      components can use <img src={practice.portrait}/> normally.
+//   4. Pulls the per-direction module (e.g. protected/direction-1.js),
+//      dynamic-imports the same way, reads the default export as the
+//      DirectionMount function.
+//   5. Calls mount(rootEl, { tweaks, practice }) — the protected
+//      module owns the React render path so React + ReactDOM are a
+//      single instance per page — and reveals the body.
 //
 // Why Storage instead of plain `fetch` + Hosting rewrites: see
 // storage.rules and the PR-3 body for the org-policy issue that
 // blocked the Cloud Function approach. With Storage, the SDK handles
 // auth header attachment; we don't have to manage tokens manually.
 //
-// Phase 2 (#22) of the Vite migration: ported from src/direction-
-// loader.js to TS, kept the Babel + indirect-eval implementation
-// intact. Phase 4 (#24) replaces the Babel runtime with a blob-URL
-// dynamic import; this file shrinks substantially then.
+// Phase 4 (#24) of the Vite migration: replaced the Babel-runtime
+// indirect-eval path with blob-URL dynamic import. Each protected
+// module is an esbuild-bundled, self-contained ES module that owns
+// its own React + ReactDOM and exports a mount function — the loader
+// hands it a target element + props and the module renders itself.
+// This keeps React a single instance per page (loader doesn't import
+// react/react-dom at all anymore), avoiding the cross-instance hook
+// dispatch failure Codex P1'd before merge.
+//
+// content.js exports the typed Practice object (no React).
+// direction-{1,2,3}.js export DirectionMount functions.
+//
+// Risk: blob-URL dynamic import has historically been a Safari sharp
+// edge. Smoke on iOS Safari before merging — the Chromium-based
+// preview server can't catch this. CSP is currently empty in
+// firebase.json; if a Cloudflare-injected CSP enforces script-src
+// without `blob:`, the blob-URL import fails. No CSP is set today,
+// so this works in production as written; if a CSP gets added later,
+// the directive needs `script-src 'self' blob:`.
 import type { User } from "firebase/auth";
 import {
   guardOrRedirect,
   getProtectedBlob,
   signOutAndGoHome,
 } from "./auth";
-import type { DirectionComponent, Tweaks } from "./types";
+import type { DirectionMount, Practice, Tweaks } from "./types";
 
 // Hard timeout on any single Storage / parse step. If `getBlob()` or
-// `Babel.transform` ever hangs without throwing (CORS preflight that
-// stalls, network promise that never settles, etc.), users would
-// stare at a blank page forever — `body { visibility: hidden }` only
-// flips on `.ready`, which we add only on success or on the
-// showBootError fallback. The timeout converts a hang into a visible
-// error.
+// `import()` ever hangs without throwing (CORS preflight that stalls,
+// network promise that never settles, etc.), users would stare at a
+// blank page forever — `body { visibility: hidden }` only flips on
+// `.ready`, which we add only on success or on the showBootError
+// fallback. The timeout converts a hang into a visible error.
 const STEP_TIMEOUT_MS = 15000;
 
 function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
@@ -53,32 +70,42 @@ function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
   ]);
 }
 
-async function loadAndExec(filename: string): Promise<void> {
+// Fetch a built ES module from the protected bucket and dynamic-
+// import it via a blob URL. Returns the module's default export
+// typed as T.
+//
+// `URL.revokeObjectURL` runs on a microtask after the import resolves.
+// Browsers keep the resolved module alive after revoke, so subsequent
+// imports of the same URL would fail — but we always mint a fresh URL
+// per call, and the loader only fetches each protected file once per
+// direction visit, so this is fine.
+async function loadModule<T>(filename: string): Promise<T> {
   console.log(`[direction-loader] fetching protected/${filename}`);
   const blob = await withTimeout(
     getProtectedBlob(filename),
     `protected/${filename} fetch`,
   );
-  const code = await blob.text();
-  // @babel/standalone exposes Babel.transform synchronously. The 'react'
-  // preset handles JSX; we don't need 'env' because the source already
-  // targets modern browsers.
-  const { code: compiled } = window.Babel.transform(code, {
-    presets: ["react"],
-    sourceType: "script",
-  });
-  if (compiled == null) {
-    // Babel.transform returns { code: string | null }; null means it
-    // parsed the input but emitted nothing (uncommon for our JSX
-    // files). Treat as fatal — eval'ing null would silently no-op
-    // and the next step (window.PRACTICE / window.D{id} lookup)
-    // would throw a less informative error.
-    throw new Error(`Babel emitted no code for protected/${filename}`);
+  // Force the blob's MIME type to a JS module type so Safari accepts
+  // the dynamic import. Without this, Storage may serve the blob with
+  // a generic `application/octet-stream` and Safari refuses to import
+  // it via `import()` (Chromium is more permissive).
+  const moduleBlob = blob.type.startsWith("text/javascript")
+    ? blob
+    : blob.slice(0, blob.size, "text/javascript");
+  const url = URL.createObjectURL(moduleBlob);
+  try {
+    // /* @vite-ignore */ — the URL is dynamic at runtime; Vite's
+    // build-time analyzer must not try to inline it.
+    const mod = (await import(/* @vite-ignore */ url)) as { default: T };
+    if (mod.default == null) {
+      throw new Error(
+        `protected/${filename} did not export a default value`,
+      );
+    }
+    return mod.default;
+  } finally {
+    URL.revokeObjectURL(url);
   }
-  // Indirect eval runs in the global scope, so `window.PRACTICE = ...`
-  // and `window.D1 = ...` assignments at the bottom of each protected
-  // file land where the mount step expects them.
-  (0, eval)(compiled);
 }
 
 async function loadAsBlobUrl(filename: string): Promise<string> {
@@ -111,7 +138,7 @@ function wirePreviewBar(user: User): void {
 }
 
 // Render a visible failure state and reveal the body. Without this, a
-// failed protected fetch / Babel transform / mount would leave the body
+// failed protected fetch / dynamic import / mount would leave the body
 // hidden indefinitely (since `.ready` only gets added on success), and
 // the user would stare at a blank page with the answer only in the
 // devtools console.
@@ -179,41 +206,30 @@ export async function bootDirection({
     wirePreviewBar(user);
 
     // Order matters:
-    //  - content.jsx defines window.PRACTICE first
+    //  - content.js imported first to get the typed Practice object
     //  - then we override portrait with an auth-fetched object URL
-    //  - then the direction file references window.PRACTICE inside its
-    //    React component closures
-    await loadAndExec("content.jsx");
-    if (window.PRACTICE) {
-      try {
-        window.PRACTICE.portrait = await loadAsBlobUrl("sterling-tadlock.png");
-      } catch (err) {
-        // Portrait is non-fatal — let the rest of the page render with
-        // an empty src. The other content is still useful.
-        console.warn(
-          "[direction-loader] portrait fetch failed; using empty placeholder",
-          err,
-        );
-        window.PRACTICE.portrait = "";
-      }
-    }
-    await loadAndExec(`direction-${id}.jsx`);
-
-    const Component = window[`D${id}` as "D1" | "D2" | "D3"] as
-      | DirectionComponent
-      | undefined;
-    if (!Component) {
-      throw new Error(
-        `window.D${id} not defined after loading direction-${id}.jsx`,
+    //  - then the direction module is imported and rendered with
+    //    `practice` passed as a prop (no globals)
+    const practice = await loadModule<Practice>("content.js");
+    try {
+      practice.portrait = await loadAsBlobUrl("sterling-tadlock.png");
+    } catch (err) {
+      // Portrait is non-fatal — let the rest of the page render with
+      // an empty src. The other content is still useful.
+      console.warn(
+        "[direction-loader] portrait fetch failed; using empty placeholder",
+        err,
       );
+      practice.portrait = "";
     }
+
+    const mount = await loadModule<DirectionMount>(`direction-${id}.js`);
+
     const rootEl = document.getElementById("root");
     if (!rootEl) {
       throw new Error("#root element not found in DOM");
     }
-    window.ReactDOM.createRoot(rootEl).render(
-      window.React.createElement(Component, { tweaks }),
-    );
+    mount(rootEl, { tweaks, practice });
     document.body.classList.add("ready");
   } catch (err) {
     console.error(`[direction-loader] boot failed for d/${id}`, err);

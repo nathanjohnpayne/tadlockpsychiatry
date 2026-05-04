@@ -3,14 +3,13 @@
 // that responds to cursor, monospace metadata. Bold blocks, hard divisions,
 // information-dense.
 //
-// Phase 3 (#23) port from protected/direction-3.jsx — see direction-1.tsx
-// header for the runtime contract and the rationale for `: any` on
-// internal sub-components.
-import type { Practice, Tweaks } from "../src/types";
-declare const React: typeof import("react");
+// Phase 4 (#24) port — see direction-1.tsx header for the dynamic-
+// import + DirectionMount contract and the `: any` deferral.
+import React, { createElement } from "react";
+import { createRoot } from "react-dom/client";
+import type { DirectionComponent, DirectionMount } from "../src/types";
 
-const D3 = ({ tweaks = {} }: { tweaks?: Tweaks }) => {
-  const P = window.PRACTICE as Practice;
+const D3: DirectionComponent = ({ tweaks, practice: P }) => {
   const dark = tweaks.dark === true;
   const accent = tweaks.accent || "#FF5C2A";
   const sans = tweaks.sans || '"Söhne", "Inter", -apple-system, system-ui, sans-serif';
@@ -470,4 +469,8 @@ const FooterD3 = ({ P, fg, dim, faint, accent, mono }: any) => (
   </footer>
 );
 
-window.D3 = D3;
+const mount: DirectionMount = (rootEl, props) => {
+  createRoot(rootEl).render(createElement(D3, props));
+};
+
+export default mount;
