@@ -27,10 +27,11 @@ import { resolve } from "node:path";
 // www.gstatic.com (Firebase SDK ESM) was removed in phase 2 (#22) —
 // firebase 11.x is now an npm dep, so auth.ts/firebase-config.ts use
 // bare imports that Vite bundles. unpkg.com (React + Babel UMD) was
-// removed in phase 4 (#24) — the protected modules are now esbuild-
-// bundled with React inlined, the direction-loader uses npm
-// react-dom/client, and the runtime Babel-transformed indirect-eval
-// path is gone.
+// removed in phase 4 (#24) — each protected module is now esbuild-
+// bundled with React + ReactDOM inlined and exports a mount function
+// (DirectionMount), so the direction-loader doesn't import any React
+// package itself. The runtime Babel-transformed indirect-eval path
+// is gone.
 //
 // Anything not in this set falls through and Rollup tries to resolve
 // it normally, which fails the build loudly.
