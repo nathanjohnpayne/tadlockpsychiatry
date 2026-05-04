@@ -19,7 +19,18 @@
 // storage.rules and the PR-3 body for the org-policy issue that
 // blocked the Cloud Function approach. With Storage, the SDK handles
 // auth header attachment; we don't have to manage tokens manually.
-import { guardOrRedirect, getProtectedBlob, signOutAndGoHome } from "/src/auth.js";
+//
+// Phase 2 (#22) of the Vite migration: ported from src/direction-
+// loader.js to TS, kept the Babel + indirect-eval implementation
+// intact. Phase 4 (#24) replaces the Babel runtime with a blob-URL
+// dynamic import; this file shrinks substantially then.
+import type { User } from "firebase/auth";
+import {
+  guardOrRedirect,
+  getProtectedBlob,
+  signOutAndGoHome,
+} from "./auth";
+import type { DirectionComponent, Tweaks } from "./types";
 
 // Hard timeout on any single Storage / parse step. If `getBlob()` or
 // `Babel.transform` ever hangs without throwing (CORS preflight that
@@ -30,18 +41,24 @@ import { guardOrRedirect, getProtectedBlob, signOutAndGoHome } from "/src/auth.j
 // error.
 const STEP_TIMEOUT_MS = 15000;
 
-function withTimeout(promise, label) {
+function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
   return Promise.race([
     promise,
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error(`${label} timed out after ${STEP_TIMEOUT_MS}ms`)), STEP_TIMEOUT_MS)
+    new Promise<T>((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`${label} timed out after ${STEP_TIMEOUT_MS}ms`)),
+        STEP_TIMEOUT_MS,
+      ),
     ),
   ]);
 }
 
-async function loadAndExec(filename) {
+async function loadAndExec(filename: string): Promise<void> {
   console.log(`[direction-loader] fetching protected/${filename}`);
-  const blob = await withTimeout(getProtectedBlob(filename), `protected/${filename} fetch`);
+  const blob = await withTimeout(
+    getProtectedBlob(filename),
+    `protected/${filename} fetch`,
+  );
   const code = await blob.text();
   // @babel/standalone exposes Babel.transform synchronously. The 'react'
   // preset handles JSX; we don't need 'env' because the source already
@@ -56,9 +73,12 @@ async function loadAndExec(filename) {
   (0, eval)(compiled);
 }
 
-async function loadAsBlobUrl(filename) {
+async function loadAsBlobUrl(filename: string): Promise<string> {
   console.log(`[direction-loader] fetching protected/${filename} as blob`);
-  const blob = await withTimeout(getProtectedBlob(filename), `protected/${filename} fetch`);
+  const blob = await withTimeout(
+    getProtectedBlob(filename),
+    `protected/${filename} fetch`,
+  );
   return URL.createObjectURL(blob);
 }
 
@@ -66,10 +86,10 @@ async function loadAsBlobUrl(filename) {
 // link. Mirrors the menu's topbar wiring (menu/index.html). Tolerant
 // of the elements being absent — if a future direction shell drops
 // the bar, this becomes a no-op.
-function wirePreviewBar(user) {
+function wirePreviewBar(user: User): void {
   const who = document.getElementById("who");
-  if (who && user) {
-    const email = (user.email || "").toLowerCase();
+  if (who) {
+    const email = (user.email ?? "").toLowerCase();
     const local = email.split("@")[0];
     who.textContent = local || user.displayName || email;
   }
@@ -77,7 +97,7 @@ function wirePreviewBar(user) {
   if (out) {
     out.addEventListener("click", (e) => {
       e.preventDefault();
-      signOutAndGoHome();
+      void signOutAndGoHome();
     });
   }
 }
@@ -87,21 +107,34 @@ function wirePreviewBar(user) {
 // hidden indefinitely (since `.ready` only gets added on success), and
 // the user would stare at a blank page with the answer only in the
 // devtools console.
-function showBootError(id, err) {
+function showBootError(id: string, err: unknown): void {
   const root = document.getElementById("root");
   if (root) {
     root.innerHTML = "";
     const wrap = document.createElement("div");
     wrap.style.cssText = [
-      "position:fixed", "inset:0", "display:grid", "place-items:center",
-      "padding:24px", "font-family:'JetBrains Mono', ui-monospace, monospace",
-      "font-size:13px", "color:#ffffff", "mix-blend-mode:difference",
+      "position:fixed",
+      "inset:0",
+      "display:grid",
+      "place-items:center",
+      "padding:24px",
+      "font-family:'JetBrains Mono', ui-monospace, monospace",
+      "font-size:13px",
+      "color:#ffffff",
+      "mix-blend-mode:difference",
       "text-align:center",
     ].join(";");
+    const message =
+      (err as { message?: string } | null)?.message ?? "Unknown error";
+    const safe = String(message).replace(/[<>&]/g, (c) => {
+      if (c === "<") return "&lt;";
+      if (c === ">") return "&gt;";
+      return "&amp;";
+    });
     wrap.innerHTML =
       `<div>` +
       `<div style="opacity:0.7; letter-spacing:1.6px; text-transform:uppercase; font-size:10.5px; margin-bottom:14px;">DIRECTION ${id}—LOAD FAILED</div>` +
-      `<div style="opacity:0.55; max-width:480px; line-height:1.6;">${(err && err.message) ? String(err.message).replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c])) : "Unknown error"}</div>` +
+      `<div style="opacity:0.55; max-width:480px; line-height:1.6;">${safe}</div>` +
       `<div style="margin-top:24px;"><a href="/menu" style="color:inherit;">← BACK TO MENU</a></div>` +
       `</div>`;
     root.appendChild(wrap);
@@ -109,10 +142,15 @@ function showBootError(id, err) {
   document.body.classList.add("ready");
 }
 
-export async function bootDirection({ id, tweaks }) {
-  if (!["1", "2", "3"].includes(String(id))) {
-    throw new Error(`bootDirection: invalid id ${id}`);
-  }
+export interface BootDirectionArgs {
+  id: "1" | "2" | "3";
+  tweaks: Tweaks;
+}
+
+export async function bootDirection({
+  id,
+  tweaks,
+}: BootDirectionArgs): Promise<void> {
   try {
     // Guard runs first — unauthorized users never trigger any protected
     // Storage request, so we never see a 403 in the console for the
@@ -137,18 +175,29 @@ export async function bootDirection({ id, tweaks }) {
       } catch (err) {
         // Portrait is non-fatal — let the rest of the page render with
         // an empty src. The other content is still useful.
-        console.warn("[direction-loader] portrait fetch failed; using empty placeholder", err);
+        console.warn(
+          "[direction-loader] portrait fetch failed; using empty placeholder",
+          err,
+        );
         window.PRACTICE.portrait = "";
       }
     }
     await loadAndExec(`direction-${id}.jsx`);
 
-    const Component = window[`D${id}`];
+    const Component = window[`D${id}` as "D1" | "D2" | "D3"] as
+      | DirectionComponent
+      | undefined;
     if (!Component) {
-      throw new Error(`window.D${id} not defined after loading direction-${id}.jsx`);
+      throw new Error(
+        `window.D${id} not defined after loading direction-${id}.jsx`,
+      );
     }
-    window.ReactDOM.createRoot(document.getElementById("root")).render(
-      window.React.createElement(Component, { tweaks })
+    const rootEl = document.getElementById("root");
+    if (!rootEl) {
+      throw new Error("#root element not found in DOM");
+    }
+    window.ReactDOM.createRoot(rootEl).render(
+      window.React.createElement(Component, { tweaks }),
     );
     document.body.classList.add("ready");
   } catch (err) {
