@@ -135,8 +135,8 @@ export async function signOutAndGoHome(): Promise<void> {
 // user's Firebase Auth token; Storage Rules (storage.rules) enforce the
 // allowlist server-side. Returns a Blob.
 //
-// Used by src/direction-loader.ts to pull /protected/content.jsx,
-// /protected/direction-{1,2,3}.jsx, and /protected/sterling-tadlock.png
+// Used by src/direction-loader.ts to pull /protected/content.js,
+// /protected/direction-{1,2,3}.js, and /protected/sterling-tadlock.png
 // for any signed-in allowlisted user. An anonymous fetch from `gsutil
 // cp` or a `curl` of the bucket URL returns 403 because the rules
 // require an authenticated email on the allowlist.

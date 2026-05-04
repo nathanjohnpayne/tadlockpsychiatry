@@ -4,9 +4,10 @@
 // interactions.
 //
 // Phase 4 (#24) port — see direction-1.tsx header for the dynamic-
-// import contract and the `: any` deferral.
-import React from "react";
-import type { DirectionComponent } from "../src/types";
+// import + DirectionMount contract and the `: any` deferral.
+import React, { createElement } from "react";
+import { createRoot } from "react-dom/client";
+import type { DirectionComponent, DirectionMount } from "../src/types";
 
 const D2: DirectionComponent = ({ tweaks, practice: P }) => {
   const dark = tweaks.dark === true;
@@ -503,4 +504,8 @@ const FootCol = ({ mono, dim, title, items }: any) => (
   </div>
 );
 
-export default D2;
+const mount: DirectionMount = (rootEl, props) => {
+  createRoot(rootEl).render(createElement(D2, props));
+};
+
+export default mount;

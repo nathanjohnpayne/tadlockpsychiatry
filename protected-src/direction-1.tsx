@@ -4,15 +4,18 @@
 // grain, cursor-tracked spotlight, parallax scroll on hero glyph.
 //
 // Phase 4 (#24) of the Vite migration: dist-protected/direction-1.js
-// is now an esbuild-bundled ES module (with React inlined). The loader
-// fetches the bundle as a Blob, mints a blob URL, dynamic-imports it,
-// and renders the default export with `<D1 tweaks={tweaks}
-// practice={practice} />`. The legacy window.D1 / window.PRACTICE /
-// window.React globals are gone. Phase 5 (#25) replaces the inline-
-// styled sub-components with typed-prop versions and a useViewport()
-// hook; internal sub-components stay `: any` here to minimise churn.
-import React from "react";
-import type { DirectionComponent } from "../src/types";
+// is now an esbuild-bundled ES module (React + ReactDOM inlined). The
+// module exports a mount function — the loader calls
+// `mount(rootEl, { tweaks, practice })` and the module owns the
+// React render path so React + ReactDOM are a single instance per
+// page. (See src/types.ts DirectionMount for the rationale.) The
+// legacy window.D1 / window.PRACTICE / window.React globals are gone.
+// Phase 5 (#25) replaces the inline-styled sub-components with typed-
+// prop versions and a useViewport() hook; internal sub-components
+// stay `: any` here to minimise churn.
+import React, { createElement } from "react";
+import { createRoot } from "react-dom/client";
+import type { DirectionComponent, DirectionMount } from "../src/types";
 
 const D1: DirectionComponent = ({ tweaks, practice: P }) => {
   const dark = tweaks.dark !== false;
@@ -582,4 +585,8 @@ const FooterCol = ({ mono, dim, faint, fg, title, items }: any) => (
   </div>
 );
 
-export default D1;
+const mount: DirectionMount = (rootEl, props) => {
+  createRoot(rootEl).render(createElement(D1, props));
+};
+
+export default mount;

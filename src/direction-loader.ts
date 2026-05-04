@@ -13,8 +13,10 @@
 //      components can use <img src={practice.portrait}/> normally.
 //   4. Pulls the per-direction module (e.g. protected/direction-1.js),
 //      dynamic-imports the same way, reads the default export as the
-//      DirectionComponent.
-//   5. Mounts the React component into #root and reveals the body.
+//      DirectionMount function.
+//   5. Calls mount(rootEl, { tweaks, practice }) — the protected
+//      module owns the React render path so React + ReactDOM are a
+//      single instance per page — and reveals the body.
 //
 // Why Storage instead of plain `fetch` + Hosting rewrites: see
 // storage.rules and the PR-3 body for the org-policy issue that
@@ -22,11 +24,16 @@
 // auth header attachment; we don't have to manage tokens manually.
 //
 // Phase 4 (#24) of the Vite migration: replaced the Babel-runtime
-// indirect-eval path with blob-URL dynamic import. The protected
-// modules are now esbuild-bundled ES modules with React inlined;
-// they export a default React component (or, for content.js, the
-// Practice object). The window.PRACTICE / window.D1..D3 / window.Babel
-// globals are gone.
+// indirect-eval path with blob-URL dynamic import. Each protected
+// module is an esbuild-bundled, self-contained ES module that owns
+// its own React + ReactDOM and exports a mount function — the loader
+// hands it a target element + props and the module renders itself.
+// This keeps React a single instance per page (loader doesn't import
+// react/react-dom at all anymore), avoiding the cross-instance hook
+// dispatch failure Codex P1'd before merge.
+//
+// content.js exports the typed Practice object (no React).
+// direction-{1,2,3}.js export DirectionMount functions.
 //
 // Risk: blob-URL dynamic import has historically been a Safari sharp
 // edge. Smoke on iOS Safari before merging — the Chromium-based
@@ -35,15 +42,13 @@
 // without `blob:`, the blob-URL import fails. No CSP is set today,
 // so this works in production as written; if a CSP gets added later,
 // the directive needs `script-src 'self' blob:`.
-import { createRoot } from "react-dom/client";
-import { createElement } from "react";
 import type { User } from "firebase/auth";
 import {
   guardOrRedirect,
   getProtectedBlob,
   signOutAndGoHome,
 } from "./auth";
-import type { DirectionComponent, Practice, Tweaks } from "./types";
+import type { DirectionMount, Practice, Tweaks } from "./types";
 
 // Hard timeout on any single Storage / parse step. If `getBlob()` or
 // `import()` ever hangs without throwing (CORS preflight that stalls,
@@ -218,15 +223,13 @@ export async function bootDirection({
       practice.portrait = "";
     }
 
-    const Component = await loadModule<DirectionComponent>(
-      `direction-${id}.js`,
-    );
+    const mount = await loadModule<DirectionMount>(`direction-${id}.js`);
 
     const rootEl = document.getElementById("root");
     if (!rootEl) {
       throw new Error("#root element not found in DOM");
     }
-    createRoot(rootEl).render(createElement(Component, { tweaks, practice }));
+    mount(rootEl, { tweaks, practice });
     document.body.classList.add("ready");
   } catch (err) {
     console.error(`[direction-loader] boot failed for d/${id}`, err);

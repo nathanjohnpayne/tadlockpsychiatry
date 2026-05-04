@@ -1,16 +1,15 @@
-// Shared types across the public surface and (in phase 3) the
-// protected direction modules.
+// Shared types across the public surface and the protected direction
+// modules. Imported by both src/* (loader) and protected-src/*
+// (content + direction components).
 //
-// These describe the runtime contract between the direction-loader and
-// the gated content it pulls from Firebase Storage:
+// Runtime contract since phase 4 (#24):
 //
-//   1. content.jsx defines a Practice object on window.PRACTICE.
-//   2. direction-{1,2,3}.jsx defines a React component on window.D{N}
-//      whose props are { tweaks: Tweaks }.
+//   1. content.js exports default a Practice object.
+//   2. direction-{1,2,3}.js export default a DirectionMount function
+//      that owns its own React + ReactDOM and renders a
+//      DirectionComponent into the supplied root element.
 //
-// Phase 3 will move the protected sources to TS and import these types
-// directly. Phase 4 swaps the runtime contract from globals to
-// dynamic-imported ES modules; the types stay shaped the same.
+// The legacy phase-3 window.PRACTICE / window.D{N} globals are gone.
 import type { ComponentType } from "react";
 
 // Practice — the content object built by protected-src/content.tsx.
@@ -96,13 +95,31 @@ export interface Tweaks {
   heroVariant?: string;
 }
 
-// DirectionComponent — the shape of the default export from
-// protected-src/direction-{1,2,3}.tsx. Phase 4 (#24) added the
-// `practice` prop: the loader now imports content as an ES module,
-// overrides the portrait field with a blob URL, and passes the result
-// in as a prop instead of mutating window.PRACTICE. The window-globals
-// path is gone.
+// DirectionComponent — the React component shape inside each
+// protected-src/direction-{1,2,3}.tsx. NOT the default export of the
+// built module today; see DirectionMount.
 export type DirectionComponent = ComponentType<{
   tweaks: Tweaks;
   practice: Practice;
 }>;
+
+// DirectionMount — the shape of the default export from each built
+// dist-protected/direction-{1,2,3}.js module.
+//
+// Phase 4 originally exported the React component itself and let the
+// loader call createRoot + createElement against it. That broke at
+// runtime: the loader's react-dom (npm-bundled into the loader chunk)
+// and the protected module's react (npm-bundled into the protected
+// chunk) were two distinct React instances, so hook dispatch failed
+// with "Cannot read properties of null (reading 'useRef')". See
+// Codex's P1 finding on PR #33.
+//
+// The fix is to make each protected module fully self-contained:
+// it owns React + react-dom, and exports a mount function the loader
+// calls with a target element + props. The loader stops importing any
+// React-related package — it's now a pure orchestrator (auth + fetch +
+// hand-off).
+export type DirectionMount = (
+  rootEl: HTMLElement,
+  props: { tweaks: Tweaks; practice: Practice },
+) => void;

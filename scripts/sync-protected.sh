@@ -9,10 +9,13 @@
 # environment serves nothing (or stale content) from the bucket.
 #
 # Phase 3 (#23) of the Vite migration: SRC_DIR moved from `protected/`
-# (raw .jsx + portrait) to `dist-protected/` (esbuild-built .jsx with
-# TypeScript types stripped + portrait copied through). The runtime
-# loader contract is unchanged — Storage still serves the same set of
-# .jsx files at the same paths.
+# (raw .jsx + portrait) to `dist-protected/`. Phase 4 (#24) flipped
+# the build output from `.jsx` (Babel-transformed at runtime) to `.js`
+# ES modules with React inlined; the loader now uses blob-URL dynamic
+# import. Storage still serves the bucket prefix `protected/` — the
+# names changed (`content.js`, `direction-{1,2,3}.js`,
+# `sterling-tadlock.png`) but the storage.rules path-prefix match is
+# unchanged.
 #
 # Why rsync with --delete: the bucket should mirror dist-protected/.
 # A file removed from protected-src/ (and therefore not emitted into
