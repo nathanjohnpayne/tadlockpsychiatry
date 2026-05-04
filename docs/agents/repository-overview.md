@@ -8,7 +8,9 @@ It was scaffolded from the AI Agent Tooling Standard template
 ([Mergepath](https://github.com/nathanjohnpayne/mergepath)), so the
 agent-tooling files (AGENTS.md, REVIEW_POLICY.md, scripts/, .github/
 workflows, rules/, docs/agents/) follow the standard. The application
-surface is a hand-rolled static site at the repo root.
+surface is a Vite-built multi-page site (sources in `src/` + the per-
+surface `index.html` entries; build output in `dist/`, which is what
+Firebase Hosting serves).
 
 ## Tech Stack
 
