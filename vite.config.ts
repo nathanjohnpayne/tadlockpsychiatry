@@ -8,6 +8,14 @@ import { resolve } from "node:path";
 // Rollup does not try to resolve and bundle them. Phase 2 will port
 // src/* to TypeScript and switch to npm-resolved firebase imports.
 //
+// Note: @vitejs/plugin-react is in devDependencies but NOT wired into
+// the plugins array yet. There is no .tsx/.jsx source under src/ in
+// phase 1 to transform, and the protected/*.jsx files are gitignored
+// from dist/ (uploaded to Firebase Storage and Babel-transformed at
+// runtime). The plugin gets wired up in phase 2 (#22) when src/* gets
+// ported to TS, and again in phase 3 (#23) when protected-src/*.tsx
+// is bundled by a second Vite config.
+//
 // Multi-page mode: the gate (/), /menu, and the three direction shells
 // (/d/1, /d/2, /d/3) are each their own HTML entry. Vite emits each as
 // its own chunk graph in dist/ at the same URL paths.
