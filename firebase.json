@@ -3,10 +3,11 @@
     "rules": "storage.rules"
   },
   "hosting": {
-    "public": ".",
+    "public": "dist",
     "cleanUrls": true,
     "trailingSlash": false,
     "predeploy": [
+      "npm run build",
       "bash scripts/sync-protected.sh"
     ],
     "postdeploy": [
@@ -15,37 +16,7 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/.*/**",
-      ".git/**",
-      ".github/**",
-      ".claude/**",
-      ".cursor/**",
-      ".vscode/**",
-      "**/node_modules/**",
-      "**/*.md",
-      "AGENTS.md",
-      "CLAUDE.md",
-      "REVIEW_POLICY.md",
-      "DEPLOYMENT.md",
-      "CONTRIBUTING.md",
-      "SECURITY.md",
-      "ai_agent_tooling_standard.md",
-      ".repo-template.yml",
-      ".coderabbit.yml",
-      ".gitignore",
-      ".ai_context.md",
-      "scripts/**",
-      "tests/**",
-      "rules/**",
-      "specs/**",
-      "plans/**",
-      "docs/**",
-      "bugs/**",
-      "functions/**",
-      "packaging/**",
-      "protected/**",
-      "storage.rules",
-      "storage.cors.json"
+      "**/.*/**"
     ],
     "headers": [
       {

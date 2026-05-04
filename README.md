@@ -25,22 +25,30 @@ app (Phase 4a) or a manual CLI fallback (Phase 4b).
 
 ## Local Development
 
-The site is hand-rolled static HTML/CSS/JS. To preview locally:
+The site is built with Vite (multi-page) — see `vite.config.ts` for the
+list of HTML entries (gate `/`, `/menu`, `/d/{1,2,3}`). To preview
+locally:
 
 ```bash
-# From the repo root, serve the current directory
-npx http-server . -p 8080
+npm install
+npm run dev      # Vite dev server (defaults to http://localhost:5173)
 # or
-python3 -m http.server 8080
+npm run build && npm run preview   # production build served from dist/
 ```
 
-Open http://localhost:8080.
+Note: `vite preview` does not apply Firebase Hosting's `cleanUrls`
+rewrite, so multi-page entries need a trailing slash locally
+(`/menu/`, `/d/1/`). Hosting rewrites them in production.
 
 ## Deploy
 
 ```bash
 op-firebase-deploy --only hosting
 ```
+
+`firebase.json`'s `hosting.predeploy` runs `npm run build` (writing
+`dist/`, which Hosting serves) and then `bash scripts/sync-protected.sh`
+(uploading the gated content to Firebase Storage) before any upload.
 
 See `DEPLOYMENT.md` for the full setup and deploy flow, including
 one-time service account configuration.
@@ -49,9 +57,14 @@ one-time service account configuration.
 
 | File | Purpose |
 |---|---|
-| `index.html` | Landing page |
-| `src/firebase-init.js` | Firebase web SDK init (analytics) |
-| `firebase.json` | Hosting config |
+| `index.html` | Gate page (Vite entry) |
+| `menu/index.html`, `d/{1,2,3}/index.html` | Other Vite entries |
+| `src/firebase-config.js` | Firebase web SDK config (apiKey, projectId, etc.) |
+| `src/auth.js` | Auth + allowlist guard + protected-blob fetch |
+| `src/direction-loader.js` | Runtime loader for the gated direction prototypes |
+| `vite.config.ts` | Multi-page Vite config (externalizes gstatic + unpkg URLs) |
+| `firebase.json` | Hosting config (`public: dist`, predeploy build hook) |
+| `storage.rules` | Server-side allowlist for the protected/ prefix |
 | `.firebaserc` | Firebase project pointer |
 | `AGENTS.md` | Instructions for AI agents |
 | `DEPLOYMENT.md` | Build and deployment |
@@ -62,8 +75,9 @@ one-time service account configuration.
 
 | Directory | Purpose |
 |---|---|
-| `src/` | Application code |
-| `public/` | Static assets |
+| `src/` | Application code (auth, firebase config, direction loader) |
+| `protected/` | Gated content uploaded to Storage (not bundled into `dist/`) |
+| `dist/` | Vite build output (gitignored; what Hosting serves) |
 | `rules/` | Binding repository constraints |
 | `specs/` | Intended system behavior |
 | `tests/` | Automated validation |
