@@ -1,7 +1,18 @@
-// Shared content for Dr. Sterling Tadlock—Psychiatry
-// All three directions read from this single source so copy stays consistent.
+// Shared content for Dr. Sterling Tadlock—Psychiatry.
+// All three directions read from this single source so copy stays
+// consistent.
+//
+// Phase 3 (#23) of the Vite migration: this file moved from
+// protected/content.jsx to protected-src/content.tsx with a typed
+// Practice annotation. The build step (npm run build:protected)
+// strips TypeScript types via esbuild and emits the result as
+// dist-protected/content.jsx — same window.PRACTICE assignment as
+// before, so the runtime Babel-transformed loader contract is
+// preserved. Phase 4 (#24) replaces the window-globals path with
+// a typed default export and dynamic import.
+import type { Practice } from "../src/types";
 
-const PRACTICE = {
+const PRACTICE: Practice = {
   name: "Sterling Tadlock, M.D.",
   shortName: "S. Tadlock",
   practice: "Performance Psychiatry",

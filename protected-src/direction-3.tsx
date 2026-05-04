@@ -2,9 +2,15 @@
 // High-contrast brutalist-leaning. Massive sans display, generative line-grid
 // that responds to cursor, monospace metadata. Bold blocks, hard divisions,
 // information-dense.
+//
+// Phase 3 (#23) port from protected/direction-3.jsx — see direction-1.tsx
+// header for the runtime contract and the rationale for `: any` on
+// internal sub-components.
+import type { Practice, Tweaks } from "../src/types";
+declare const React: typeof import("react");
 
-const D3 = ({ tweaks = {} }) => {
-  const P = window.PRACTICE;
+const D3 = ({ tweaks = {} }: { tweaks?: Tweaks }) => {
+  const P = window.PRACTICE as Practice;
   const dark = tweaks.dark === true;
   const accent = tweaks.accent || "#FF5C2A";
   const sans = tweaks.sans || '"Söhne", "Inter", -apple-system, system-ui, sans-serif';
@@ -18,14 +24,14 @@ const D3 = ({ tweaks = {} }) => {
   const card = dark ? "#141414" : "#FAF8F2";
   const inv = dark ? "#0A0A0A" : "#F0EDE6";
 
-  const rootRef = React.useRef(null);
-  const gridRef = React.useRef(null);
+  const rootRef = React.useRef<any>(null);
+  const gridRef = React.useRef<any>(null);
   const [mouse, setMouse] = React.useState({ x: 0.5, y: 0.5 });
 
   React.useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const onMove = (e) => {
+    const onMove = (e: any) => {
       const r = root.getBoundingClientRect();
       const mx = (e.clientX - r.left) / r.width;
       const my = (e.clientY - r.top) / r.height;
@@ -58,7 +64,7 @@ const D3 = ({ tweaks = {} }) => {
   );
 };
 
-const NavBarD3 = ({ fg, dim, faint, accent, mono, bg }) => (
+const NavBarD3 = ({ fg, dim, faint, accent, mono, bg }: any) => (
   <nav style={{
     position: "sticky", top: 0, zIndex: 10,
     padding: "14px 32px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
@@ -86,19 +92,21 @@ const NavBarD3 = ({ fg, dim, faint, accent, mono, bg }) => (
   </nav>
 );
 
-const HeroD3 = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef, variant, mouse, dark }) => {
+const HeroD3 = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef, variant, mouse, dark }: any) => {
   if (variant === "manifesto") return <HeroD3Manifesto P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} inv={inv} />;
   if (variant === "stats") return <HeroD3Stats P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} inv={inv} />;
   return <HeroD3Blocks P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg} inv={inv} gridRef={gridRef} mouse={mouse} dark={dark} />;
 };
 
-const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef, mouse, dark }) => (
+const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef, mouse, dark }: any) => (
   <section style={{ position: "relative", borderBottom: `1px solid ${fg}` }}>
     {/* generative line-grid that follows the cursor */}
     <div ref={gridRef} style={{
       position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden",
-      "--mx": 0.5, "--my": 0.5,
-    }}>
+      // CSS custom properties aren't in React.CSSProperties; cast around it.
+      ["--mx" as string]: 0.5,
+      ["--my" as string]: 0.5,
+    } as React.CSSProperties}>
       <svg width="100%" height="100%" style={{ position: "absolute", inset: 0, opacity: dark ? 0.18 : 0.12 }}>
         <defs>
           <pattern id="d3grid" width="48" height="48" patternUnits="userSpaceOnUse">
@@ -180,7 +188,7 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
   </section>
 );
 
-const HeroD3Manifesto = ({ P, fg, dim, accent, mono, card, inv }) => (
+const HeroD3Manifesto = ({ P, fg, dim, accent, mono, card, inv }: any) => (
   <section style={{ padding: "80px 40px 60px", borderBottom: `1px solid ${fg}` }}>
     <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase", marginBottom: 40 }}>
       ▦ Manifesto · {P.heroEyebrow}
@@ -203,7 +211,7 @@ const HeroD3Manifesto = ({ P, fg, dim, accent, mono, card, inv }) => (
   </section>
 );
 
-const HeroD3Stats = ({ P, fg, dim, faint, accent, mono, card, inv }) => (
+const HeroD3Stats = ({ P, fg, dim, faint, accent, mono, card, inv }: any) => (
   <section style={{ padding: "60px 40px 40px", borderBottom: `1px solid ${fg}`, position: "relative" }}>
     <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase", marginBottom: 32 }}>
       ▦ Practice Profile · {P.established}
@@ -228,7 +236,7 @@ const HeroD3Stats = ({ P, fg, dim, faint, accent, mono, card, inv }) => (
   </section>
 );
 
-const PrincipleD3 = ({ P, fg, dim, faint, accent, mono, card }) => (
+const PrincipleD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
   <section style={{ padding: "60px 40px", borderBottom: `1px solid ${fg}` }}>
     <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 40, marginBottom: 40 }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase" }}>
@@ -258,7 +266,7 @@ const PrincipleD3 = ({ P, fg, dim, faint, accent, mono, card }) => (
   </section>
 );
 
-const SpecialtiesD3 = ({ P, fg, dim, faint, accent, mono, card }) => {
+const SpecialtiesD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => {
   const [hover, setHover] = React.useState(null);
   return (
     <section style={{ padding: "60px 40px", borderBottom: `1px solid ${fg}` }}>
@@ -301,7 +309,7 @@ const SpecialtiesD3 = ({ P, fg, dim, faint, accent, mono, card }) => {
   );
 };
 
-const ProcessD3 = ({ P, fg, dim, faint, accent, mono, card, inv }) => (
+const ProcessD3 = ({ P, fg, dim, faint, accent, mono, card, inv }: any) => (
   <section style={{ padding: "60px 40px", borderBottom: `1px solid ${fg}`, background: fg, color: inv }}>
     <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 40, marginBottom: 48, alignItems: "end" }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase" }}>
@@ -332,7 +340,7 @@ const ProcessD3 = ({ P, fg, dim, faint, accent, mono, card, inv }) => (
   </section>
 );
 
-const AboutD3 = ({ P, fg, dim, faint, accent, mono, card }) => (
+const AboutD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
   <section style={{ padding: "60px 40px", borderBottom: `1px solid ${fg}` }}>
     <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 40, marginBottom: 40, alignItems: "end" }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase" }}>
@@ -385,7 +393,7 @@ const AboutD3 = ({ P, fg, dim, faint, accent, mono, card }) => (
   </section>
 );
 
-const WaitlistD3 = ({ P, fg, dim, faint, accent, mono, bg, inv }) => {
+const WaitlistD3 = ({ P, fg, dim, faint, accent, mono, bg, inv }: any) => {
   const [email, setEmail] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
   return (
@@ -404,11 +412,11 @@ const WaitlistD3 = ({ P, fg, dim, faint, accent, mono, bg, inv }) => {
         </div>
         <div>
           {!submitted ? (
-            <form onSubmit={(e) => { e.preventDefault(); if (email) setSubmitted(true); }}
+            <form onSubmit={(e: any) => { e.preventDefault(); if (email) setSubmitted(true); }}
               style={{ border: "1px solid #0A0A0A" }}>
               <div style={{ padding: "16px 18px", borderBottom: "1px solid #0A0A0A" }}>
                 <label style={{ fontFamily: mono, fontSize: 10, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 6, fontWeight: 700 }}>Email</label>
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@domain.com"
+                <input type="email" required value={email} onChange={(e: any) => setEmail(e.target.value)} placeholder="you@domain.com"
                   style={{
                     width: "100%", padding: 0, border: "none", background: "transparent",
                     color: "#0A0A0A", fontSize: 16, fontFamily: mono, outline: "none", boxSizing: "border-box",
@@ -434,7 +442,7 @@ const WaitlistD3 = ({ P, fg, dim, faint, accent, mono, bg, inv }) => {
   );
 };
 
-const FooterD3 = ({ P, fg, dim, faint, accent, mono }) => (
+const FooterD3 = ({ P, fg, dim, faint, accent, mono }: any) => (
   <footer style={{ padding: "32px 40px", borderTop: `1px solid ${fg}`, fontFamily: mono, fontSize: 11.5, letterSpacing: 0.4 }}>
     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 32, marginBottom: 32 }}>
       <div>

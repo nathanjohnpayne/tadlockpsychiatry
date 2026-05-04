@@ -1,20 +1,28 @@
 #!/usr/bin/env bash
-# Sync protected/ to the project's Firebase Storage default bucket.
+# Sync dist-protected/ to the project's Firebase Storage default bucket.
 #
 # Run automatically as a Hosting predeploy hook (firebase.json
-# hosting.predeploy) so every `firebase deploy --only hosting` first
-# uploads the latest protected files. This closes the gap Codex
-# flagged on PR #9: without this, Storage objects drift from the
-# committed protected/ tree, and a fresh environment serves nothing
-# (or stale content) from the bucket.
+# hosting.predeploy) AFTER `npm run build:protected` so every
+# `firebase deploy --only hosting` uploads the freshly-built protected
+# files. This closes the gap Codex flagged on PR #9: without this,
+# Storage objects drift from the committed source tree, and a fresh
+# environment serves nothing (or stale content) from the bucket.
 #
-# Why rsync with --delete: the bucket should mirror committed protected/.
-# A file removed from the repo should be removed from the bucket too,
-# or storage.rules' allowlist would still serve it indefinitely.
+# Phase 3 (#23) of the Vite migration: SRC_DIR moved from `protected/`
+# (raw .jsx + portrait) to `dist-protected/` (esbuild-built .jsx with
+# TypeScript types stripped + portrait copied through). The runtime
+# loader contract is unchanged — Storage still serves the same set of
+# .jsx files at the same paths.
+#
+# Why rsync with --delete: the bucket should mirror dist-protected/.
+# A file removed from protected-src/ (and therefore not emitted into
+# dist-protected/) should be removed from the bucket too, or
+# storage.rules' allowlist would still serve it indefinitely.
 #
 # Usage:
 #   scripts/sync-protected.sh                 # sync to default bucket
 #   BUCKET=other-bucket scripts/sync-protected.sh
+#   SRC_DIR=protected scripts/sync-protected.sh   # legacy override
 #   DRY_RUN=1 scripts/sync-protected.sh       # show what would change
 #   SKIP=1 scripts/sync-protected.sh          # no-op (used by CI / tests)
 set -euo pipefail
@@ -25,7 +33,7 @@ if [[ "${SKIP:-}" == "1" ]]; then
 fi
 
 BUCKET="${BUCKET:-tadlockpsychiatry.firebasestorage.app}"
-SRC_DIR="${SRC_DIR:-protected}"
+SRC_DIR="${SRC_DIR:-dist-protected}"
 
 if [[ ! -d "$SRC_DIR" ]]; then
   echo "[sync-protected] $SRC_DIR/ not found — nothing to sync" >&2

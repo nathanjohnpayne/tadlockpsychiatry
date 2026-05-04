@@ -13,19 +13,74 @@
 // dynamic-imported ES modules; the types stay shaped the same.
 import type { ComponentType } from "react";
 
-// Practice — the content object built by protected/content.jsx today.
-// The shape is intentionally permissive: content evolves freely on
-// the protected side, and the loader only depends on `portrait` (which
-// it overrides with an auth-fetched blob URL before mounting). Other
-// fields are passed through to the direction components, which read
-// them via window.PRACTICE in phase 2 and via a typed prop in phase 3+.
+// Practice — the content object built by protected-src/content.tsx.
+// All three direction components read from the same shape so copy
+// stays consistent across /d/1, /d/2, /d/3.
+//
+// The loader overrides `portrait` with an auth-fetched blob: URL
+// before mounting. Every other field is rendered as-is by the
+// directions; adding a new field to content.tsx without adding it
+// here will fail the protected typecheck (intentional — keeps the
+// content file and the components in lockstep).
+export interface PracticePositioning {
+  k: string;
+  h: string;
+  p: string;
+}
+export interface PracticeCredential {
+  era: string;
+  school: string;
+  years: string;
+}
+export interface PracticeSpecialty {
+  n: string;
+  title: string;
+  body: string;
+  tags: string[];
+}
+export interface PracticeProcessStep {
+  n: string;
+  title: string;
+  duration: string;
+  body: string;
+}
+export interface PracticeMetric {
+  v: string;
+  u: string;
+  l: string;
+}
+export interface PracticeFaq {
+  q: string;
+  a: string;
+}
+export interface PracticeContact {
+  address: string;
+  email: string;
+  site: string;
+  hours: string;
+}
 export interface Practice {
+  name: string;
+  shortName: string;
+  practice: string;
+  location: string;
+  format: string;
+  established: string;
+  status: string;
+  heroEyebrow: string;
+  heroLeads: string[];
+  heroSub: string;
+  positioning: PracticePositioning[];
+  bio: string[];
+  credentials: PracticeCredential[];
+  specialties: PracticeSpecialty[];
+  process: PracticeProcessStep[];
+  metrics: PracticeMetric[];
+  faqs: PracticeFaq[];
+  contact: PracticeContact;
   // Overridden by the loader to a blob: URL after the portrait file
   // is fetched from Storage. May be empty string if the fetch failed.
   portrait: string;
-  // Anything else the content file defines. Direction components
-  // access these via the shared global; phase 3 will tighten this.
-  [key: string]: unknown;
 }
 
 // Tweaks — per-direction styling overrides passed in by the HTML shell.

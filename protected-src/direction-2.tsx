@@ -2,9 +2,15 @@
 // Off-white, near-black, single muted accent. Mono + sans pairing,
 // data-confident layout, parallax depth on scroll, hover-driven micro-
 // interactions.
+//
+// Phase 3 (#23) port from protected/direction-2.jsx — see direction-1.tsx
+// header for the runtime contract and the rationale for `: any` on
+// internal sub-components.
+import type { Practice, Tweaks } from "../src/types";
+declare const React: typeof import("react");
 
-const D2 = ({ tweaks = {} }) => {
-  const P = window.PRACTICE;
+const D2 = ({ tweaks = {} }: { tweaks?: Tweaks }) => {
+  const P = window.PRACTICE as Practice;
   const dark = tweaks.dark === true;
   const accent = tweaks.accent || "#3E5C7A";
   const sans = tweaks.sans || '"Söhne", "Inter", -apple-system, system-ui, sans-serif';
@@ -17,7 +23,7 @@ const D2 = ({ tweaks = {} }) => {
   const faint = dark ? "rgba(232,230,224,0.13)" : "rgba(20,23,28,0.13)";
   const card = dark ? "#161A21" : "#FFFFFF";
 
-  const rootRef = React.useRef(null);
+  const rootRef = React.useRef<any>(null);
   const [scrollY, setScrollY] = React.useState(0);
   const [mouse, setMouse] = React.useState({ x: 0.5, y: 0.5 });
 
@@ -25,7 +31,7 @@ const D2 = ({ tweaks = {} }) => {
     const root = rootRef.current;
     if (!root) return;
     const onScroll = () => setScrollY(root.scrollTop);
-    const onMove = (e) => {
+    const onMove = (e: any) => {
       const r = root.getBoundingClientRect();
       setMouse({ x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height });
     };
@@ -56,7 +62,7 @@ const D2 = ({ tweaks = {} }) => {
   );
 };
 
-const NavBarD2 = ({ fg, dim, faint, accent, mono, bg }) => (
+const NavBarD2 = ({ fg, dim, faint, accent, mono, bg }: any) => (
   <nav style={{
     position: "sticky", top: 0, zIndex: 10,
     padding: "16px 48px", display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -84,13 +90,13 @@ const NavBarD2 = ({ fg, dim, faint, accent, mono, bg }) => (
   </nav>
 );
 
-const HeroD2 = ({ P, fg, dim, faint, accent, mono, card, bg, scrollY, mouse, variant, dark }) => {
+const HeroD2 = ({ P, fg, dim, faint, accent, mono, card, bg, scrollY, mouse, variant, dark }: any) => {
   if (variant === "stack") return <HeroD2Stack P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} scrollY={scrollY} mouse={mouse} />;
   if (variant === "wide") return <HeroD2Wide P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} scrollY={scrollY} />;
   return <HeroD2Metrics P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg} scrollY={scrollY} mouse={mouse} dark={dark} />;
 };
 
-const HeroD2Metrics = ({ P, fg, dim, faint, accent, mono, card, bg, scrollY, mouse, dark }) => {
+const HeroD2Metrics = ({ P, fg, dim, faint, accent, mono, card, bg, scrollY, mouse, dark }: any) => {
   // ambient wireframe sphere parallax
   const ax = (mouse.x - 0.5) * 24;
   const ay = (mouse.y - 0.5) * 24;
@@ -179,7 +185,7 @@ const HeroD2Metrics = ({ P, fg, dim, faint, accent, mono, card, bg, scrollY, mou
   );
 };
 
-const HeroD2Stack = ({ P, fg, dim, faint, accent, mono, card }) => (
+const HeroD2Stack = ({ P, fg, dim, faint, accent, mono, card }: any) => (
   <section style={{ padding: "120px 48px 100px", minHeight: "88vh", display: "flex", flexDirection: "column", justifyContent: "center" }}>
     <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 40 }}>
       {P.heroEyebrow} · {P.established}
@@ -198,7 +204,7 @@ const HeroD2Stack = ({ P, fg, dim, faint, accent, mono, card }) => (
   </section>
 );
 
-const HeroD2Wide = ({ P, fg, dim, faint, accent, mono, card, scrollY }) => (
+const HeroD2Wide = ({ P, fg, dim, faint, accent, mono, card, scrollY }: any) => (
   <section style={{ padding: "100px 48px", minHeight: "90vh", display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 64, alignItems: "center" }}>
     <div>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 36 }}>
@@ -227,7 +233,7 @@ const HeroD2Wide = ({ P, fg, dim, faint, accent, mono, card, scrollY }) => (
   </section>
 );
 
-const PrincipleD2 = ({ P, fg, dim, faint, accent, mono, card }) => (
+const PrincipleD2 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
   <section style={{ padding: "120px 48px", borderTop: `0.5px solid ${faint}` }}>
     <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 80, alignItems: "start" }}>
       <div>
@@ -247,7 +253,7 @@ const PrincipleD2 = ({ P, fg, dim, faint, accent, mono, card }) => (
   </section>
 );
 
-const PrincipleCardD2 = ({ c, fg, dim, faint, accent, mono, card }) => {
+const PrincipleCardD2 = ({ c, fg, dim, faint, accent, mono, card }: any) => {
   const [hover, setHover] = React.useState(false);
   return (
     <div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
@@ -269,7 +275,7 @@ const PrincipleCardD2 = ({ c, fg, dim, faint, accent, mono, card }) => {
   );
 };
 
-const SpecialtiesD2 = ({ P, fg, dim, faint, accent, mono, card }) => (
+const SpecialtiesD2 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
   <section style={{ padding: "120px 48px", borderTop: `0.5px solid ${faint}` }}>
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 48 }}>
       <div>
@@ -291,7 +297,7 @@ const SpecialtiesD2 = ({ P, fg, dim, faint, accent, mono, card }) => (
   </section>
 );
 
-const SpecCardD2 = ({ s, fg, dim, faint, accent, mono, card }) => {
+const SpecCardD2 = ({ s, fg, dim, faint, accent, mono, card }: any) => {
   const [hover, setHover] = React.useState(false);
   return (
     <div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
@@ -324,7 +330,7 @@ const SpecCardD2 = ({ s, fg, dim, faint, accent, mono, card }) => {
   );
 };
 
-const ProcessD2 = ({ P, fg, dim, faint, accent, mono, card }) => (
+const ProcessD2 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
   <section style={{ padding: "120px 48px", borderTop: `0.5px solid ${faint}` }}>
     <div style={{ marginBottom: 56, display: "grid", gridTemplateColumns: "1fr 1.6fr", gap: 64 }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase" }}>
@@ -361,7 +367,7 @@ const ProcessD2 = ({ P, fg, dim, faint, accent, mono, card }) => (
   </section>
 );
 
-const AboutD2 = ({ P, fg, dim, faint, accent, mono, card }) => (
+const AboutD2 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
   <section style={{ padding: "120px 48px", borderTop: `0.5px solid ${faint}` }}>
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 80, alignItems: "start" }}>
       <div>
@@ -409,7 +415,7 @@ const AboutD2 = ({ P, fg, dim, faint, accent, mono, card }) => (
   </section>
 );
 
-const WaitlistD2 = ({ P, fg, dim, faint, accent, mono, card }) => {
+const WaitlistD2 = ({ P, fg, dim, faint, accent, mono, card }: any) => {
   const [email, setEmail] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
   return (
@@ -436,9 +442,9 @@ const WaitlistD2 = ({ P, fg, dim, faint, accent, mono, card }) => {
           </div>
           <div>
             {!submitted ? (
-              <form onSubmit={(e) => { e.preventDefault(); if (email) setSubmitted(true); }}>
+              <form onSubmit={(e: any) => { e.preventDefault(); if (email) setSubmitted(true); }}>
                 <label style={{ fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 8 }}>Email</label>
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@domain.com"
+                <input type="email" required value={email} onChange={(e: any) => setEmail(e.target.value)} placeholder="you@domain.com"
                   style={{
                     width: "100%", padding: "14px 16px", border: `1px solid ${faint}`,
                     background: "transparent", color: fg, fontSize: 15, borderRadius: 4, outline: "none",
@@ -467,7 +473,7 @@ const WaitlistD2 = ({ P, fg, dim, faint, accent, mono, card }) => {
   );
 };
 
-const FooterD2 = ({ P, fg, dim, faint, accent, mono }) => (
+const FooterD2 = ({ P, fg, dim, faint, accent, mono }: any) => (
   <footer style={{ padding: "56px 48px 32px", borderTop: `0.5px solid ${faint}` }}>
     <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40, marginBottom: 48, alignItems: "start" }}>
       <div>
@@ -492,7 +498,7 @@ const FooterD2 = ({ P, fg, dim, faint, accent, mono }) => (
   </footer>
 );
 
-const FootCol = ({ mono, dim, title, items }) => (
+const FootCol = ({ mono, dim, title, items }: any) => (
   <div>
     <div style={{ fontFamily: mono, fontSize: 10, color: dim, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>{title}</div>
     {items.map((it, i) => <div key={i} style={{ fontSize: 13, marginBottom: 4 }}>{it}</div>)}

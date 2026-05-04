@@ -47,8 +47,10 @@ op-firebase-deploy --only hosting
 ```
 
 `firebase.json`'s `hosting.predeploy` runs `npm run build` (writing
-`dist/`, which Hosting serves) and then `bash scripts/sync-protected.sh`
-(uploading the gated content to Firebase Storage) before any upload.
+`dist/`, which Hosting serves), then `npm run build:protected` (esbuild
+strips TypeScript from `protected-src/*.tsx` into `dist-protected/`),
+then `bash scripts/sync-protected.sh` (uploading the built protected
+files to Firebase Storage) before any upload.
 
 See `DEPLOYMENT.md` for the full setup and deploy flow, including
 one-time service account configuration.
@@ -62,10 +64,13 @@ one-time service account configuration.
 | `src/firebase-config.ts` | Firebase web SDK config (apiKey, projectId, etc.) |
 | `src/auth.ts` | Auth + allowlist guard + protected-blob fetch |
 | `src/direction-loader.ts` | Runtime loader for the gated direction prototypes |
-| `src/types.ts` | Shared types (`Practice`, `Tweaks`, `DirectionComponent`) |
+| `src/types.ts` | Shared types (`Practice`, `Tweaks`, `DirectionComponent`) — imported by both `src/` and `protected-src/` |
 | `src/global.d.ts` | Ambient `window.PRACTICE` / `D1..D3` / `Babel` types for the Babel-runtime loader |
+| `protected-src/*.tsx` | Gated React components + content (TypeScript source — NOT bundled into `dist/`) |
 | `vite.config.ts` | Multi-page Vite config (externalizes unpkg + Google Fonts URLs only) |
-| `firebase.json` | Hosting config (`public: dist`, predeploy build hook) |
+| `tsconfig.protected.json` | TS project config for `protected-src/` (relaxed strictness for the inline-styled prototypes) |
+| `scripts/build-protected.mjs` | esbuild step that strips TS from `protected-src/*.tsx` → `dist-protected/*.jsx` for Storage upload |
+| `firebase.json` | Hosting config (`public: dist`, three-step predeploy: build → build:protected → sync) |
 | `storage.rules` | Server-side allowlist for the protected/ prefix |
 | `.firebaserc` | Firebase project pointer |
 | `AGENTS.md` | Instructions for AI agents |
@@ -77,9 +82,10 @@ one-time service account configuration.
 
 | Directory | Purpose |
 |---|---|
-| `src/` | Application code (auth, firebase config, direction loader) |
-| `protected/` | Gated content uploaded to Storage (not bundled into `dist/`) |
-| `dist/` | Vite build output (gitignored; what Hosting serves) |
+| `src/` | Public application code (auth, firebase config, direction loader, types) |
+| `protected-src/` | TypeScript source for the gated direction prototypes + content (built into `dist-protected/` by `npm run build:protected`) |
+| `dist/` | Vite public build output (gitignored; what Hosting serves) |
+| `dist-protected/` | esbuild protected build output (gitignored; uploaded to Firebase Storage by `scripts/sync-protected.sh`) |
 | `rules/` | Binding repository constraints |
 | `specs/` | Intended system behavior |
 | `tests/` | Automated validation |
