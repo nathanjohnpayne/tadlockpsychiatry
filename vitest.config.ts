@@ -9,12 +9,10 @@ export default defineConfig({
     environment: "jsdom",
     include: ["tests/unit/**/*.test.ts"],
     globals: false,
-  },
-  // Vitest 4 hoists poolOptions to the root config. Suite is small —
-  // single-thread keeps startup latency low.
-  poolOptions: {
-    threads: {
-      singleThread: true,
-    },
+    // Vitest 4 removed poolOptions and the per-pool singleThread flag.
+    // The replacement for "run files sequentially without spinning up
+    // worker pools" is fileParallelism: false (sets maxWorkers=1).
+    // Suite is small — sequential keeps startup latency low.
+    fileParallelism: false,
   },
 });

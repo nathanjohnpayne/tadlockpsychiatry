@@ -5,7 +5,8 @@ Read in this order before taking any action:
 1. `README.md` — understand the project
 2. `AGENTS.md` — load behavioral instructions (index pointing to this directory)
 3. `rules/repo_rules.md` — load binding constraints
-4. `.ai_context.md` — load supplemental context
+4. `DEPLOYMENT.md` — deploy process and credential setup
+5. `.ai_context.md` — load supplemental context
 
 Intended behavior is captured in code, comments, and per-PR commit
 messages — there is no `specs/` directory in this repo. If a contract

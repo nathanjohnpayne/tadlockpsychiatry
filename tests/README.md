@@ -19,8 +19,11 @@ build to pass (see `rules/repo_rules.md`).
   `dist-protected/` build artifact: ES module shape, default exports,
   no leftover `window.PRACTICE` / `window.D{N}` / `@babel/standalone`
   globals, no leftover TypeScript syntax, no http(s) external imports
-  (React + ReactDOM inlined). Skips silently if the build hasn't been
-  run; CI runs `npm run build:protected && npm test`.
+  (React + ReactDOM inlined). The `pretest` script in `package.json`
+  runs `npm run build:protected` before every `npm test`, so the
+  build artifact is always current and the suite can't silently skip
+  via `describe.skipIf`. CI is not yet wired to run `npm test`; that
+  is a follow-up.
 
 ## Adding a test
 

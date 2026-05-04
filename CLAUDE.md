@@ -1,12 +1,13 @@
 Read these files before taking any action in this repository:
 
-1. `AGENTS.md` — behavioral rules and operating instructions
-2. `rules/repo_rules.md` — binding structural constraints
-3. `DEPLOYMENT.md` — deploy process and credential setup
-4. `.ai_context.md` — supplemental context
+1. `README.md` — project overview
+2. `AGENTS.md` — behavioral rules and operating instructions
+3. `rules/repo_rules.md` — binding structural constraints
+4. `DEPLOYMENT.md` — deploy process and credential setup
+5. `.ai_context.md` — supplemental context
 
 Intended behavior is captured in code, comments, and per-PR commit
-messages — there is no `specs/` directory. If any of the four files
+messages — there is no `specs/` directory. If any of the five files
 above are missing, flag the gap before proceeding.
 
 # Code Review — Mandatory Checklist

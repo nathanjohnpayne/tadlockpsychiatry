@@ -61,7 +61,7 @@ describe.skipIf(!buildExists)("dist-protected contract", () => {
           expect(src).not.toMatch(/import\(['"]https?:\/\//);
         });
 
-        it("calls createRoot exactly once (per the DirectionMount contract)", () => {
+        it("includes a createRoot reference (per the DirectionMount contract proxy)", () => {
           // The mount fn calls createRoot(rootEl).render(...). Bundled
           // react-dom internally references createRoot in setup paths —
           // the user-code call is what we want to count, but minified
