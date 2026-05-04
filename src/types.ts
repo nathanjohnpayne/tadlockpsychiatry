@@ -97,6 +97,12 @@ export interface Tweaks {
 }
 
 // DirectionComponent — the shape of the default export from
-// protected-src/direction-{1,2,3}.tsx (phase 3) and the type the loader
-// expects from the eval'd window.D{N} global today.
-export type DirectionComponent = ComponentType<{ tweaks: Tweaks }>;
+// protected-src/direction-{1,2,3}.tsx. Phase 4 (#24) added the
+// `practice` prop: the loader now imports content as an ES module,
+// overrides the portrait field with a blob URL, and passes the result
+// in as a prop instead of mutating window.PRACTICE. The window-globals
+// path is gone.
+export type DirectionComponent = ComponentType<{
+  tweaks: Tweaks;
+  practice: Practice;
+}>;

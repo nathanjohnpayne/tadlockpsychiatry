@@ -1,20 +1,33 @@
 #!/usr/bin/env node
 // scripts/build-protected.mjs
 //
-// Phase 3 (#23) of the Vite migration. Strips TypeScript types from
-// protected-src/*.tsx and emits dist-protected/*.jsx — the existing
-// runtime Babel-transformed loader (src/direction-loader.ts) fetches
-// these .jsx files from Firebase Storage and indirect-evals them.
-// JSX stays as JSX so Babel's react preset handles it at runtime
-// (per the long-standing contract); only the TS syntax is removed.
+// Phase 4 (#24) of the Vite migration. Bundles each source file in
+// protected-src/ into a self-contained ES module with React inlined,
+// emits dist-protected/*.js. The runtime loader (src/direction-
+// loader.ts) fetches each file from Firebase Storage as a Blob, mints
+// a blob URL, and dynamic-imports it — `(await import(url)).default`
+// is either the Practice object (for content.js) or the React
+// component (for direction-{1,2,3}.js). The legacy Babel-runtime
+// indirect-eval contract is gone.
 //
-// Phase 4 (#24) replaces this output shape with bundled ES modules
-// at .js extensions and switches the loader to a blob-URL dynamic
-// import. At that point this file changes its loader option set;
-// the build hook in firebase.json stays the same.
+// Bundle/format notes:
+//   - bundle: true so React + react/jsx-runtime are inlined per file.
+//     Cost: ~140KB raw / ~50KB gzip per direction module. Acceptable
+//     because each module is loaded once per direction visit.
+//   - format: "esm" so the output is a real ES module the browser's
+//     dynamic import can consume.
+//   - jsx: "automatic" + jsxDev: false so esbuild emits the modern
+//     react/jsx-runtime calls (no `import React` needed in source —
+//     but the source files still import React explicitly today, which
+//     is harmless: jsx-runtime handles JSX, the React import covers
+//     hooks).
+//   - target: "es2022" matches tsconfig + the browser baseline the
+//     gate / menu / direction shells already require.
+//   - minify: true strips whitespace + does dead-code elimination so
+//     the React bundle inside each direction module is the production
+//     build, not the dev build.
 //
-// Also copies the protected portrait PNG into dist-protected/ so
-// scripts/sync-protected.sh has a single source root to upload.
+// Also copies protected-src/assets/* into dist-protected/.
 //
 // Usage:
 //   node scripts/build-protected.mjs
@@ -37,23 +50,25 @@ const tsxEntries = readdirSync(srcDir).filter((f) => f.endsWith(".tsx"));
 await build({
   entryPoints: tsxEntries.map((f) => resolve(srcDir, f)),
   outdir: outDir,
-  // Per-entry single-file output (no chunking) so each .tsx maps to
-  // exactly one output file, with the same basename. Matches the
-  // protected/*.jsx → bucket/protected/*.jsx contract today.
-  bundle: false,
-  // jsx: "preserve" keeps <Foo /> as JSX in the output so the runtime
-  // Babel.transform({ presets: ["react"] }) call in the loader can
-  // do its job unchanged. format: "esm" keeps ES module syntax for
-  // phase 4's dynamic-import swap, but since we're emitting .jsx not
-  // .js the loader still treats it as a script today.
-  loader: { ".tsx": "tsx" },
-  jsx: "preserve",
-  outExtension: { ".js": ".jsx" },
+  bundle: true,
   format: "esm",
-  // Don't touch console / source URLs — keep stack traces close to
-  // the source line numbers so the loader's showBootError diagnostics
-  // remain useful.
+  loader: { ".tsx": "tsx" },
+  jsx: "automatic",
+  jsxDev: false,
+  target: "es2022",
+  minify: true,
+  // Per-entry single-file output: each source produces one self-
+  // contained module with React inlined. No code-splitting because
+  // the runtime loader fetches each module independently from
+  // Storage; sharing a chunk between modules would need a second
+  // fetch + Storage rule + cross-module URL rewrite. Triplicated
+  // React (~150KB raw / 50KB gzip per direction) is the simpler
+  // tradeoff today and is loaded once per direction visit.
+  splitting: false,
   sourcemap: false,
+  // Define NODE_ENV so React's bundle picks the production build
+  // (skips the dev-only invariant warnings, ~2× smaller).
+  define: { "process.env.NODE_ENV": '"production"' },
   logLevel: "info",
 });
 

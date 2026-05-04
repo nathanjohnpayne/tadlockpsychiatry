@@ -65,9 +65,8 @@ one-time service account configuration.
 | `src/auth.ts` | Auth + allowlist guard + protected-blob fetch |
 | `src/direction-loader.ts` | Runtime loader for the gated direction prototypes |
 | `src/types.ts` | Shared types (`Practice`, `Tweaks`, `DirectionComponent`) — imported by both `src/` and `protected-src/` |
-| `src/global.d.ts` | Ambient `window.PRACTICE` / `D1..D3` / `Babel` types for the Babel-runtime loader |
 | `protected-src/*.tsx` | Gated React components + content (TypeScript source — NOT bundled into `dist/`) |
-| `vite.config.ts` | Multi-page Vite config (externalizes unpkg + Google Fonts URLs only) |
+| `vite.config.ts` | Multi-page Vite config (externalizes Google Fonts URLs only) |
 | `tsconfig.protected.json` | TS project config for `protected-src/` (relaxed strictness for the inline-styled prototypes) |
 | `scripts/build-protected.mjs` | esbuild step that strips TS from `protected-src/*.tsx` → `dist-protected/*.jsx` for Storage upload |
 | `firebase.json` | Hosting config (`public: dist`, three-step predeploy: build → build:protected → sync) |

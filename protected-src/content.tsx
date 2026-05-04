@@ -2,14 +2,11 @@
 // All three directions read from this single source so copy stays
 // consistent.
 //
-// Phase 3 (#23) of the Vite migration: this file moved from
-// protected/content.jsx to protected-src/content.tsx with a typed
-// Practice annotation. The build step (npm run build:protected)
-// strips TypeScript types via esbuild and emits the result as
-// dist-protected/content.jsx — same window.PRACTICE assignment as
-// before, so the runtime Babel-transformed loader contract is
-// preserved. Phase 4 (#24) replaces the window-globals path with
-// a typed default export and dynamic import.
+// Phase 4 (#24) of the Vite migration: the build now bundles this
+// file with esbuild (`bundle: true, format: "esm"`) into
+// dist-protected/content.js. The runtime loader fetches the bundle
+// as a Blob, mints a blob URL, dynamic-imports it, and reads the
+// default export. The legacy window.PRACTICE global is gone.
 import type { Practice } from "../src/types";
 
 const PRACTICE: Practice = {
@@ -138,4 +135,4 @@ const PRACTICE: Practice = {
   portrait: "/assets/sterling-tadlock.png",
 };
 
-window.PRACTICE = PRACTICE;
+export default PRACTICE;

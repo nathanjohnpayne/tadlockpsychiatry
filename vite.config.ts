@@ -21,20 +21,20 @@ import { resolve } from "node:path";
 // future change could introduce an unintended CDN URL and Rollup would
 // silently externalize it. Locked to the hosts actually used today:
 //
-//   - unpkg.com                 React + react-dom + @babel/standalone UMD bundles
 //   - fonts.googleapis.com      Google Fonts CSS
 //   - fonts.gstatic.com         Google Fonts woff2 binaries
 //
 // www.gstatic.com (Firebase SDK ESM) was removed in phase 2 (#22) —
 // firebase 11.x is now an npm dep, so auth.ts/firebase-config.ts use
-// bare imports that Vite bundles. Phase 4 (#24) will further drop the
-// unpkg.com host when the React/Babel UMD <script> tags in the
-// direction shells are replaced by bundled React + dynamic import.
+// bare imports that Vite bundles. unpkg.com (React + Babel UMD) was
+// removed in phase 4 (#24) — the protected modules are now esbuild-
+// bundled with React inlined, the direction-loader uses npm
+// react-dom/client, and the runtime Babel-transformed indirect-eval
+// path is gone.
 //
 // Anything not in this set falls through and Rollup tries to resolve
 // it normally, which fails the build loudly.
 const ALLOWED_EXTERNAL_HOSTS = new Set([
-  "unpkg.com",
   "fonts.googleapis.com",
   "fonts.gstatic.com",
 ]);
