@@ -28,12 +28,16 @@ declare global {
     D3?: DirectionComponent;
     // @babel/standalone is loaded via a <script src="https://unpkg.com/
     // @babel/standalone..."> in each direction shell. Only the
-    // .transform method is used by the loader.
+    // .transform method is used by the loader. The result.code field
+    // matches @babel/core's BabelFileResult.code: `string | null`. Babel
+    // returns null for inputs it parsed but emitted no code for (rare,
+    // mostly TS type-only files); the loader treats null as a fatal
+    // boot error rather than risk eval'ing null.
     Babel: {
       transform(
         code: string,
         opts: { presets?: string[]; sourceType?: string },
-      ): { code: string };
+      ): { code: string | null };
     };
     // React + ReactDOM UMD globals from the unpkg <script> tags. Only
     // the createElement / createRoot subset is used here; broader use

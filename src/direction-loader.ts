@@ -67,6 +67,14 @@ async function loadAndExec(filename: string): Promise<void> {
     presets: ["react"],
     sourceType: "script",
   });
+  if (compiled == null) {
+    // Babel.transform returns { code: string | null }; null means it
+    // parsed the input but emitted nothing (uncommon for our JSX
+    // files). Treat as fatal — eval'ing null would silently no-op
+    // and the next step (window.PRACTICE / window.D{id} lookup)
+    // would throw a less informative error.
+    throw new Error(`Babel emitted no code for protected/${filename}`);
+  }
   // Indirect eval runs in the global scope, so `window.PRACTICE = ...`
   // and `window.D1 = ...` assignments at the bottom of each protected
   // file land where the mount step expects them.
@@ -110,7 +118,7 @@ function wirePreviewBar(user: User): void {
 function showBootError(id: string, err: unknown): void {
   const root = document.getElementById("root");
   if (root) {
-    root.innerHTML = "";
+    root.replaceChildren();
     const wrap = document.createElement("div");
     wrap.style.cssText = [
       "position:fixed",
@@ -124,19 +132,26 @@ function showBootError(id: string, err: unknown): void {
       "mix-blend-mode:difference",
       "text-align:center",
     ].join(";");
-    const message =
+    const inner = document.createElement("div");
+    const heading = document.createElement("div");
+    heading.style.cssText =
+      "opacity:0.7; letter-spacing:1.6px; text-transform:uppercase; font-size:10.5px; margin-bottom:14px;";
+    heading.textContent = `DIRECTION ${id}—LOAD FAILED`;
+    const message = document.createElement("div");
+    message.style.cssText = "opacity:0.55; max-width:480px; line-height:1.6;";
+    // textContent — never enters HTML parsing, so the err.message can
+    // contain any user-uncontrolled string without an XSS risk.
+    message.textContent =
       (err as { message?: string } | null)?.message ?? "Unknown error";
-    const safe = String(message).replace(/[<>&]/g, (c) => {
-      if (c === "<") return "&lt;";
-      if (c === ">") return "&gt;";
-      return "&amp;";
-    });
-    wrap.innerHTML =
-      `<div>` +
-      `<div style="opacity:0.7; letter-spacing:1.6px; text-transform:uppercase; font-size:10.5px; margin-bottom:14px;">DIRECTION ${id}—LOAD FAILED</div>` +
-      `<div style="opacity:0.55; max-width:480px; line-height:1.6;">${safe}</div>` +
-      `<div style="margin-top:24px;"><a href="/menu" style="color:inherit;">← BACK TO MENU</a></div>` +
-      `</div>`;
+    const linkWrap = document.createElement("div");
+    linkWrap.style.marginTop = "24px";
+    const link = document.createElement("a");
+    link.href = "/menu";
+    link.style.color = "inherit";
+    link.textContent = "← BACK TO MENU";
+    linkWrap.appendChild(link);
+    inner.append(heading, message, linkWrap);
+    wrap.appendChild(inner);
     root.appendChild(wrap);
   }
   document.body.classList.add("ready");
