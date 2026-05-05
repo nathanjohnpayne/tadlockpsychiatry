@@ -3,10 +3,13 @@
 // Asserts the runtime contract every direction module + content module
 // must hold post-phase-4: ES module shape, default export, no leftover
 // window.* globals, no leftover TypeScript syntax, no external CDN
-// references. Skips silently if the build hasn't been run — `npm run
-// build:protected` produces dist-protected/.
+// references.
 //
-// Run order in CI: `npm run build:protected && npm run test`.
+// `npm test` runs `npm run pretest` (which is `npm run build:protected`)
+// first, so the artifact is always current when this suite runs locally.
+// CI doesn't yet run `npm test` — when that wiring lands, the same
+// pretest hook applies. The describe.skipIf gate below is a defensive
+// fallback for direct `vitest` invocations where no build was run.
 import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -28,8 +31,15 @@ describe.skipIf(!buildExists)("dist-protected contract", () => {
   describe("each direction module", () => {
     for (const f of directionFiles) {
       describe(f, () => {
-        const src = buildExists
-          ? readFileSync(resolve(distRoot, f), "utf8")
+        // Per-file existsSync guard: buildExists only checks the dist
+        // root. If a single artifact is missing while the dir exists,
+        // a top-level readFileSync would throw at suite-definition
+        // time and abort the whole file — losing the cleaner failure
+        // signal that the "emits all four module files" assertion
+        // would otherwise produce.
+        const filePath = resolve(distRoot, f);
+        const src = existsSync(filePath)
+          ? readFileSync(filePath, "utf8")
           : "";
 
         it("has a default export", () => {
@@ -80,8 +90,10 @@ describe.skipIf(!buildExists)("dist-protected contract", () => {
   });
 
   describe("content.js", () => {
-    const src = buildExists
-      ? readFileSync(resolve(distRoot, "content.js"), "utf8")
+    // Same per-file existsSync guard as the direction modules above.
+    const contentPath = resolve(distRoot, "content.js");
+    const src = existsSync(contentPath)
+      ? readFileSync(contentPath, "utf8")
       : "";
 
     it("has a default export", () => {
