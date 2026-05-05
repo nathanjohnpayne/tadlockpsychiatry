@@ -598,6 +598,32 @@ If the shared source credential itself needs rotation, refresh it once with `gcl
 gcloud auth application-default set-quota-project {project-id}
 ```
 
+After a fresh `application-default login` on a new machine (or one whose
+local gcloud configuration has no default project), the next deploy may
+abort partway through `scripts/sync-protected.sh` with:
+
+```
+ERROR: (gcloud.storage.rsync) There was a problem refreshing your current
+auth tokens: Reauthentication failed. cannot prompt during non-interactive
+execution.
+```
+
+The trigger is gcloud spawning an interactive `gcloud init` prompt on a
+non-interactive shell because it has no active config to attach the
+storage-rsync call to. Resolve in one shot by setting the active project
++ logging in the user-account auth (separate from ADC):
+
+```bash
+gcloud auth login                              # browser flow, user-account auth
+gcloud config set project tadlockpsychiatry     # default project for the active config
+gcloud config list                              # verify account + project
+```
+
+`gcloud storage ls gs://{bucket}/` should then run without any prompts;
+re-run `op-firebase-deploy --only hosting` and the predeploy chain
+completes. (Captured during the phase-5 deploy on 2026-05-04 — closes
+#36 in the project repo.)
+
 If deploy impersonation breaks because IAM bindings or project configuration drifted:
 
 ```bash
