@@ -16,7 +16,12 @@
       --dim: rgba(240,237,230,0.55);
       --faint: rgba(240,237,230,0.16);
       --hair: rgba(240,237,230,0.22);
-      --accent: #E2362F;
+      --accent: #FF5C2A;
+      /* Brand red for the small accent-square indicators (topbar dot,
+         eyebrow dot). The orange --accent is reserved for the D3
+         "Architectural Performance" card tile + hover, where it
+         teases the destination direction's color. */
+      --brand: #E2362F;
       --sans: "Inter", -apple-system, system-ui, sans-serif;
       --mono: "JetBrains Mono", ui-monospace, monospace;
       --serif: "Fraunces", "Times New Roman", serif;
@@ -36,7 +41,7 @@
     }
     .topbar .l, .topbar .r { display: flex; gap: 18px; align-items: center; }
     .topbar .r { justify-content: flex-end; color: var(--dim); }
-    .dot { width: 10px; height: 10px; background: var(--accent); display: inline-block; }
+    .dot { width: 10px; height: 10px; background: var(--brand); display: inline-block; }
     .topbar a { color: var(--dim); text-decoration: none; cursor: pointer; }
     .topbar a:hover { color: var(--fg); }
     .ident { display: flex; align-items: center; gap: 10px; color: var(--fg); }
@@ -52,7 +57,7 @@
       font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim);
       display: flex; align-items: center; gap: 12px;
     }
-    .header .eyebrow i { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+    .header .eyebrow i { width: 6px; height: 6px; background: var(--brand); border-radius: 50%; }
     .header h1 {
       font-family: var(--sans); font-weight: 200; font-size: clamp(36px, 5.6vw, 80px);
       letter-spacing: -0.035em; line-height: 0.98; margin: 18px 0 0;

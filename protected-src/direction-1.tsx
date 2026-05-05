@@ -243,17 +243,19 @@ const HeroD1 = ({ P, fg, dim, faint, bg, accent, serif, mono, scrollY, glyphRef,
   return <HeroD1Monogram bp={bp} P={P} fg={fg} dim={dim} faint={faint} bg={bg} accent={accent} serif={serif} mono={mono} scrollY={scrollY} glyphRef={glyphRef} />;
 };
 
-const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyphRef, bp }: any) => (
+const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyphRef, bp }: any) => {
+  const isMobile = bp === "mobile" || bp === "tablet";
+  return (
   <section style={{
-    position: "relative", padding: sectionPadding(bp, "120px 56px 140px"),
-    // Desktop: tall cinematic hero with content vertically centered.
-    // Mobile/tablet (#34 feedback): the 92vh + center-justify left a
-    // big empty band above the eyebrow on tall phones (iPhone Pro
-    // 402×874 etc.). Drop the minHeight + flex-center on small
-    // viewports and let content flow from the top.
-    minHeight: bp === "desktop" ? "92vh" : undefined,
-    display: bp === "desktop" ? "flex" : "block",
-    flexDirection: "column", justifyContent: "center",
+    // Trimmed top padding (was 120px desktop) + dropped 92vh +
+    // dropped flex-center entirely. Per #34 round 2 feedback the
+    // cinematic vertical centering left a big empty band above the
+    // eyebrow on every viewport (most pronounced on desktop and tall
+    // phones). Content now sits at the natural top of the section
+    // and the bottom status strip flows after the buttons instead of
+    // being absolutely positioned.
+    position: "relative",
+    padding: sectionPadding(bp, "72px 56px 80px"),
     overflow: "hidden",
   }}>
     {/* parallax monogram */}
@@ -267,14 +269,28 @@ const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyph
     }}>T</div>
 
     <div style={{ position: "relative", zIndex: 3, maxWidth: 1100 }}>
+      {/* Eyebrow row. Desktop/tablet: single flex row. Mobile:
+          stacked block layout so "Psychiatry · San Francisco" wraps
+          as a unit and "Est. 2026" sits on its own line, instead of
+          breaking mid-word as the flex row did at narrow widths
+          (#34 round 2). */}
       <div style={{
-        display: "flex", alignItems: "center", gap: 14, marginBottom: 56,
-        fontFamily: mono, fontSize: 11.5, color: dim, letterSpacing: 1.4, textTransform: "uppercase",
+        display: isMobile ? "block" : "flex",
+        alignItems: "center", gap: 14,
+        marginBottom: isMobile ? 28 : 40,
+        fontFamily: mono, fontSize: 11.5, color: dim,
+        letterSpacing: 1.4, textTransform: "uppercase",
       }}>
-        <span style={{ width: 32, height: 1, background: accent }} />
-        <span>{P.heroEyebrow}</span>
-        <span style={{ color: faint }}>·</span>
-        <span style={{ color: accent }}>{P.established}</span>
+        {!isMobile && <span style={{ width: 32, height: 1, background: accent, display: "inline-block" }} />}
+        <span style={{ display: isMobile ? "block" : undefined }}>{P.heroEyebrow}</span>
+        {isMobile ? (
+          <span style={{ display: "block", color: accent, marginTop: 6 }}>{P.established}</span>
+        ) : (
+          <>
+            <span style={{ color: faint }}>·</span>
+            <span style={{ color: accent }}>{P.established}</span>
+          </>
+        )}
       </div>
 
       <h1 style={{
@@ -289,13 +305,14 @@ const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyph
       </h1>
 
       <p style={{
-        marginTop: 44, maxWidth: 640, fontSize: 18, lineHeight: 1.55,
+        marginTop: isMobile ? 24 : 32,
+        maxWidth: 640, fontSize: 18, lineHeight: 1.55,
         color: dim, fontWeight: 400,
       }}>
         {P.heroSub}
       </p>
 
-      <div style={{ marginTop: 56, display: "flex", alignItems: "center", gap: 28 }}>
+      <div style={{ marginTop: isMobile ? 32 : 40, display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap" }}>
         <button style={{
           padding: "16px 30px", border: "none", background: accent, color: "#0E0F12",
           fontFamily: mono, fontSize: 12.5, letterSpacing: 1, textTransform: "uppercase",
@@ -308,10 +325,19 @@ const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyph
       </div>
     </div>
 
-    {/* status strip */}
+    {/* Status strip. Pre-#34-round-2 was position: absolute at
+        bottom: 56px, which overlapped the buttons whenever the hero
+        rendered shorter than 92vh (mobile + any time the section
+        had natural content height). Now flows after the buttons in
+        normal block flow, with a top border to keep the stripe
+        feel. */}
     <div style={{
-      position: "absolute", bottom: 56, left: 56, right: 56, zIndex: 3,
-      display: "flex", alignItems: "flex-end", justifyContent: "space-between",
+      position: "relative", zIndex: 3,
+      marginTop: isMobile ? 48 : 80,
+      display: "flex", flexDirection: isMobile ? "column" : "row",
+      alignItems: isMobile ? "flex-start" : "flex-end",
+      justifyContent: "space-between",
+      gap: isMobile ? 12 : 0,
       borderTop: `0.5px solid ${faint}`, paddingTop: 24,
     }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: dim, letterSpacing: 1, textTransform: "uppercase" }}>
@@ -321,16 +347,19 @@ const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyph
         </div>
         <div>{P.location}  ·  {P.format}</div>
       </div>
-      <div style={{
-        fontFamily: mono, fontSize: 10, color: dim,
-        letterSpacing: 1.2, textTransform: "uppercase", textAlign: "right",
-      }}>
-        <div>Scroll</div>
-        <div style={{ marginTop: 4, fontSize: 14, color: accent }}>↓</div>
-      </div>
+      {!isMobile && (
+        <div style={{
+          fontFamily: mono, fontSize: 10, color: dim,
+          letterSpacing: 1.2, textTransform: "uppercase", textAlign: "right",
+        }}>
+          <div>Scroll</div>
+          <div style={{ marginTop: 4, fontSize: 14, color: accent }}>↓</div>
+        </div>
+      )}
     </div>
   </section>
-);
+  );
+};
 
 const HeroD1Split = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
   <section style={{
