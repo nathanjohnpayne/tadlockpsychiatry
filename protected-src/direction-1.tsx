@@ -128,42 +128,114 @@ const D1: DirectionComponent = ({ tweaks, practice: P }) => {
   );
 };
 
-const NavBarD1 = ({ fg, dim, faint, accent, mono, bp }: any) => (
-  <nav style={{
-    position: "sticky", top: 0, zIndex: 10,
-    padding: "20px 56px",
-    display: "flex", alignItems: "center", justifyContent: "space-between",
-    backdropFilter: "blur(20px) saturate(140%)",
-    WebkitBackdropFilter: "blur(20px) saturate(140%)",
-    borderBottom: `0.5px solid ${faint}`,
-    background: "rgba(14,15,18,0.62)",
-  }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-      <div style={{
-        width: 28, height: 28, borderRadius: 14,
-        border: `1px solid ${accent}`, display: "grid", placeItems: "center",
-        fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 0.5,
-      }}>ST</div>
-      <div style={{ fontSize: 14, fontWeight: 500, letterSpacing: -0.1 }}>Sterling Tadlock, M.D.</div>
-    </div>
-    <div style={{ display: "flex", gap: 36, fontSize: 12.5, color: dim, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase" }}>
-      <a style={{ color: "inherit", textDecoration: "none", cursor: "pointer" }}>Practice</a>
-      <a style={{ color: "inherit", textDecoration: "none", cursor: "pointer" }}>Specialties</a>
-      <a style={{ color: "inherit", textDecoration: "none", cursor: "pointer" }}>Process</a>
-      <a style={{ color: "inherit", textDecoration: "none", cursor: "pointer" }}>About</a>
-    </div>
-    <div style={{
-      padding: "9px 18px", borderRadius: 999,
-      border: `1px solid ${accent}`, color: accent,
-      fontSize: 12.5, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase",
-      cursor: "pointer", transition: "all 0.2s",
-    }}
-    onMouseEnter={(e: any) => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#0E0F12"; }}
-    onMouseLeave={(e: any) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = accent; }}>
-      Request consult
-    </div>
-  </nav>
-);
+const NavBarD1 = ({ fg, dim, faint, accent, mono, bp }: any) => {
+  const [open, setOpen] = React.useState(false);
+  const isMobile = bp === "mobile" || bp === "tablet";
+  const links = ["Practice", "Specialties", "Process", "About"];
+  return (
+    <nav style={{
+      position: "sticky", top: 0, zIndex: 10,
+      padding: bp === "mobile" ? "14px 16px" : "20px 56px",
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      backdropFilter: "blur(20px) saturate(140%)",
+      WebkitBackdropFilter: "blur(20px) saturate(140%)",
+      borderBottom: `0.5px solid ${faint}`,
+      background: "rgba(14,15,18,0.62)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: 14,
+          border: `1px solid ${accent}`, display: "grid", placeItems: "center",
+          fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 0.5,
+        }}>ST</div>
+        <div style={{ fontSize: 14, fontWeight: 500, letterSpacing: -0.1 }}>Sterling Tadlock, M.D.</div>
+      </div>
+      {isMobile ? (
+        // Hamburger toggle (≤880px). Touch target 44×44 px, panel
+        // expands below the nav with the same link list.
+        <button type="button"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          onClick={() => setOpen(!open)}
+          style={{
+            width: 44, height: 44, padding: 0,
+            display: "grid", placeItems: "center",
+            background: "transparent", border: `1px solid ${faint}`,
+            color: accent, cursor: "pointer", borderRadius: 4,
+          }}
+        >
+          {open ? (
+            <span style={{ fontFamily: mono, fontSize: 18, lineHeight: 1 }}>×</span>
+          ) : (
+            <span style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ width: 18, height: 1, background: accent }} />
+              <span style={{ width: 18, height: 1, background: accent }} />
+              <span style={{ width: 18, height: 1, background: accent }} />
+            </span>
+          )}
+        </button>
+      ) : (
+        <>
+          <div style={{ display: "flex", gap: 36, fontSize: 12.5, color: dim, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase" }}>
+            {links.map((l) => (
+              <a key={l} style={{ color: "inherit", textDecoration: "none", cursor: "pointer" }}>{l}</a>
+            ))}
+          </div>
+          <div style={{
+            padding: "9px 18px", borderRadius: 999,
+            border: `1px solid ${accent}`, color: accent,
+            fontSize: 12.5, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase",
+            cursor: "pointer", transition: "all 0.2s",
+          }}
+          onMouseEnter={(e: any) => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#0E0F12"; }}
+          onMouseLeave={(e: any) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = accent; }}>
+            Request consult
+          </div>
+        </>
+      )}
+      {/* Mobile panel — slides down below the sticky nav. */}
+      {isMobile && open && (
+        <div style={{
+          position: "absolute", top: "100%", left: 0, right: 0,
+          background: "rgba(14,15,18,0.96)",
+          backdropFilter: "blur(20px) saturate(140%)",
+          WebkitBackdropFilter: "blur(20px) saturate(140%)",
+          borderBottom: `0.5px solid ${faint}`,
+          padding: "16px 16px 24px",
+          display: "flex", flexDirection: "column", gap: 0,
+        }}>
+          {links.map((l) => (
+            <a
+              key={l}
+              onClick={() => setOpen(false)}
+              style={{
+                display: "block",
+                padding: "16px 0",
+                color: dim, textDecoration: "none", cursor: "pointer",
+                fontFamily: mono, fontSize: 13, letterSpacing: 0.4,
+                textTransform: "uppercase",
+                borderBottom: `0.5px solid ${faint}`,
+                minHeight: 44,
+              }}
+            >{l}</a>
+          ))}
+          <a
+            onClick={() => setOpen(false)}
+            style={{
+              marginTop: 16, padding: "12px 18px",
+              border: `1px solid ${accent}`, color: accent,
+              fontFamily: mono, fontSize: 12.5, letterSpacing: 0.4,
+              textTransform: "uppercase", cursor: "pointer",
+              textAlign: "center", textDecoration: "none",
+              borderRadius: 999, minHeight: 44,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >Request consult</a>
+        </div>
+      )}
+    </nav>
+  );
+};
 
 const HeroD1 = ({ P, fg, dim, faint, bg, accent, serif, mono, scrollY, glyphRef, variant, bp }: any) => {
   if (variant === "split") return <HeroD1Split bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} serif={serif} mono={mono} scrollY={scrollY} />;
@@ -300,16 +372,33 @@ const HeroD1Marquee = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
         {P.heroEyebrow}
       </div>
     </div>
+    {/* Marquee — per #11, mobile caps font-size at 56px and reduces
+        the animation distance so the giant scrolling text doesn't
+        blow past the viewport. The mobile keyframe translates -25%
+        (vs the desktop -50%) because each glyph is much smaller and
+        a -50% translate would overshoot the visible window in the
+        same animation duration. */}
     <div style={{
       whiteSpace: "nowrap", overflow: "hidden",
-      fontFamily: serif, fontSize: "clamp(72px, 12vw, 200px)",
-      fontWeight: 300, lineHeight: 1, letterSpacing: -3,
+      fontFamily: serif,
+      fontSize: bp === "mobile" ? 56 : "clamp(72px, 12vw, 200px)",
+      fontWeight: 300, lineHeight: 1,
+      letterSpacing: bp === "mobile" ? -1 : -3,
     }}>
-      <div style={{ display: "inline-block", animation: "marqueeD1 38s linear infinite", paddingLeft: 56 }}>
+      <div style={{
+        display: "inline-block",
+        animation: bp === "mobile"
+          ? "marqueeD1Mobile 38s linear infinite"
+          : "marqueeD1 38s linear infinite",
+        paddingLeft: bp === "mobile" ? 16 : 56,
+      }}>
         Performance.&nbsp;<em style={{ fontStyle: "italic", color: accent }}>Resilience.</em>&nbsp;Recovery.&nbsp;<em style={{ fontStyle: "italic", color: accent }}>Clarity.</em>&nbsp;Performance.&nbsp;<em style={{ fontStyle: "italic", color: accent }}>Resilience.</em>&nbsp;Recovery.&nbsp;
       </div>
     </div>
-    <style>{`@keyframes marqueeD1 { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
+    <style>{`
+      @keyframes marqueeD1 { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+      @keyframes marqueeD1Mobile { from { transform: translateX(0) } to { transform: translateX(-25%) } }
+    `}</style>
     <div style={{ padding: "80px 56px 0", display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1fr"), gap: collapseGridGap(bp, 64) }}>
       <div>
         <p style={{ fontFamily: serif, fontSize: 30, lineHeight: 1.2, color: fg, fontWeight: 300, margin: 0, textWrap: "pretty" }}>
