@@ -20,11 +20,15 @@ Firebase Hosting serves).
 - The build is wired in as a Hosting predeploy hook
   (`firebase.json` → `hosting.predeploy`), so `firebase deploy --only
   hosting` runs `npm run build` before uploading.
-- The migration is in progress per #20. Phases 1 (#21, toolchain),
-  2 (#22, TS port + npm-resolved `firebase@^11`), 3 (#23, protected
-  sources to TypeScript + esbuild build to `dist-protected/`), and
-  4 (#24, loader swapped to blob-URL dynamic import + unpkg
-  React/Babel UMD scripts retired) are merged. Public modules:
+- The migration shipped through #20 across six phases:
+  1 (#21, toolchain), 2 (#22, TS port + npm-resolved `firebase@^11`),
+  3 (#23, protected sources to TypeScript + esbuild build to
+  `dist-protected/`), 4 (#24, loader swapped to blob-URL dynamic
+  import + unpkg React/Babel UMD scripts retired), 5 (#25,
+  per-direction theme tokens + useViewport hook + inline-style
+  refactor + the src/direction-responsive.css overlay retired), and
+  6 (#26, hamburger nav on /d/{1,2,3} at ≤880px + D1 marquee mobile
+  cap + D3 metrics row 4/2/1, closing #11). Public modules:
   `src/auth.ts` / `src/firebase-config.ts` / `src/direction-loader.ts`
   / `src/types.ts`. Protected sources: `protected-src/{content,
   direction-{1,2,3}}.tsx` plus `protected-src/assets/sterling-
@@ -34,12 +38,7 @@ Firebase Hosting serves).
   React package and is a thin orchestrator (~2.7 kB chunk) — this
   keeps React a single instance per page and avoids cross-instance
   hook-dispatch failures (see Codex P1 on PR #33). The only external
-  CDN imports left are the Google Fonts stylesheets. Phases 5 (#25,
-  per-direction theme tokens + useViewport hook + inline-style
-  refactor + the src/direction-responsive.css overlay retired) and
-  6 (#26, hamburger nav on /d/{1,2,3} at ≤880px + D1 marquee mobile
-  cap + D3 metrics row 4/2/1, closing #11) are both merged. The
-  migration is complete.
+  CDN imports left are the Google Fonts stylesheets.
 - Firebase Hosting + Firebase Storage (storage.rules gates
   `protected/`).
 - Firebase Analytics (GA4 measurement id `G-R8TK2SVVS0`).
@@ -48,7 +47,7 @@ Firebase Hosting serves).
 
 Maintain the site content, the agent-tooling infrastructure, and the
 review-policy workflow. Keep `dist/` and other build artifacts out of
-git. Drive the #20 migration phase by phase rather than expanding the
-toolchain speculatively beyond what each phase needs.
+git. Keep the post-migration toolchain stable; avoid speculative
+expansion beyond current product needs.
 
 See `.ai_context.md` for hosting identifiers and deploy tooling.
