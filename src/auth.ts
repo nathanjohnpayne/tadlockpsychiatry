@@ -99,14 +99,25 @@ export async function startSignIn(): Promise<User | null> {
 
 // Page-load guard. Call from /menu and /d/N. Resolves with the user
 // when allowlisted; otherwise navigates away and never resolves.
+//
+// `unsub()` fires on every exit path (issue #29). The pre-#29 version
+// only unsubscribed on the happy path; on the unauthenticated and
+// unauthorized branches the listener stayed subscribed until the
+// `location.replace()` navigation tore down the page. In practice
+// the redirect was fast enough to make this a non-issue, but on the
+// unauthorized branch `signOut(auth)` re-fired the callback (user
+// becomes null) before the redirect committed, causing a redundant
+// `location.replace("/")` on top of the in-flight `/?denied=1` nav.
 export function guardOrRedirect(): Promise<User> {
   return new Promise((resolve) => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) {
+        unsub();
         location.replace("/");
         return;
       }
       if (!isAllowed(user)) {
+        unsub();
         try {
           await signOut(auth);
         } catch {
