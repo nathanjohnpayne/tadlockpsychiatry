@@ -65,33 +65,102 @@ const D3: DirectionComponent = ({ tweaks, practice: P }) => {
   );
 };
 
-const NavBarD3 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => (
+const NavBarD3 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => {
+  const [open, setOpen] = React.useState(false);
+  const isMobile = bp === "mobile" || bp === "tablet";
+  const links = ["[01] Practice", "[02] Specialties", "[03] Process", "[04] About"];
+  return (
   <nav style={{
     position: "sticky", top: 0, zIndex: 10,
-    padding: "14px 32px", display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1fr 1fr"),
+    padding: bp === "mobile" ? "12px 14px" : "14px 32px",
+    display: isMobile ? "flex" : "grid",
+    gridTemplateColumns: isMobile ? undefined : "1fr 1fr 1fr",
     alignItems: "center",
+    justifyContent: isMobile ? "space-between" : undefined,
     background: bg, borderBottom: `1px solid ${fg}`,
     fontFamily: mono, fontSize: 11.5, letterSpacing: 0.6, textTransform: "uppercase",
   }}>
-    <div style={{ display: "flex", alignItems: "center", gap: collapseGridGap(bp, 12) }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
       <div style={{ width: 14, height: 14, background: accent }} />
       <span style={{ fontWeight: 700 }}>TADLOCK / PSYCHIATRY</span>
     </div>
-    <div style={{ display: "flex", justifyContent: "center", gap: 28 }}>
-      <a style={{ color: fg, textDecoration: "none", cursor: "pointer" }}>[01] Practice</a>
-      <a style={{ color: dim, textDecoration: "none", cursor: "pointer" }}>[02] Specialties</a>
-      <a style={{ color: dim, textDecoration: "none", cursor: "pointer" }}>[03] Process</a>
-      <a style={{ color: dim, textDecoration: "none", cursor: "pointer" }}>[04] About</a>
-    </div>
-    <div style={{ display: "flex", justifyContent: "flex-end", gap: 18, alignItems: "center" }}>
-      <span style={{ color: dim }}>SF · 37.7951°N</span>
-      <button style={{
-        padding: "8px 14px", background: accent, color: "#0A0A0A", border: "none",
-        fontFamily: mono, fontSize: 11, letterSpacing: 0.6, textTransform: "uppercase", fontWeight: 700, cursor: "pointer",
-      }}>Apply →</button>
-    </div>
+    {isMobile ? (
+      <button
+        aria-label={open ? "Close menu" : "Open menu"}
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        style={{
+          width: 44, height: 44, padding: 0,
+          display: "grid", placeItems: "center",
+          background: bg, border: `1px solid ${fg}`,
+          color: fg, cursor: "pointer",
+        }}
+      >
+        {open ? (
+          <span style={{ fontSize: 18, lineHeight: 1, fontWeight: 700 }}>×</span>
+        ) : (
+          <span style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <span style={{ width: 18, height: 2, background: fg }} />
+            <span style={{ width: 18, height: 2, background: fg }} />
+            <span style={{ width: 18, height: 2, background: fg }} />
+          </span>
+        )}
+      </button>
+    ) : (
+      <>
+        <div style={{ display: "flex", justifyContent: "center", gap: 28 }}>
+          {links.map((l, i) => (
+            <a key={l} style={{ color: i === 0 ? fg : dim, textDecoration: "none", cursor: "pointer" }}>{l}</a>
+          ))}
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 18, alignItems: "center" }}>
+          <span style={{ color: dim }}>SF · 37.7951°N</span>
+          <button style={{
+            padding: "8px 14px", background: accent, color: "#0A0A0A", border: "none",
+            fontFamily: mono, fontSize: 11, letterSpacing: 0.6, textTransform: "uppercase", fontWeight: 700, cursor: "pointer",
+          }}>Apply →</button>
+        </div>
+      </>
+    )}
+    {isMobile && open && (
+      <div style={{
+        position: "absolute", top: "100%", left: 0, right: 0,
+        background: bg,
+        borderBottom: `1px solid ${fg}`,
+        padding: "12px 14px 20px",
+        display: "flex", flexDirection: "column",
+        fontFamily: mono, fontSize: 13, letterSpacing: 0.6, textTransform: "uppercase",
+      }}>
+        {links.map((l) => (
+          <a
+            key={l}
+            onClick={() => setOpen(false)}
+            style={{
+              display: "block",
+              padding: "16px 0",
+              color: fg, textDecoration: "none", cursor: "pointer",
+              borderBottom: `1px solid ${faint}`,
+              minHeight: 44,
+            }}
+          >{l}</a>
+        ))}
+        <a
+          onClick={() => setOpen(false)}
+          style={{
+            marginTop: 16, padding: "12px 14px",
+            background: accent, color: "#0A0A0A",
+            fontFamily: mono, fontSize: 12, letterSpacing: 0.6,
+            textTransform: "uppercase", fontWeight: 700, cursor: "pointer",
+            textAlign: "center", textDecoration: "none",
+            minHeight: 44,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >Apply →</a>
+      </div>
+    )}
   </nav>
-);
+  );
+};
 
 const HeroD3 = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef, variant, mouse, dark, bp }: any) => {
   if (variant === "manifesto") return <HeroD3Manifesto bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} inv={inv} />;
@@ -168,24 +237,38 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
       </div>
     </div>
 
-    {/* metric strip */}
-    <div style={{ position: "relative", display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(4, 1fr)") }}>
-      {[
+    {/* metric strip — per #11, steps 4 / 2 / 1 across desktop /
+        tablet / mobile (NOT the phase-5 default 4 → 1 collapse). */}
+    {(() => {
+      const items = [
         { l: "Established", v: "MMXXVI" },
         { l: "Discipline", v: "Psychiatry" },
         { l: "Method", v: "Performance" },
         { l: "Status", v: "Open · Limited" },
-      ].map((m, i) => (
-        <div key={m.l} style={{
-          padding: "18px 24px", borderRight: i < 3 ? `1px solid ${fg}` : "none",
-          display: "flex", justifyContent: "space-between", alignItems: "baseline",
-          background: bg,
-        }}>
-          <span style={{ fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 1, textTransform: "uppercase" }}>{m.l}</span>
-          <span style={{ fontFamily: mono, fontSize: 13, fontWeight: 700, letterSpacing: 0.2 }}>{m.v}</span>
+      ];
+      const cols = bp === "mobile" ? 1 : bp === "tablet" ? 2 : 4;
+      const cssCols =
+        cols === 1 ? "1fr" : `repeat(${cols}, 1fr)`;
+      return (
+        <div style={{ position: "relative", display: "grid", gridTemplateColumns: cssCols }}>
+          {items.map((m, i) => (
+            <div key={m.l} style={{
+              padding: "18px 24px",
+              // Borders aware of the row layout: divider on the right
+              // of each non-row-end item; horizontal bottom divider
+              // between stacked rows on mobile.
+              borderRight: (i + 1) % cols !== 0 ? `1px solid ${fg}` : "none",
+              borderBottom: bp === "mobile" && i < items.length - 1 ? `1px solid ${fg}` : "none",
+              display: "flex", justifyContent: "space-between", alignItems: "baseline",
+              background: bg,
+            }}>
+              <span style={{ fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 1, textTransform: "uppercase" }}>{m.l}</span>
+              <span style={{ fontFamily: mono, fontSize: 13, fontWeight: 700, letterSpacing: 0.2 }}>{m.v}</span>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
+      );
+    })()}
   </section>
 );
 

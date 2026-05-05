@@ -34,12 +34,12 @@ Firebase Hosting serves).
   React package and is a thin orchestrator (~2.7 kB chunk) — this
   keeps React a single instance per page and avoids cross-instance
   hook-dispatch failures (see Codex P1 on PR #33). The only external
-  CDN imports left are the Google Fonts stylesheets. Phase 5 (#25,
+  CDN imports left are the Google Fonts stylesheets. Phases 5 (#25,
   per-direction theme tokens + useViewport hook + inline-style
-  refactor + the src/direction-responsive.css overlay retired) is
-  merged. Phase 6 (#26) ships #11's specific responsive refinements
-  (hamburger nav, D1 marquee text cap, D3 metrics row 4/2/1) on top
-  of the phase-5 foundation.
+  refactor + the src/direction-responsive.css overlay retired) and
+  6 (#26, hamburger nav on /d/{1,2,3} at ≤880px + D1 marquee mobile
+  cap + D3 metrics row 4/2/1, closing #11) are both merged. The
+  migration is complete.
 - Firebase Hosting + Firebase Storage (storage.rules gates
   `protected/`).
 - Firebase Analytics (GA4 measurement id `G-R8TK2SVVS0`).

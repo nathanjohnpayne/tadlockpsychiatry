@@ -64,10 +64,15 @@ const D2: DirectionComponent = ({ tweaks, practice: P }) => {
   );
 };
 
-const NavBarD2 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => (
+const NavBarD2 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => {
+  const [open, setOpen] = React.useState(false);
+  const isMobile = bp === "mobile" || bp === "tablet";
+  const links = ["Practice", "Specialties", "Process", "About"];
+  return (
   <nav style={{
     position: "sticky", top: 0, zIndex: 10,
-    padding: "16px 48px", display: "flex", alignItems: "center", justifyContent: "space-between",
+    padding: bp === "mobile" ? "12px 16px" : "16px 48px",
+    display: "flex", alignItems: "center", justifyContent: "space-between",
     backdropFilter: "blur(24px) saturate(140%)", WebkitBackdropFilter: "blur(24px) saturate(140%)",
     borderBottom: `0.5px solid ${faint}`,
     background: `${bg}cc`,
@@ -75,22 +80,87 @@ const NavBarD2 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => (
     <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
       <div style={{ width: 22, height: 22, background: accent, borderRadius: 2 }} />
       <div style={{ fontSize: 14.5, fontWeight: 600, letterSpacing: -0.2 }}>Tadlock Psychiatry</div>
-      <div style={{ fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 0.8, textTransform: "uppercase", paddingLeft: 14, marginLeft: 4, borderLeft: `1px solid ${faint}` }}>
-        SF · Jackson Sq.
+      {!isMobile && (
+        <div style={{ fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 0.8, textTransform: "uppercase", paddingLeft: 14, marginLeft: 4, borderLeft: `1px solid ${faint}` }}>
+          SF · Jackson Sq.
+        </div>
+      )}
+    </div>
+    {isMobile ? (
+      <button
+        aria-label={open ? "Close menu" : "Open menu"}
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        style={{
+          width: 44, height: 44, padding: 0,
+          display: "grid", placeItems: "center",
+          background: "transparent", border: `1px solid ${faint}`,
+          color: fg, cursor: "pointer", borderRadius: 4,
+        }}
+      >
+        {open ? (
+          <span style={{ fontSize: 18, lineHeight: 1 }}>×</span>
+        ) : (
+          <span style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <span style={{ width: 18, height: 1.5, background: fg }} />
+            <span style={{ width: 18, height: 1.5, background: fg }} />
+            <span style={{ width: 18, height: 1.5, background: fg }} />
+          </span>
+        )}
+      </button>
+    ) : (
+      <>
+        <div style={{ display: "flex", gap: 32, fontSize: 13.5 }}>
+          {links.map((l, i) => (
+            <a key={l} style={{ color: i === 0 ? fg : dim, textDecoration: "none", cursor: "pointer", fontWeight: i === 0 ? 500 : undefined }}>{l}</a>
+          ))}
+        </div>
+        <button style={{
+          padding: "9px 18px", borderRadius: 999, border: "none", background: accent, color: "#fff",
+          fontSize: 13, fontWeight: 500, cursor: "pointer", letterSpacing: -0.1,
+        }}>Request consult →</button>
+      </>
+    )}
+    {isMobile && open && (
+      <div style={{
+        position: "absolute", top: "100%", left: 0, right: 0,
+        background: bg,
+        backdropFilter: "blur(24px) saturate(140%)",
+        WebkitBackdropFilter: "blur(24px) saturate(140%)",
+        borderBottom: `0.5px solid ${faint}`,
+        padding: "16px 16px 24px",
+        display: "flex", flexDirection: "column",
+      }}>
+        {links.map((l) => (
+          <a
+            key={l}
+            onClick={() => setOpen(false)}
+            style={{
+              display: "block",
+              padding: "16px 0",
+              color: fg, textDecoration: "none", cursor: "pointer",
+              fontSize: 14, fontWeight: 500,
+              borderBottom: `0.5px solid ${faint}`,
+              minHeight: 44,
+            }}
+          >{l}</a>
+        ))}
+        <a
+          onClick={() => setOpen(false)}
+          style={{
+            marginTop: 16, padding: "12px 18px",
+            borderRadius: 999, border: "none", background: accent, color: "#fff",
+            fontSize: 13, fontWeight: 500, cursor: "pointer", letterSpacing: -0.1,
+            textAlign: "center", textDecoration: "none",
+            minHeight: 44,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >Request consult →</a>
       </div>
-    </div>
-    <div style={{ display: "flex", gap: 32, fontSize: 13.5 }}>
-      <a style={{ color: fg, textDecoration: "none", cursor: "pointer", fontWeight: 500 }}>Practice</a>
-      <a style={{ color: dim, textDecoration: "none", cursor: "pointer" }}>Specialties</a>
-      <a style={{ color: dim, textDecoration: "none", cursor: "pointer" }}>Process</a>
-      <a style={{ color: dim, textDecoration: "none", cursor: "pointer" }}>About</a>
-    </div>
-    <button style={{
-      padding: "9px 18px", borderRadius: 999, border: "none", background: accent, color: "#fff",
-      fontSize: 13, fontWeight: 500, cursor: "pointer", letterSpacing: -0.1,
-    }}>Request consult →</button>
+    )}
   </nav>
-);
+  );
+};
 
 const HeroD2 = ({ P, fg, dim, faint, accent, mono, card, bg, scrollY, mouse, variant, dark, bp }: any) => {
   if (variant === "stack") return <HeroD2Stack bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} scrollY={scrollY} mouse={mouse} />;
