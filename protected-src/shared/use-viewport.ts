@@ -100,3 +100,47 @@ export function capHeroFontSize(
   if (bp === "mobile") return Math.min(desktopPx, 64);
   return desktopPx;
 }
+
+// Heading caps: the CSS overlay forced h1/h2/h3 inline `clamp()`
+// values to a smaller mobile/tablet range so direction-specific
+// headings (`clamp(56px, 7.4vw, 124px)` etc.) didn't keep their
+// desktop minimums on small viewports. These helpers wrap each
+// h-tag's inline `fontSize: <desktop>` and substitute the overlay's
+// mobile/tablet clamp on those breakpoints.
+//
+// Source values (matched the overlay's @media (max-width: 880px) and
+// (max-width: 480px) blocks):
+//   h1 tablet:  clamp(32px, 9vw, 48px)
+//   h1 mobile:  clamp(28px, 10vw, 40px)
+//   h2 tablet:  clamp(28px, 7vw, 40px)
+//   h3 tablet:  clamp(20px, 5vw, 28px)
+// (The overlay had no separate mobile h2/h3 — the tablet rule covered
+//  both via media-query precedence; we replicate that.)
+export function h1FontSize(bp: Breakpoint, desktop: string | number): string | number {
+  if (bp === "mobile") return "clamp(28px, 10vw, 40px)";
+  if (bp === "tablet") return "clamp(32px, 9vw, 48px)";
+  return desktop;
+}
+export function h2FontSize(bp: Breakpoint, desktop: string | number): string | number {
+  if (bp === "mobile" || bp === "tablet") return "clamp(28px, 7vw, 40px)";
+  return desktop;
+}
+export function h3FontSize(bp: Breakpoint, desktop: string | number): string | number {
+  if (bp === "mobile" || bp === "tablet") return "clamp(20px, 5vw, 28px)";
+  return desktop;
+}
+
+// Grid gap collapse: the CSS overlay rule
+//   .d-root [style*="grid-template-columns"] { gap: 24px !important }
+// applied to every element with an inline grid. The collapseGrid-
+// Columns helper handles the column collapse; this handles the gap
+// drop on the same elements. Use it on every `gap: <N>` that lives
+// inside a style block whose gridTemplateColumns is wrapped in
+// collapseGridColumns.
+export function collapseGridGap(
+  bp: Breakpoint,
+  desktop: number | string,
+): number | string {
+  if (bp === "mobile" || bp === "tablet") return 24;
+  return desktop;
+}

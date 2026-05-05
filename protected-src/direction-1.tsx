@@ -23,9 +23,13 @@ import type { DirectionComponent, DirectionMount } from "../src/types";
 import { getD1Theme } from "./d1/theme";
 import {
   useViewport,
-  sectionPadding,
-  collapseGridColumns,
   capHeroFontSize,
+  collapseGridColumns,
+  collapseGridGap,
+  h1FontSize,
+  h2FontSize,
+  h3FontSize,
+  sectionPadding,
 } from "./shared/use-viewport";
 
 const D1: DirectionComponent = ({ tweaks, practice: P }) => {
@@ -195,7 +199,7 @@ const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyph
 
       <h1 style={{
         fontFamily: serif, fontWeight: 300,
-        fontSize: "clamp(56px, 7.4vw, 124px)", lineHeight: 0.94,
+        fontSize: h1FontSize(bp, "clamp(56px, 7.4vw, 124px)"), lineHeight: 0.94,
         letterSpacing: -2.2, margin: 0, maxWidth: 1240,
         textWrap: "balance",
       }}>
@@ -251,7 +255,7 @@ const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyph
 const HeroD1Split = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
   <section style={{
     padding: sectionPadding(bp, "100px 56px"),
-    display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1.4fr 1fr"), gap: 64,
+    display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1.4fr 1fr"), gap: collapseGridGap(bp, 64),
     minHeight: "88vh", alignItems: "center", position: "relative", zIndex: 3,
   }}>
     <div>
@@ -259,7 +263,7 @@ const HeroD1Split = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
         {P.heroEyebrow} · {P.established}
       </div>
       <h1 style={{
-        fontFamily: serif, fontWeight: 300, fontSize: "clamp(48px, 5.6vw, 92px)",
+        fontFamily: serif, fontWeight: 300, fontSize: h1FontSize(bp, "clamp(48px, 5.6vw, 92px)"),
         lineHeight: 0.98, letterSpacing: -1.6, margin: 0, textWrap: "balance",
       }}>
         Clinical psychiatry, applied to the <em style={{ fontStyle: "italic", color: accent, fontWeight: 300 }}>architecture</em> of high performance.
@@ -305,7 +309,7 @@ const HeroD1Marquee = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
       </div>
     </div>
     <style>{`@keyframes marqueeD1 { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
-    <div style={{ padding: "80px 56px 0", display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1fr"), gap: 64 }}>
+    <div style={{ padding: "80px 56px 0", display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1fr"), gap: collapseGridGap(bp, 64) }}>
       <div>
         <p style={{ fontFamily: serif, fontSize: 30, lineHeight: 1.2, color: fg, fontWeight: 300, margin: 0, textWrap: "pretty" }}>
           A psychiatry practice for the moments your performance depends on.
@@ -324,25 +328,25 @@ const HeroD1Marquee = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
 
 const PositioningD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "140px 56px 120px"), borderTop: `0.5px solid ${faint}`, position: "relative", zIndex: 3 }}>
-    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 2.4fr"), gap: 80, marginBottom: 80, alignItems: "start" }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 2.4fr"), gap: collapseGridGap(bp, 80), marginBottom: 80, alignItems: "start" }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase" }}>
         § The premise
       </div>
       <h2 style={{
-        fontFamily: serif, fontWeight: 300, fontSize: "clamp(40px, 4.4vw, 68px)",
+        fontFamily: serif, fontWeight: 300, fontSize: h2FontSize(bp, "clamp(40px, 4.4vw, 68px)"),
         lineHeight: 1.05, letterSpacing: -1, margin: 0, textWrap: "balance", maxWidth: 920,
       }}>
         Most psychiatry treats the <em style={{ fontStyle: "italic", color: accent, fontWeight: 300 }}>absence</em> of distress as the goal. We treat it as the floor.
       </h2>
     </div>
-    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(3, 1fr)"), gap: 56 }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(3, 1fr)"), gap: collapseGridGap(bp, 56) }}>
       {P.positioning.map((c) => (
         <div key={c.k} style={{ borderTop: `1px solid ${faint}`, paddingTop: 24 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 18 }}>
             <span style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1 }}>{c.k}</span>
             <span style={{ fontFamily: mono, fontSize: 10, color: dim, letterSpacing: 1, textTransform: "uppercase" }}>Principle</span>
           </div>
-          <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 26, lineHeight: 1.15, letterSpacing: -0.5, margin: "0 0 16px" }}>{c.h}</h3>
+          <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: h3FontSize(bp, 26), lineHeight: 1.15, letterSpacing: -0.5, margin: "0 0 16px" }}>{c.h}</h3>
           <p style={{ fontSize: 14.5, lineHeight: 1.65, color: dim, margin: 0 }}>{c.p}</p>
         </div>
       ))}
@@ -359,7 +363,7 @@ const SpecialtiesD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => {
           <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 18 }}>
             § Areas of clinical focus
           </div>
-          <h2 style={{ fontFamily: serif, fontWeight: 300, fontSize: "clamp(44px, 5vw, 76px)", lineHeight: 1, letterSpacing: -1.4, margin: 0 }}>
+          <h2 style={{ fontFamily: serif, fontWeight: 300, fontSize: h2FontSize(bp, "clamp(44px, 5vw, 76px)"), lineHeight: 1, letterSpacing: -1.4, margin: 0 }}>
             Four practices,<br /><em style={{ fontStyle: "italic", color: accent }}>one method.</em>
           </h2>
         </div>
@@ -376,7 +380,7 @@ const SpecialtiesD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => {
             onMouseLeave={() => setHover(null)}
             style={{
               display: "grid", gridTemplateColumns: collapseGridColumns(bp, "70px 1fr 2.4fr 1fr"),
-              gap: 32, padding: "32px 0",
+              gap: collapseGridGap(bp, 32), padding: "32px 0",
               borderTop: `0.5px solid ${faint}`,
               borderBottom: i === P.specialties.length - 1 ? `0.5px solid ${faint}` : "none",
               alignItems: "start", cursor: "pointer",
@@ -387,7 +391,7 @@ const SpecialtiesD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => {
             <div style={{ fontFamily: mono, fontSize: 12, color: hover === i ? accent : dim, letterSpacing: 1, transition: "color 0.3s" }}>{s.n}</div>
             <h3 style={{
               fontFamily: serif, fontWeight: 400,
-              fontSize: 30, lineHeight: 1.05, letterSpacing: -0.5, margin: 0,
+              fontSize: h3FontSize(bp, 30), lineHeight: 1.05, letterSpacing: -0.5, margin: 0,
               color: hover === i ? accent : fg, transition: "color 0.3s",
             }}>{s.title}</h3>
             <p style={{ fontSize: 15, lineHeight: 1.6, color: dim, margin: 0, maxWidth: 560 }}>{s.body}</p>
@@ -408,7 +412,7 @@ const SpecialtiesD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => {
 
 const ProcessD1 = ({ P, fg, dim, faint, veryFaint, accent, serif, mono, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "140px 56px"), borderTop: `0.5px solid ${faint}`, background: veryFaint, position: "relative", zIndex: 3 }}>
-    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 2fr"), gap: 80, marginBottom: 80, alignItems: "start" }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 2fr"), gap: collapseGridGap(bp, 80), marginBottom: 80, alignItems: "start" }}>
       <div>
         <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 18 }}>
           § What to expect
@@ -419,13 +423,13 @@ const ProcessD1 = ({ P, fg, dim, faint, veryFaint, accent, serif, mono, bp }: an
       </div>
       <h2 style={{
         fontFamily: serif, fontWeight: 300,
-        fontSize: "clamp(40px, 4.4vw, 64px)", lineHeight: 1.05, letterSpacing: -1, margin: 0, textWrap: "balance",
+        fontSize: h2FontSize(bp, "clamp(40px, 4.4vw, 64px)"), lineHeight: 1.05, letterSpacing: -1, margin: 0, textWrap: "balance",
       }}>
         Care moves through <em style={{ fontStyle: "italic", color: accent }}>structured phases</em>—each with explicit hypotheses, decision points, and a written plan.
       </h2>
     </div>
 
-    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(4, 1fr)"), gap: 32 }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(4, 1fr)"), gap: collapseGridGap(bp, 32) }}>
       {P.process.map((p, i) => (
         <div key={p.n} style={{ position: "relative" }}>
           <div style={{
@@ -436,7 +440,7 @@ const ProcessD1 = ({ P, fg, dim, faint, veryFaint, accent, serif, mono, bp }: an
           <div style={{ fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>
             Phase {i + 1} · {p.duration}
           </div>
-          <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: 24, lineHeight: 1.15, margin: "0 0 14px", letterSpacing: -0.4 }}>{p.title}</h3>
+          <h3 style={{ fontFamily: serif, fontWeight: 400, fontSize: h3FontSize(bp, 24), lineHeight: 1.15, margin: "0 0 14px", letterSpacing: -0.4 }}>{p.title}</h3>
           <p style={{ fontSize: 14, lineHeight: 1.65, color: dim, margin: 0 }}>{p.body}</p>
         </div>
       ))}
@@ -446,7 +450,7 @@ const ProcessD1 = ({ P, fg, dim, faint, veryFaint, accent, serif, mono, bp }: an
 
 const AboutD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "140px 56px"), borderTop: `0.5px solid ${faint}`, position: "relative", zIndex: 3 }}>
-    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1.6fr"), gap: 96, alignItems: "start" }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1.6fr"), gap: collapseGridGap(bp, 96), alignItems: "start" }}>
       <div>
         <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 28 }}>
           § About
@@ -470,7 +474,7 @@ const AboutD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
       <div>
         <h2 style={{
           fontFamily: serif, fontWeight: 300,
-          fontSize: "clamp(36px, 4vw, 60px)", lineHeight: 1.05, letterSpacing: -1, margin: "0 0 40px", textWrap: "balance",
+          fontSize: h2FontSize(bp, "clamp(36px, 4vw, 60px)"), lineHeight: 1.05, letterSpacing: -1, margin: "0 0 40px", textWrap: "balance",
         }}>
           A psychiatrist trained at <em style={{ fontStyle: "italic", color: accent }}>Duke, UNC, and UCSF</em>—practicing at the intersection of medicine and performance.
         </h2>
@@ -485,7 +489,7 @@ const AboutD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
           {P.credentials.map((c, i) => (
             <div key={i} style={{
               display: "grid", gridTemplateColumns: collapseGridColumns(bp, "180px 1fr 200px"),
-              gap: 24, padding: "18px 0",
+              gap: collapseGridGap(bp, 24), padding: "18px 0",
               borderTop: i > 0 ? `0.5px solid ${faint}` : "none",
               alignItems: "baseline",
             }}>
@@ -511,7 +515,7 @@ const WaitlistD1 = ({ P, fg, dim, faint, bg, accent, serif, mono, bp }: any) => 
         </div>
         <h2 style={{
           fontFamily: serif, fontWeight: 300,
-          fontSize: "clamp(48px, 6vw, 96px)", lineHeight: 0.98, letterSpacing: -1.8, margin: 0, textWrap: "balance",
+          fontSize: h2FontSize(bp, "clamp(48px, 6vw, 96px)"), lineHeight: 0.98, letterSpacing: -1.8, margin: 0, textWrap: "balance",
         }}>
           The work begins with a <em style={{ fontStyle: "italic", color: accent }}>conversation.</em>
         </h2>
@@ -553,7 +557,7 @@ const WaitlistD1 = ({ P, fg, dim, faint, bg, accent, serif, mono, bp }: any) => 
 
 const FooterD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
   <footer style={{ padding: sectionPadding(bp, "56px 56px 36px"), borderTop: `0.5px solid ${faint}`, position: "relative", zIndex: 3 }}>
-    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "2fr 1fr 1fr 1fr"), gap: 40, marginBottom: 64, alignItems: "start" }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "2fr 1fr 1fr 1fr"), gap: collapseGridGap(bp, 40), marginBottom: 64, alignItems: "start" }}>
       <div>
         <div style={{ fontFamily: serif, fontSize: 28, fontWeight: 300, letterSpacing: -0.5 }}>
           Sterling Tadlock, M.D.
