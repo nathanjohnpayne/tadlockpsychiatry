@@ -87,7 +87,7 @@ const NavBarD2 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => {
       )}
     </div>
     {isMobile ? (
-      <button
+      <button type="button"
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         onClick={() => setOpen(!open)}

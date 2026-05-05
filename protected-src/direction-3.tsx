@@ -85,7 +85,7 @@ const NavBarD3 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => {
       <span style={{ fontWeight: 700 }}>TADLOCK / PSYCHIATRY</span>
     </div>
     {isMobile ? (
-      <button
+      <button type="button"
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         onClick={() => setOpen(!open)}
@@ -256,9 +256,16 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
               padding: "18px 24px",
               // Borders aware of the row layout: divider on the right
               // of each non-row-end item; horizontal bottom divider
-              // between stacked rows on mobile.
+              // between stacked rows (mobile + tablet).
               borderRight: (i + 1) % cols !== 0 ? `1px solid ${fg}` : "none",
-              borderBottom: bp === "mobile" && i < items.length - 1 ? `1px solid ${fg}` : "none",
+              // borderBottom on every item that isn't in the last row.
+              // Desktop (cols=4, items=4): items.length - cols === 0,
+              //   nothing matches, single row gets no extras.
+              // Tablet (cols=2, items=4): row 1 (i=0,1) is < 4-2=2 →
+              //   bottom border on top row, row 2 has none.
+              // Mobile (cols=1, items=4): rows 1-3 (i=0,1,2) all match;
+              //   bottom borders between every stacked row.
+              borderBottom: i < items.length - cols ? `1px solid ${fg}` : "none",
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
               background: bg,
             }}>

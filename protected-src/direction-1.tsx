@@ -153,7 +153,7 @@ const NavBarD1 = ({ fg, dim, faint, accent, mono, bp }: any) => {
       {isMobile ? (
         // Hamburger toggle (≤880px). Touch target 44×44 px, panel
         // expands below the nav with the same link list.
-        <button
+        <button type="button"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen(!open)}
