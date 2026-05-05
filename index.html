@@ -17,7 +17,7 @@
       --dim: rgba(240, 237, 230, 0.55);
       --faint: rgba(240, 237, 230, 0.16);
       --hair: rgba(240, 237, 230, 0.22);
-      --accent: #FF5C2A;
+      --accent: #E2362F;
       --sans: "Inter", -apple-system, system-ui, sans-serif;
       --mono: "JetBrains Mono", ui-monospace, monospace;
     }
@@ -158,6 +158,10 @@
     @media (max-width: 420px) {
       .corner.tr, .corner.br { display: none; }
       .display { font-size: 38px; }
+      /* Centered wordmark + drift overlap with the corner labels at
+         narrow widths (caught on iOS in #34). Drop them; the corners
+         carry the "TADLOCK / PSYCHIATRY" + RECORD context anyway. */
+      .wordmark-row, .drift { display: none; }
     }
     /* Hide drift on very short screens so it doesn't crowd */
     @media (max-height: 620px) {

@@ -204,7 +204,12 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
         </div>
         <h1 style={{
           fontWeight: 800, fontSize: h1FontSize(bp, "clamp(60px, 8.4vw, 156px)"), lineHeight: h1LineHeight(bp, 0.86),
-          letterSpacing: -5, margin: 0, textTransform: "uppercase", textWrap: "balance",
+          // letterSpacing -5 is calibrated for the clamp(60-156px)
+          // desktop type. At the wrapped 28-40px mobile clamp the
+          // same -5 over-tightens characters and clipped "MIND." in
+          // the iOS smoke (#34); relax on small viewports.
+          letterSpacing: bp === "mobile" || bp === "tablet" ? -1.5 : -5,
+          margin: 0, textTransform: "uppercase", textWrap: "balance",
         }}>
           Psychiatry<br />for a <span style={{ color: accent }}>clear</span><br />mind.
         </h1>
@@ -534,7 +539,15 @@ const WaitlistD3 = ({ P, fg, dim, faint, accent, mono, bg, inv, bp }: any) => {
 };
 
 const FooterD3 = ({ P, fg, dim, faint, accent, mono, bp }: any) => (
-  <footer style={{ padding: "32px 40px", borderTop: `1px solid ${fg}`, fontFamily: mono, fontSize: 11.5, letterSpacing: 0.4 }}>
+  // Padding compresses on mobile so the 4-col grid (collapsed to 1col)
+  // doesn't sit in 322px of content area at 402px viewport. Bottom
+  // copyright/site strip stacks vertically on mobile so the two halves
+  // don't scrunch into one cramped row (#34 footer feedback).
+  <footer style={{
+    padding: bp === "mobile" ? "24px 16px" : "32px 40px",
+    borderTop: `1px solid ${fg}`,
+    fontFamily: mono, fontSize: 11.5, letterSpacing: 0.4,
+  }}>
     <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(4, 1fr)"), gap: collapseGridGap(bp, 32), marginBottom: 32 }}>
       <div>
         <div style={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>TADLOCK / PSYCHIATRY</div>
@@ -554,7 +567,14 @@ const FooterD3 = ({ P, fg, dim, faint, accent, mono, bp }: any) => (
         <div style={{ color: dim }}>If in crisis, call 988</div>
       </div>
     </div>
-    <div style={{ borderTop: `1px solid ${fg}`, paddingTop: 18, display: "flex", justifyContent: "space-between", textTransform: "uppercase", letterSpacing: 1, color: dim }}>
+    <div style={{
+      borderTop: `1px solid ${fg}`, paddingTop: 18,
+      display: "flex",
+      flexDirection: bp === "mobile" ? "column" : "row",
+      justifyContent: "space-between",
+      gap: bp === "mobile" ? 8 : 0,
+      textTransform: "uppercase", letterSpacing: 1, color: dim,
+    }}>
       <span>© 2026—TADLOCK PSYCHIATRY, LLC</span>
       <span>SITE V0.1 / {P.established}</span>
     </div>

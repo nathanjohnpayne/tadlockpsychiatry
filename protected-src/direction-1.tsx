@@ -246,7 +246,14 @@ const HeroD1 = ({ P, fg, dim, faint, bg, accent, serif, mono, scrollY, glyphRef,
 const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyphRef, bp }: any) => (
   <section style={{
     position: "relative", padding: sectionPadding(bp, "120px 56px 140px"),
-    minHeight: "92vh", display: "flex", flexDirection: "column", justifyContent: "center",
+    // Desktop: tall cinematic hero with content vertically centered.
+    // Mobile/tablet (#34 feedback): the 92vh + center-justify left a
+    // big empty band above the eyebrow on tall phones (iPhone Pro
+    // 402×874 etc.). Drop the minHeight + flex-center on small
+    // viewports and let content flow from the top.
+    minHeight: bp === "desktop" ? "92vh" : undefined,
+    display: bp === "desktop" ? "flex" : "block",
+    flexDirection: "column", justifyContent: "center",
     overflow: "hidden",
   }}>
     {/* parallax monogram */}
