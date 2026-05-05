@@ -49,8 +49,14 @@
 
     .stage {
       position: relative; z-index: 4;
-      min-height: 100vh; display: grid; grid-template-columns: 1fr; place-items: center;
-      padding: 0 48px;
+      min-height: 100vh; display: grid; grid-template-columns: 1fr;
+      /* Horizontal-center the column; vertical-align to start so the
+         auth panel sits near the top of the viewport instead of the
+         middle. Pre-fix used place-items: center which pushed the
+         button into the bottom-fixed corner labels on standard
+         desktop heights. */
+      align-items: start; justify-items: center;
+      padding: 80px 48px 120px;
     }
     .col { width: 100%; max-width: 720px; text-align: center; }
 
@@ -65,7 +71,7 @@
 
     .display {
       font-family: var(--sans); font-weight: 200;
-      font-size: clamp(48px, 8.4vw, 124px);
+      font-size: clamp(48px, 7vw, 96px);
       letter-spacing: -0.04em; line-height: 0.95; margin: 0;
       animation: fadeUp 1.4s 0.25s both ease-out;
     }
@@ -128,14 +134,12 @@
     }
     .wordmark-row .dot { width: 10px; height: 10px; background: var(--accent); }
 
-    /* Drift line */
-    .drift {
-      position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%);
-      font-family: var(--mono); font-size: 10px; letter-spacing: 2.4px; text-transform: uppercase; color: var(--dim);
-      white-space: nowrap; z-index: 3;
-      animation: drift 38s linear infinite;
-    }
-    @keyframes drift { 0% { transform: translateX(-50%) translateX(20vw); } 100% { transform: translateX(-50%) translateX(-20vw); } }
+    /* Drift line — hidden by default. Used to be an animated marquee
+       at the bottom but it persistently collided with the centered
+       auth panel on standard desktop heights (caught on iOS + macOS
+       Safari at 897×1481). Killed in favor of the corner labels +
+       wordmark which carry the same atmosphere without the conflict. */
+    .drift { display: none; }
 
     /* ---------- RESPONSIVE ---------- */
     @media (max-width: 720px) {
@@ -163,9 +167,12 @@
          carry the "TADLOCK / PSYCHIATRY" + RECORD context anyway. */
       .wordmark-row, .drift { display: none; }
     }
-    /* Hide drift on very short screens so it doesn't crowd */
-    @media (max-height: 620px) {
-      .drift { display: none; }
+    /* On short / medium-height viewports, hide the bottom-fixed
+       decorations entirely so they can't overlap the centered auth
+       panel. Was max-height 620px (too narrow); 820px covers typical
+       desktop preview chrome + macOS safari iframe heights. */
+    @media (max-height: 820px) {
+      .drift, .corner.bl, .corner.br { display: none; }
     }
   </style>
 </head>

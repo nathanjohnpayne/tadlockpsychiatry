@@ -538,48 +538,62 @@ const WaitlistD3 = ({ P, fg, dim, faint, accent, mono, bg, inv, bp }: any) => {
   );
 };
 
-const FooterD3 = ({ P, fg, dim, faint, accent, mono, bp }: any) => (
+const FooterD3 = ({ P, fg, dim, faint, accent, mono, bp }: any) => {
+  const isMobile = bp === "mobile";
+  return (
   // Padding compresses on mobile so the 4-col grid (collapsed to 1col)
   // doesn't sit in 322px of content area at 402px viewport. Bottom
   // copyright/site strip stacks vertically on mobile so the two halves
-  // don't scrunch into one cramped row (#34 footer feedback).
+  // don't scrunch into one cramped row. Mobile body font bumped from
+  // 11.5px to 13px and column gap relaxed to 32px so the stacked
+  // sections breathe (#34 round 2 feedback).
   <footer style={{
-    padding: bp === "mobile" ? "24px 16px" : "32px 40px",
+    padding: isMobile ? "32px 18px" : "32px 40px",
     borderTop: `1px solid ${fg}`,
-    fontFamily: mono, fontSize: 11.5, letterSpacing: 0.4,
+    fontFamily: mono,
+    fontSize: isMobile ? 13 : 11.5,
+    letterSpacing: 0.4,
+    lineHeight: isMobile ? 1.5 : undefined,
   }}>
-    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(4, 1fr)"), gap: collapseGridGap(bp, 32), marginBottom: 32 }}>
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: collapseGridColumns(bp, "repeat(4, 1fr)"),
+      gap: isMobile ? 32 : collapseGridGap(bp, 32),
+      marginBottom: isMobile ? 28 : 32,
+    }}>
       <div>
-        <div style={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>TADLOCK / PSYCHIATRY</div>
+        <div style={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>TADLOCK / PSYCHIATRY</div>
         <div style={{ color: dim, lineHeight: 1.55 }}>{P.practice}</div>
       </div>
       <div>
-        <div style={{ color: dim, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Office</div>
+        <div style={{ color: dim, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Office</div>
         <div>{P.contact.address}</div>
         <div style={{ color: dim }}>{P.contact.hours}</div>
       </div>
       <div>
-        <div style={{ color: dim, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Contact</div>
+        <div style={{ color: dim, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Contact</div>
         <div>{P.contact.email}</div>
       </div>
       <div>
-        <div style={{ color: dim, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Notice</div>
+        <div style={{ color: dim, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Notice</div>
         <div style={{ color: dim }}>If in crisis, call 988</div>
       </div>
     </div>
     <div style={{
       borderTop: `1px solid ${fg}`, paddingTop: 18,
       display: "flex",
-      flexDirection: bp === "mobile" ? "column" : "row",
+      flexDirection: isMobile ? "column" : "row",
       justifyContent: "space-between",
-      gap: bp === "mobile" ? 8 : 0,
+      gap: isMobile ? 8 : 0,
       textTransform: "uppercase", letterSpacing: 1, color: dim,
+      fontSize: isMobile ? 11 : undefined,
     }}>
       <span>© 2026—TADLOCK PSYCHIATRY, LLC</span>
       <span>SITE V0.1 / {P.established}</span>
     </div>
   </footer>
-);
+  );
+};
 
 const mount: DirectionMount = (rootEl, props) => {
   createRoot(rootEl).render(createElement(D3, props));
