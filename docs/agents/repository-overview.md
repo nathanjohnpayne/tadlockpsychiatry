@@ -28,9 +28,12 @@ Firebase Hosting serves).
   `src/auth.ts` / `src/firebase-config.ts` / `src/direction-loader.ts`
   / `src/types.ts`. Protected sources: `protected-src/{content,
   direction-{1,2,3}}.tsx` plus `protected-src/assets/sterling-
-  tadlock.png`. Firebase is bundled into the auth chunk; React +
-  react-dom are bundled into the direction-loader chunk; React (no
-  react-dom) is bundled into each protected module. The only external
+  tadlock.png`. Firebase is bundled into the auth chunk. React +
+  react-dom are bundled into each protected module via a
+  `DirectionMount` function; the direction-loader itself imports no
+  React package and is a thin orchestrator (~2.7 kB chunk) — this
+  keeps React a single instance per page and avoids cross-instance
+  hook-dispatch failures (see Codex P1 on PR #33). The only external
   CDN imports left are the Google Fonts stylesheets. Phases 5–6
   refactor the inline-styled prototypes onto `useViewport()` + a
   theme object and ship #11's responsive refinements.

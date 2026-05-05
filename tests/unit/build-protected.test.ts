@@ -54,11 +54,16 @@ describe.skipIf(!buildExists)("dist-protected contract", () => {
         });
 
         it("has no http(s) external imports (React + ReactDOM inlined)", () => {
-          // Permissive: matches any `from "https://..."` or `import "https://..."`
-          // in source position. Internal Firebase analytics URLs that appear as
-          // string literals in the bundle don't count.
-          expect(src).not.toMatch(/from\s+['"]https?:\/\//);
-          expect(src).not.toMatch(/import\(['"]https?:\/\//);
+          // Block all three module-import shapes:
+          //   - static `from "https://..."` (named / namespace / default)
+          //   - side-effect `import "https://..."` (no `from`)
+          //   - dynamic `import("https://...")` (with optional whitespace)
+          // Internal Firebase analytics URLs that appear as string
+          // literals in the bundle don't fall into any of these and so
+          // don't trip the assertion.
+          expect(src).not.toMatch(/\bfrom\s+['"]https?:\/\//);
+          expect(src).not.toMatch(/^\s*import\s+['"]https?:\/\//m);
+          expect(src).not.toMatch(/\bimport\s*\(\s*['"]https?:\/\//);
         });
 
         it("includes a createRoot reference (per the DirectionMount contract proxy)", () => {
