@@ -66,6 +66,8 @@ one-time service account configuration.
 | `src/direction-loader.ts` | Runtime loader for the gated direction prototypes |
 | `src/types.ts` | Shared types (`Practice`, `Tweaks`, `DirectionComponent`) — imported by both `src/` and `protected-src/` |
 | `protected-src/*.tsx` | Gated React components + content (TypeScript source — NOT bundled into `dist/`) |
+| `protected-src/d{1,2,3}/theme.ts` | Per-direction color/font/spacing tokens (phase 5) |
+| `protected-src/shared/use-viewport.ts` | `useViewport()` hook + `sectionPadding`/`collapseGridColumns`/`capHeroFontSize` responsive helpers (phase 5) |
 | `vite.config.ts` | Multi-page Vite config (externalizes Google Fonts URLs only) |
 | `tsconfig.protected.json` | TS project config for `protected-src/` (relaxed strictness for the inline-styled prototypes) |
 | `scripts/build-protected.mjs` | esbuild step that bundles `protected-src/*.tsx` (React inlined) into `dist-protected/*.js` ES modules for Storage upload |

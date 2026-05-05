@@ -3,25 +3,22 @@
 // that responds to cursor, monospace metadata. Bold blocks, hard divisions,
 // information-dense.
 //
-// Phase 4 (#24) port — see direction-1.tsx header for the dynamic-
-// import + DirectionMount contract and the `: any` deferral.
+// Phase 5 (#25) — see direction-1.tsx header for the theme/useViewport
+// rationale. Phase 4 (#24) DirectionMount contract unchanged.
 import React, { createElement } from "react";
 import { createRoot } from "react-dom/client";
 import type { DirectionComponent, DirectionMount } from "../src/types";
+import { getD3Theme } from "./d3/theme";
+import {
+  useViewport,
+  sectionPadding,
+  collapseGridColumns,
+} from "./shared/use-viewport";
 
 const D3: DirectionComponent = ({ tweaks, practice: P }) => {
-  const dark = tweaks.dark === true;
-  const accent = tweaks.accent || "#FF5C2A";
-  const sans = tweaks.sans || '"Söhne", "Inter", -apple-system, system-ui, sans-serif';
-  const mono = tweaks.mono || '"JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace';
-  const heroVariant = tweaks.heroVariant || "blocks";
-
-  const bg = dark ? "#0A0A0A" : "#EFEDE7";
-  const fg = dark ? "#F0EDE6" : "#0A0A0A";
-  const dim = dark ? "rgba(240,237,230,0.55)" : "rgba(10,10,10,0.55)";
-  const faint = dark ? "rgba(240,237,230,0.15)" : "rgba(10,10,10,0.15)";
-  const card = dark ? "#141414" : "#FAF8F2";
-  const inv = dark ? "#0A0A0A" : "#F0EDE6";
+  const t = getD3Theme(tweaks);
+  const { bg, fg, dim, faint, card, inv, accent, sans, mono, dark, heroVariant } = t;
+  const { bp } = useViewport();
 
   const rootRef = React.useRef<any>(null);
   const gridRef = React.useRef<any>(null);
@@ -50,23 +47,23 @@ const D3: DirectionComponent = ({ tweaks, practice: P }) => {
       background: bg, color: fg, fontFamily: sans,
       scrollbarWidth: "thin", scrollbarColor: `${faint} transparent`,
     }}>
-      <NavBarD3 fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} bg={bg} />
-      <HeroD3 P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg} inv={inv}
+      <NavBarD3 bp={bp} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} bg={bg} />
+      <HeroD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg} inv={inv}
         gridRef={gridRef} variant={heroVariant} mouse={mouse} dark={dark} />
-      <PrincipleD3 P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
-      <SpecialtiesD3 P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
-      <ProcessD3 P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} inv={inv} />
-      <AboutD3 P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
-      <WaitlistD3 P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} bg={bg} inv={inv} />
-      <FooterD3 P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} />
+      <PrincipleD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      <SpecialtiesD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      <ProcessD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} inv={inv} />
+      <AboutD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      <WaitlistD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} bg={bg} inv={inv} />
+      <FooterD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} />
     </div>
   );
 };
 
-const NavBarD3 = ({ fg, dim, faint, accent, mono, bg }: any) => (
+const NavBarD3 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => (
   <nav style={{
     position: "sticky", top: 0, zIndex: 10,
-    padding: "14px 32px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
+    padding: "14px 32px", display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1fr 1fr"),
     alignItems: "center",
     background: bg, borderBottom: `1px solid ${fg}`,
     fontFamily: mono, fontSize: 11.5, letterSpacing: 0.6, textTransform: "uppercase",
@@ -91,13 +88,13 @@ const NavBarD3 = ({ fg, dim, faint, accent, mono, bg }: any) => (
   </nav>
 );
 
-const HeroD3 = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef, variant, mouse, dark }: any) => {
-  if (variant === "manifesto") return <HeroD3Manifesto P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} inv={inv} />;
-  if (variant === "stats") return <HeroD3Stats P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} inv={inv} />;
-  return <HeroD3Blocks P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg} inv={inv} gridRef={gridRef} mouse={mouse} dark={dark} />;
+const HeroD3 = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef, variant, mouse, dark, bp }: any) => {
+  if (variant === "manifesto") return <HeroD3Manifesto bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} inv={inv} />;
+  if (variant === "stats") return <HeroD3Stats bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} inv={inv} />;
+  return <HeroD3Blocks bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg} inv={inv} gridRef={gridRef} mouse={mouse} dark={dark} />;
 };
 
-const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef, mouse, dark }: any) => (
+const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef, mouse, dark, bp }: any) => (
   <section style={{ position: "relative", borderBottom: `1px solid ${fg}` }}>
     {/* generative line-grid that follows the cursor */}
     <div ref={gridRef} style={{
@@ -124,9 +121,9 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
 
     <div style={{
       position: "relative", display: "grid",
-      gridTemplateColumns: "1.5fr 1fr", borderBottom: `1px solid ${fg}`,
+      gridTemplateColumns: collapseGridColumns(bp, "1.5fr 1fr"), borderBottom: `1px solid ${fg}`,
     }}>
-      <div style={{ padding: "60px 40px 40px", borderRight: `1px solid ${fg}` }}>
+      <div style={{ padding: sectionPadding(bp, "60px 40px 40px"), borderRight: `1px solid ${fg}` }}>
         <div style={{ fontFamily: mono, fontSize: 11, color: dim, letterSpacing: 1, textTransform: "uppercase", marginBottom: 28, display: "flex", justifyContent: "space-between" }}>
           <span>FILE—INTRODUCTION / V0.1</span>
           <span>{P.established}</span>
@@ -139,7 +136,7 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
         </h1>
       </div>
       <div style={{
-        padding: "60px 40px 40px", display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 32,
+        padding: sectionPadding(bp, "60px 40px 40px"), display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 32,
       }}>
         <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase" }}>
           ▦ Mission
@@ -167,7 +164,7 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
     </div>
 
     {/* metric strip */}
-    <div style={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(4, 1fr)" }}>
+    <div style={{ position: "relative", display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(4, 1fr)") }}>
       {[
         { l: "Established", v: "MMXXVI" },
         { l: "Discipline", v: "Psychiatry" },
@@ -187,8 +184,8 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
   </section>
 );
 
-const HeroD3Manifesto = ({ P, fg, dim, accent, mono, card, inv }: any) => (
-  <section style={{ padding: "80px 40px 60px", borderBottom: `1px solid ${fg}` }}>
+const HeroD3Manifesto = ({ P, fg, dim, accent, mono, card, inv, bp }: any) => (
+  <section style={{ padding: sectionPadding(bp, "80px 40px 60px"), borderBottom: `1px solid ${fg}` }}>
     <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase", marginBottom: 40 }}>
       ▦ Manifesto · {P.heroEyebrow}
     </div>
@@ -198,7 +195,7 @@ const HeroD3Manifesto = ({ P, fg, dim, accent, mono, card, inv }: any) => (
     }}>
       Most psychiatry treats absence<br />of distress as the <span style={{ color: accent }}>goal</span>.<br />We treat it as the floor.
     </h1>
-    <div style={{ marginTop: 56, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60 }}>
+    <div style={{ marginTop: 56, display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1fr"), gap: 60 }}>
       <p style={{ fontSize: 18, lineHeight: 1.55, color: fg, margin: 0, fontWeight: 500, textWrap: "pretty" }}>{P.heroSub}</p>
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
         <button style={{
@@ -210,8 +207,8 @@ const HeroD3Manifesto = ({ P, fg, dim, accent, mono, card, inv }: any) => (
   </section>
 );
 
-const HeroD3Stats = ({ P, fg, dim, faint, accent, mono, card, inv }: any) => (
-  <section style={{ padding: "60px 40px 40px", borderBottom: `1px solid ${fg}`, position: "relative" }}>
+const HeroD3Stats = ({ P, fg, dim, faint, accent, mono, card, inv, bp }: any) => (
+  <section style={{ padding: sectionPadding(bp, "60px 40px 40px"), borderBottom: `1px solid ${fg}`, position: "relative" }}>
     <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase", marginBottom: 32 }}>
       ▦ Practice Profile · {P.established}
     </div>
@@ -221,7 +218,7 @@ const HeroD3Stats = ({ P, fg, dim, faint, accent, mono, card, inv }: any) => (
     }}>
       Clinical psychiatry,<br />applied to <span style={{ color: accent }}>high performance</span>.
     </h1>
-    <div style={{ marginTop: 48, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", border: `1px solid ${fg}` }}>
+    <div style={{ marginTop: 48, display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(3, 1fr)"), border: `1px solid ${fg}` }}>
       {P.metrics.map((m, i) => (
         <div key={m.l} style={{ padding: "32px 28px", borderRight: i < 2 ? `1px solid ${fg}` : "none" }}>
           <div style={{ fontFamily: mono, fontSize: 11, color: dim, letterSpacing: 1, textTransform: "uppercase", marginBottom: 16 }}>0{i + 1}</div>
@@ -235,9 +232,9 @@ const HeroD3Stats = ({ P, fg, dim, faint, accent, mono, card, inv }: any) => (
   </section>
 );
 
-const PrincipleD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
-  <section style={{ padding: "60px 40px", borderBottom: `1px solid ${fg}` }}>
-    <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 40, marginBottom: 40 }}>
+const PrincipleD3 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
+  <section style={{ padding: sectionPadding(bp, "60px 40px"), borderBottom: `1px solid ${fg}` }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "240px 1fr"), gap: 40, marginBottom: 40 }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase" }}>
         § 01<br /><span style={{ color: dim, marginTop: 4, display: "block" }}>Premise</span>
       </div>
@@ -248,7 +245,7 @@ const PrincipleD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
         Three principles<br />define the work.
       </h2>
     </div>
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", border: `1px solid ${fg}` }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(3, 1fr)"), border: `1px solid ${fg}` }}>
       {P.positioning.map((c, i) => (
         <div key={c.k} style={{
           padding: 32, borderRight: i < 2 ? `1px solid ${fg}` : "none", background: card, position: "relative",
@@ -265,11 +262,11 @@ const PrincipleD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
   </section>
 );
 
-const SpecialtiesD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => {
+const SpecialtiesD3 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => {
   const [hover, setHover] = React.useState(null);
   return (
-    <section style={{ padding: "60px 40px", borderBottom: `1px solid ${fg}` }}>
-      <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 40, marginBottom: 40, alignItems: "end" }}>
+    <section style={{ padding: sectionPadding(bp, "60px 40px"), borderBottom: `1px solid ${fg}` }}>
+      <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "240px 1fr"), gap: 40, marginBottom: 40, alignItems: "end" }}>
         <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase" }}>
           § 02<br /><span style={{ color: dim, marginTop: 4, display: "block" }}>Specialties</span>
         </div>
@@ -287,7 +284,7 @@ const SpecialtiesD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => {
             onMouseEnter={() => setHover(i)}
             onMouseLeave={() => setHover(null)}
             style={{
-              display: "grid", gridTemplateColumns: "120px 1.4fr 2fr 240px",
+              display: "grid", gridTemplateColumns: collapseGridColumns(bp, "120px 1.4fr 2fr 240px"),
               gap: 32, padding: "28px 32px",
               borderTop: i > 0 ? `1px solid ${fg}` : "none",
               alignItems: "center", cursor: "pointer", position: "relative",
@@ -308,9 +305,9 @@ const SpecialtiesD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => {
   );
 };
 
-const ProcessD3 = ({ P, fg, dim, faint, accent, mono, card, inv }: any) => (
-  <section style={{ padding: "60px 40px", borderBottom: `1px solid ${fg}`, background: fg, color: inv }}>
-    <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 40, marginBottom: 48, alignItems: "end" }}>
+const ProcessD3 = ({ P, fg, dim, faint, accent, mono, card, inv, bp }: any) => (
+  <section style={{ padding: sectionPadding(bp, "60px 40px"), borderBottom: `1px solid ${fg}`, background: fg, color: inv }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "240px 1fr"), gap: 40, marginBottom: 48, alignItems: "end" }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase" }}>
         § 03<br /><span style={{ opacity: 0.6, marginTop: 4, display: "block" }}>Process</span>
       </div>
@@ -321,7 +318,7 @@ const ProcessD3 = ({ P, fg, dim, faint, accent, mono, card, inv }: any) => (
         Four phases.<br />One written plan.
       </h2>
     </div>
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", border: `1px solid ${inv}` }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(4, 1fr)"), border: `1px solid ${inv}` }}>
       {P.process.map((p, i) => (
         <div key={p.n} style={{
           padding: 28, borderRight: i < 3 ? `1px solid ${inv}` : "none",
@@ -339,9 +336,9 @@ const ProcessD3 = ({ P, fg, dim, faint, accent, mono, card, inv }: any) => (
   </section>
 );
 
-const AboutD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
-  <section style={{ padding: "60px 40px", borderBottom: `1px solid ${fg}` }}>
-    <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 40, marginBottom: 40, alignItems: "end" }}>
+const AboutD3 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
+  <section style={{ padding: sectionPadding(bp, "60px 40px"), borderBottom: `1px solid ${fg}` }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "240px 1fr"), gap: 40, marginBottom: 40, alignItems: "end" }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase" }}>
         § 04<br /><span style={{ color: dim, marginTop: 4, display: "block" }}>About</span>
       </div>
@@ -352,7 +349,7 @@ const AboutD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
         Sterling Tadlock,<br />M.D.
       </h2>
     </div>
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", border: `1px solid ${fg}` }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1.4fr"), border: `1px solid ${fg}` }}>
       <div style={{
         borderRight: `1px solid ${fg}`,
         position: "relative", aspectRatio: "1/1.1", overflow: "hidden",
@@ -377,7 +374,7 @@ const AboutD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
           </div>
           {P.credentials.map((c, i) => (
             <div key={i} style={{
-              display: "grid", gridTemplateColumns: "160px 1fr 200px",
+              display: "grid", gridTemplateColumns: collapseGridColumns(bp, "160px 1fr 200px"),
               gap: 16, padding: "14px 0",
               borderTop: i > 0 ? `1px solid ${faint}` : "none", alignItems: "baseline",
             }}>
@@ -392,12 +389,12 @@ const AboutD3 = ({ P, fg, dim, faint, accent, mono, card }: any) => (
   </section>
 );
 
-const WaitlistD3 = ({ P, fg, dim, faint, accent, mono, bg, inv }: any) => {
+const WaitlistD3 = ({ P, fg, dim, faint, accent, mono, bg, inv, bp }: any) => {
   const [email, setEmail] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
   return (
-    <section style={{ padding: "80px 40px", borderBottom: `1px solid ${fg}`, background: accent, color: "#0A0A0A" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 60, alignItems: "end" }}>
+    <section style={{ padding: sectionPadding(bp, "80px 40px"), borderBottom: `1px solid ${fg}`, background: accent, color: "#0A0A0A" }}>
+      <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1.4fr 1fr"), gap: 60, alignItems: "end" }}>
         <div>
           <div style={{ fontFamily: mono, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", marginBottom: 32, fontWeight: 700 }}>
             ▦ Apply · By application only · {P.location}
@@ -441,9 +438,9 @@ const WaitlistD3 = ({ P, fg, dim, faint, accent, mono, bg, inv }: any) => {
   );
 };
 
-const FooterD3 = ({ P, fg, dim, faint, accent, mono }: any) => (
+const FooterD3 = ({ P, fg, dim, faint, accent, mono, bp }: any) => (
   <footer style={{ padding: "32px 40px", borderTop: `1px solid ${fg}`, fontFamily: mono, fontSize: 11.5, letterSpacing: 0.4 }}>
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 32, marginBottom: 32 }}>
+    <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "repeat(4, 1fr)"), gap: 32, marginBottom: 32 }}>
       <div>
         <div style={{ fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>TADLOCK / PSYCHIATRY</div>
         <div style={{ color: dim, lineHeight: 1.55 }}>{P.practice}</div>
