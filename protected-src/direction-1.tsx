@@ -27,6 +27,7 @@ import {
   collapseGridColumns,
   collapseGridGap,
   h1FontSize,
+  h1LineHeight,
   h2FontSize,
   h3FontSize,
   sectionPadding,
@@ -199,7 +200,7 @@ const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyph
 
       <h1 style={{
         fontFamily: serif, fontWeight: 300,
-        fontSize: h1FontSize(bp, "clamp(56px, 7.4vw, 124px)"), lineHeight: 0.94,
+        fontSize: h1FontSize(bp, "clamp(56px, 7.4vw, 124px)"), lineHeight: h1LineHeight(bp, 0.94),
         letterSpacing: -2.2, margin: 0, maxWidth: 1240,
         textWrap: "balance",
       }}>
@@ -264,7 +265,7 @@ const HeroD1Split = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
       </div>
       <h1 style={{
         fontFamily: serif, fontWeight: 300, fontSize: h1FontSize(bp, "clamp(48px, 5.6vw, 92px)"),
-        lineHeight: 0.98, letterSpacing: -1.6, margin: 0, textWrap: "balance",
+        lineHeight: h1LineHeight(bp, 0.98), letterSpacing: -1.6, margin: 0, textWrap: "balance",
       }}>
         Clinical psychiatry, applied to the <em style={{ fontStyle: "italic", color: accent, fontWeight: 300 }}>architecture</em> of high performance.
       </h1>

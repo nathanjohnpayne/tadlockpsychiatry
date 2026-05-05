@@ -130,6 +130,22 @@ export function h3FontSize(bp: Breakpoint, desktop: string | number): string | n
   return desktop;
 }
 
+// h1 line-height port: the deleted overlay also set
+//   .d-root h1 { line-height: 1.05 !important }
+// at @media (max-width: 880px). Direction-side h1's set tight desktop
+// line-heights (0.86 / 0.92 / 0.94 / 0.96 / 0.98) for the giant
+// display headlines; once h1FontSize collapses the type into the
+// 28-48 px clamp range on small viewports, those tight line-heights
+// produce overlapping rows on multi-line headings. Wrap each h1's
+// inline `lineHeight` so it relaxes to 1.05 on tablet/mobile.
+//
+// (h2/h3 weren't given a line-height override by the overlay — the
+//  font-size cap alone was enough at their smaller display sizes.)
+export function h1LineHeight(bp: Breakpoint, desktop: string | number): string | number {
+  if (bp === "mobile" || bp === "tablet") return 1.05;
+  return desktop;
+}
+
 // Grid gap collapse: the CSS overlay rule
 //   .d-root [style*="grid-template-columns"] { gap: 24px !important }
 // applied to every element with an inline grid. The collapseGrid-

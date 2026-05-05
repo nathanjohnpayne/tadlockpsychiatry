@@ -14,6 +14,7 @@ import {
   collapseGridColumns,
   collapseGridGap,
   h1FontSize,
+  h1LineHeight,
   h2FontSize,
   h3FontSize,
   sectionPadding,
@@ -142,7 +143,7 @@ const HeroD2Metrics = ({ P, fg, dim, faint, accent, mono, card, bg, scrollY, mou
 
         <h1 style={{
           marginTop: 40, fontWeight: 500,
-          fontSize: h1FontSize(bp, "clamp(54px, 7vw, 116px)"), lineHeight: 0.96, letterSpacing: -3.2,
+          fontSize: h1FontSize(bp, "clamp(54px, 7vw, 116px)"), lineHeight: h1LineHeight(bp, 0.96), letterSpacing: -3.2,
           margin: "40px 0 0", maxWidth: 1200, textWrap: "balance",
         }}>
           Psychiatry for people whose work depends on a clear mind.
@@ -192,7 +193,7 @@ const HeroD2Stack = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
       {P.heroEyebrow} · {P.established}
     </div>
     <h1 style={{
-      fontWeight: 500, fontSize: h1FontSize(bp, "clamp(48px, 6vw, 100px)"), lineHeight: 0.96,
+      fontWeight: 500, fontSize: h1FontSize(bp, "clamp(48px, 6vw, 100px)"), lineHeight: h1LineHeight(bp, 0.96),
       letterSpacing: -2.4, margin: 0, maxWidth: 1320, textWrap: "balance",
     }}>
       A psychiatry practice for the moments your performance depends on.
@@ -211,7 +212,7 @@ const HeroD2Wide = ({ P, fg, dim, faint, accent, mono, card, scrollY, bp }: any)
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 36 }}>
         {P.heroEyebrow}
       </div>
-      <h1 style={{ fontWeight: 500, fontSize: h1FontSize(bp, "clamp(44px, 5.4vw, 88px)"), lineHeight: 1, letterSpacing: -2.2, margin: 0, textWrap: "balance" }}>
+      <h1 style={{ fontWeight: 500, fontSize: h1FontSize(bp, "clamp(44px, 5.4vw, 88px)"), lineHeight: h1LineHeight(bp, 1), letterSpacing: -2.2, margin: 0, textWrap: "balance" }}>
         Clinical psychiatry, applied to the architecture of high performance.
       </h1>
       <p style={{ marginTop: 32, fontSize: 17, lineHeight: 1.6, color: dim, maxWidth: 580 }}>{P.heroSub}</p>

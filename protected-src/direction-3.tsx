@@ -14,6 +14,7 @@ import {
   collapseGridColumns,
   collapseGridGap,
   h1FontSize,
+  h1LineHeight,
   h2FontSize,
   h3FontSize,
   sectionPadding,
@@ -133,7 +134,7 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
           <span>{P.established}</span>
         </div>
         <h1 style={{
-          fontWeight: 800, fontSize: h1FontSize(bp, "clamp(60px, 8.4vw, 156px)"), lineHeight: 0.86,
+          fontWeight: 800, fontSize: h1FontSize(bp, "clamp(60px, 8.4vw, 156px)"), lineHeight: h1LineHeight(bp, 0.86),
           letterSpacing: -5, margin: 0, textTransform: "uppercase", textWrap: "balance",
         }}>
           Psychiatry<br />for a <span style={{ color: accent }}>clear</span><br />mind.
@@ -194,7 +195,7 @@ const HeroD3Manifesto = ({ P, fg, dim, accent, mono, card, inv, bp }: any) => (
       ▦ Manifesto · {P.heroEyebrow}
     </div>
     <h1 style={{
-      fontWeight: 800, fontSize: h1FontSize(bp, "clamp(48px, 6.4vw, 120px)"), lineHeight: 0.92,
+      fontWeight: 800, fontSize: h1FontSize(bp, "clamp(48px, 6.4vw, 120px)"), lineHeight: h1LineHeight(bp, 0.92),
       letterSpacing: -3.4, margin: 0, textTransform: "uppercase", textWrap: "balance", maxWidth: 1500,
     }}>
       Most psychiatry treats absence<br />of distress as the <span style={{ color: accent }}>goal</span>.<br />We treat it as the floor.
@@ -217,7 +218,7 @@ const HeroD3Stats = ({ P, fg, dim, faint, accent, mono, card, inv, bp }: any) =>
       ▦ Practice Profile · {P.established}
     </div>
     <h1 style={{
-      fontWeight: 800, fontSize: h1FontSize(bp, "clamp(44px, 6vw, 108px)"), lineHeight: 0.94,
+      fontWeight: 800, fontSize: h1FontSize(bp, "clamp(44px, 6vw, 108px)"), lineHeight: h1LineHeight(bp, 0.94),
       letterSpacing: -3, margin: 0, textTransform: "uppercase", maxWidth: 1500, textWrap: "balance",
     }}>
       Clinical psychiatry,<br />applied to <span style={{ color: accent }}>high performance</span>.
