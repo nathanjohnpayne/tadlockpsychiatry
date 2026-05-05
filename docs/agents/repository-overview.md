@@ -47,7 +47,7 @@ Firebase Hosting serves).
 
 Maintain the site content, the agent-tooling infrastructure, and the
 review-policy workflow. Keep `dist/` and other build artifacts out of
-git. Drive the #20 migration phase by phase rather than expanding the
-toolchain speculatively beyond what each phase needs.
+git. Keep the post-migration toolchain stable; avoid speculative
+expansion beyond current product needs.
 
 See `.ai_context.md` for hosting identifiers and deploy tooling.

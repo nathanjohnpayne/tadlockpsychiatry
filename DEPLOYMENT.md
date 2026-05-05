@@ -602,7 +602,7 @@ After a fresh `application-default login` on a new machine (or one whose
 local gcloud configuration has no default project), the next deploy may
 abort partway through `scripts/sync-protected.sh` with:
 
-```
+```text
 ERROR: (gcloud.storage.rsync) There was a problem refreshing your current
 auth tokens: Reauthentication failed. cannot prompt during non-interactive
 execution.
@@ -622,7 +622,7 @@ gcloud config list                              # verify account + project
 `gcloud storage ls gs://{bucket}/` should then run without any prompts;
 re-run `op-firebase-deploy --only hosting` and the predeploy chain
 completes. (Captured during the phase-5 deploy on 2026-05-04 — closes
-#36 in the project repo.)
+`#36` in the project repo.)
 
 If deploy impersonation breaks because IAM bindings or project configuration drifted:
 
