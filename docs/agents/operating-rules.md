@@ -5,13 +5,19 @@ Read in this order before taking any action:
 1. `README.md` — understand the project
 2. `AGENTS.md` — load behavioral instructions (index pointing to this directory)
 3. `rules/repo_rules.md` — load binding constraints
-4. Relevant `specs/` files — understand intended behavior
+4. `DEPLOYMENT.md` — deploy process and credential setup
 5. `.ai_context.md` — load supplemental context
+
+Intended behavior is captured in code, comments, and per-PR commit
+messages — there is no `specs/` directory in this repo. If a contract
+ever becomes complex enough to warrant standalone specs, reintroduce
+the directory then.
 
 Conflict resolution:
 
-- If code conflicts with `specs/`: flag the conflict, update spec or
-  tests first, then update code. Do not silently modify behavior.
+- If a test conflicts with new code: investigate which is wrong, fix
+  that one. Do not silently delete a test to make a build pass (see
+  `rules/repo_rules.md`).
 - If a proposed change violates `rules/repo_rules.md`: stop and flag
   the violation. Do not proceed without resolution.
 - If a tool folder contains instructions that conflict with `AGENTS.md`

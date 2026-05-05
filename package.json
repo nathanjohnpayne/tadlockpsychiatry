@@ -9,7 +9,10 @@
     "preview": "vite preview",
     "build:protected": "node scripts/build-protected.mjs",
     "smoke:protected": "npm run build:protected && node scripts/smoke-protected.mjs",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.protected.json"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.protected.json",
+    "pretest": "npm run build:protected",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "firebase": "^11.10.0",
@@ -21,9 +24,12 @@
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "@vitejs/plugin-react": "4.3.4",
+    "@vitest/coverage-v8": "^4.1.5",
     "esbuild": "^0.28.0",
     "happy-dom": "^20.9.0",
+    "jsdom": "^29.1.1",
     "typescript": "5.7.2",
-    "vite": "6.4.2"
+    "vite": "6.4.2",
+    "vitest": "^4.1.5"
   }
 }
