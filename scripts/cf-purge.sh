@@ -51,6 +51,17 @@ soft_fail() {
   exit 0
 }
 
+# DRY_RUN short-circuit BEFORE token resolution. The dry-run path is
+# documented as a preview path (#19 P2: local / CI smoke without
+# secrets) — resolving the token first means environments without
+# `op` or `CF_API_TOKEN` `soft_fail` before ever reaching the
+# dry-run branch. Move the gate up so DRY_RUN=1 prints the intent
+# and exits without needing any credentials.
+if [[ "${DRY_RUN:-}" == "1" ]]; then
+  echo "[cf-purge] DRY_RUN=1: would POST purge_cache to zone $ZONE_ID ($DOMAIN)"
+  exit 0
+fi
+
 # Token resolution. Prefer the explicit env var so CI can set it
 # directly; fall back to op read if not provided.
 if [[ -n "${CF_API_TOKEN:-}" ]]; then
@@ -63,11 +74,6 @@ else
   if [[ -z "$TOKEN" ]]; then
     soft_fail "could not read $TOKEN_OP_PATH from 1Password"
   fi
-fi
-
-if [[ "${DRY_RUN:-}" == "1" ]]; then
-  echo "[cf-purge] DRY_RUN=1: would POST purge_cache to zone $ZONE_ID ($DOMAIN)"
-  exit 0
 fi
 
 echo "[cf-purge] purging Cloudflare cache for $DOMAIN (zone $ZONE_ID)"

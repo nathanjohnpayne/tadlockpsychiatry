@@ -114,7 +114,17 @@ async function loadAsBlobUrl(filename: string): Promise<string> {
     getProtectedBlob(filename),
     `protected/${filename} fetch`,
   );
-  return URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
+  // The browser GCs blob URLs on navigation, so for the current single-
+  // portrait-per-page-load use this leak is benign. Revoking explicitly
+  // on `pagehide` mirrors the loadModule() pattern (which revokes
+  // immediately) and makes the helper safe to reuse for repeated fetches
+  // in a longer-lived SPA. `{ once: true }` self-cleans the listener so
+  // the next loadAsBlobUrl call gets its own.
+  window.addEventListener("pagehide", () => URL.revokeObjectURL(url), {
+    once: true,
+  });
+  return url;
 }
 
 // Populate the preview bar's Signed-in-as field and wire its Sign-out
