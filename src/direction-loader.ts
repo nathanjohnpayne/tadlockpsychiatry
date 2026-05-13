@@ -114,7 +114,22 @@ async function loadAsBlobUrl(filename: string): Promise<string> {
     getProtectedBlob(filename),
     `protected/${filename} fetch`,
   );
-  return URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
+  // Revoke on genuine unload. `pagehide` also fires when the page enters
+  // the back-forward cache (`event.persisted === true`); revoking then
+  // would invalidate the portrait <img> when the user navigates back and
+  // the page is restored from bfcache. Skip revoke in that case — the
+  // browser keeps the blob alive across the bfcache transition, and a
+  // later genuine unload (persisted === false) will revoke. The handler
+  // self-removes only on the genuine-unload path so it stays armed
+  // across any number of bfcache cycles. CodeRabbit flagged this on #48.
+  const onPageHide = (event: PageTransitionEvent) => {
+    if (event.persisted) return;
+    URL.revokeObjectURL(url);
+    window.removeEventListener("pagehide", onPageHide);
+  };
+  window.addEventListener("pagehide", onPageHide);
+  return url;
 }
 
 // Populate the preview bar's Signed-in-as field and wire its Sign-out

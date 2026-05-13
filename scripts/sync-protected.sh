@@ -60,7 +60,7 @@ fi
 #
 # --recursive so nested files (none today, but future-safe) are picked
 # up. The -- after rsync prevents flag-parsing surprises.
-echo "[sync-protected] gcloud storage rsync $SRC_DIR/ gs://$BUCKET/protected/"
+echo "[sync-protected] gcloud storage rsync $SRC_DIR gs://$BUCKET/protected"
 # `${arr[@]+"${arr[@]}"}` expands safely under `set -u` when arr is empty.
 #
 # `--impersonate-service-account=""` drops any impersonation set in the

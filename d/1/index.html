@@ -24,9 +24,15 @@
 
     /* Embedded preview bar — same vocabulary as the menu's topbar, on
        every gated page so "← MENU", brand mark, and Sign out have a
-       permanent home that doesn't overlap the direction's chrome. */
+       permanent home that doesn't overlap the direction's chrome.
+
+       position: relative + z-index establishes a stacking context above
+       direction-1's full-viewport `position: fixed` overlays (spot
+       z-index 1, grain z-index 2 in protected-src/direction-1.tsx);
+       without it, those overlays render on top of the preview bar. */
     .preview-bar {
       flex: none;
+      position: relative; z-index: 1000;
       display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
       padding: 18px 40px; border-bottom: 1px solid rgba(240,237,230,0.22);
       background: #0A0A0A; color: #F0EDE6;
@@ -36,8 +42,23 @@
     .preview-bar .l, .preview-bar .r { display: flex; gap: 18px; align-items: center; }
     .preview-bar .r { justify-content: flex-end; color: rgba(240,237,230,0.55); }
     .preview-bar .sep { color: rgba(240,237,230,0.55); }
-    .preview-bar a { color: rgba(240,237,230,0.55); text-decoration: none; cursor: pointer; }
-    .preview-bar a:hover { color: #F0EDE6; }
+    .preview-bar a,
+    .preview-bar button#signout {
+      color: rgba(240,237,230,0.55); text-decoration: none; cursor: pointer;
+    }
+    /* Reset native <button> styling so #signout matches the surrounding
+       monospace anchors. Keeps the element keyboard-focusable while
+       inheriting the .preview-bar font + color treatment. */
+    .preview-bar button#signout {
+      background: none; border: 0; padding: 0; margin: 0;
+      font: inherit; letter-spacing: inherit; text-transform: inherit;
+    }
+    .preview-bar a:hover,
+    .preview-bar button#signout:hover { color: #F0EDE6; }
+    .preview-bar a:focus-visible,
+    .preview-bar button#signout:focus-visible {
+      color: #F0EDE6; outline: 1px solid #F0EDE6; outline-offset: 3px;
+    }
     .preview-bar .back { color: rgba(240,237,230,0.55); }
     .preview-bar .back:hover { color: #F0EDE6; }
     .preview-bar .ident { display: flex; align-items: center; gap: 10px; color: #F0EDE6; }
@@ -62,17 +83,23 @@
     <div></div>
     <div class="r">
       <span>Signed in as <span id="who">…</span></span>
-      <a id="signout">Sign out</a>
+      <button id="signout" type="button">Sign out</button>
     </div>
   </header>
 
   <div id="root"></div>
 
-  <!-- See d/1/index.html for the rationale on the global error / rejection
-       handlers. -->
+  <!-- Boot-phase fatal-error overlay. Scoped to boot only: once
+       bootDirection() mounts and adds `body.ready`, the bootInProgress
+       flag flips off so post-boot transient runtime errors (e.g.
+       benign ResizeObserver chatter, third-party script noise) cannot
+       replace a successfully-rendered page with the full-screen
+       overlay. -->
   <script>
     (function () {
+      var bootInProgress = true;
       function showFatal(label, detail) {
+        if (!bootInProgress) return;
         document.body.classList.add("ready");
         document.body.style.cssText += "background:#0E0F12; color:#fff; font-family:'JetBrains Mono', ui-monospace, monospace;";
         var pre = document.createElement("pre");
@@ -86,6 +113,17 @@
       window.addEventListener("unhandledrejection", function (e) {
         showFatal("unhandled promise rejection", (e.reason && e.reason.stack) || String(e.reason));
       });
+      // bootDirection() and the showBootError fallback both add
+      // `ready` on the body — either is a definitive "boot phase
+      // finished" signal. Watch the class list and flip the flag,
+      // then disconnect so the observer doesn't keep firing.
+      var obs = new MutationObserver(function () {
+        if (document.body.classList.contains("ready")) {
+          bootInProgress = false;
+          obs.disconnect();
+        }
+      });
+      obs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
     })();
   </script>
 
