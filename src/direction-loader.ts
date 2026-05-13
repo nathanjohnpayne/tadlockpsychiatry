@@ -115,15 +115,20 @@ async function loadAsBlobUrl(filename: string): Promise<string> {
     `protected/${filename} fetch`,
   );
   const url = URL.createObjectURL(blob);
-  // The browser GCs blob URLs on navigation, so for the current single-
-  // portrait-per-page-load use this leak is benign. Revoking explicitly
-  // on `pagehide` mirrors the loadModule() pattern (which revokes
-  // immediately) and makes the helper safe to reuse for repeated fetches
-  // in a longer-lived SPA. `{ once: true }` self-cleans the listener so
-  // the next loadAsBlobUrl call gets its own.
-  window.addEventListener("pagehide", () => URL.revokeObjectURL(url), {
-    once: true,
-  });
+  // Revoke on genuine unload. `pagehide` also fires when the page enters
+  // the back-forward cache (`event.persisted === true`); revoking then
+  // would invalidate the portrait <img> when the user navigates back and
+  // the page is restored from bfcache. Skip revoke in that case — the
+  // browser keeps the blob alive across the bfcache transition, and a
+  // later genuine unload (persisted === false) will revoke. The handler
+  // self-removes only on the genuine-unload path so it stays armed
+  // across any number of bfcache cycles. CodeRabbit flagged this on #48.
+  const onPageHide = (event: PageTransitionEvent) => {
+    if (event.persisted) return;
+    URL.revokeObjectURL(url);
+    window.removeEventListener("pagehide", onPageHide);
+  };
+  window.addEventListener("pagehide", onPageHide);
   return url;
 }
 
