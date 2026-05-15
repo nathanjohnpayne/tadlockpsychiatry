@@ -52,7 +52,8 @@
     @media (max-width: 720px) {
       .preview-bar { padding: 12px 16px; grid-template-columns: 1fr auto; gap: 12px; font-size: 9.5px; }
       .preview-bar > div:nth-child(2) { display: none; }
-      .preview-bar .r > span:first-child { display: none; }
+      /* See d/1/index.html for the label/username split rationale. */
+      .preview-bar .r .signin-label { display: none; }
       .preview-bar .ident em { display: none; }
     }
   </style>
@@ -66,7 +67,7 @@
     </div>
     <div></div>
     <div class="r">
-      <span>Signed in as <span id="who">…</span></span>
+      <span><span class="signin-label">Signed in as </span><span id="who">…</span></span>
       <button id="signout" type="button">Sign out</button>
     </div>
   </header>
