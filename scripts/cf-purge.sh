@@ -70,9 +70,23 @@ else
   if ! command -v op >/dev/null 2>&1; then
     soft_fail "1Password CLI (op) not on PATH and CF_API_TOKEN not set"
   fi
-  TOKEN="$(op read "$TOKEN_OP_PATH" 2>/dev/null || true)"
+  # Bound `op read` at 10s. The 1Password CLI can hang on a biometric
+  # unlock prompt when invoked from a Hosting postdeploy hook where
+  # no human is available to approve the touch, stalling the deploy
+  # chain indefinitely. CodeRabbit P1 on PR #19. Prefer GNU `timeout`
+  # if available; macOS ships `gtimeout` via coreutils. If neither is
+  # on PATH, fall back to an unwrapped op read — the worst case is
+  # the same as before this guard, and the soft_fail branch below
+  # still catches an empty result.
+  OP_TIMEOUT=()
+  if command -v timeout >/dev/null 2>&1; then
+    OP_TIMEOUT=(timeout 10)
+  elif command -v gtimeout >/dev/null 2>&1; then
+    OP_TIMEOUT=(gtimeout 10)
+  fi
+  TOKEN="$(${OP_TIMEOUT[@]+"${OP_TIMEOUT[@]}"} op read "$TOKEN_OP_PATH" 2>/dev/null || true)"
   if [[ -z "$TOKEN" ]]; then
-    soft_fail "could not read $TOKEN_OP_PATH from 1Password"
+    soft_fail "could not read $TOKEN_OP_PATH from 1Password (unset, unauthorized, or 10s timeout)"
   fi
 fi
 

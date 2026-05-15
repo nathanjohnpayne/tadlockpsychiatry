@@ -94,8 +94,17 @@ if [[ -f "$CORS_FILE" ]]; then
       --impersonate-service-account="" >/dev/null
     echo "[sync-protected] CORS applied"
   fi
+elif [[ "${DRY_RUN:-}" == "1" ]]; then
+  echo "[sync-protected] DRY_RUN=1 + no $CORS_FILE — skipping CORS check"
 else
-  echo "[sync-protected] no $CORS_FILE — skipping CORS sync"
+  # Hard-fail: a missing storage.cors.json in a real deploy ships a
+  # bucket with no allowed origins for the custom domain and
+  # recreates the blank-page outage observed on PR #14. Better to
+  # abort the deploy here than to push hosting + leave the bucket
+  # blocking XHR. CodeRabbit P1 on PR #14.
+  echo "[sync-protected] FAIL: $CORS_FILE missing; refusing to deploy without explicit CORS config" >&2
+  echo "[sync-protected]   set DRY_RUN=1 to bypass for non-deploy smoke testing" >&2
+  exit 1
 fi
 
 echo "[sync-protected] done"

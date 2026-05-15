@@ -68,7 +68,12 @@
     @media (max-width: 720px) {
       .preview-bar { padding: 12px 16px; grid-template-columns: 1fr auto; gap: 12px; font-size: 9.5px; }
       .preview-bar > div:nth-child(2) { display: none; }
-      .preview-bar .r > span:first-child { display: none; }
+      /* Hide only the "Signed in as" label on mobile, not the
+         username (#who). CodeRabbit P1 on PR #17: the old
+         `.r > span:first-child` selector dropped the whole
+         "Signed in as <name>" container, so mobile users lost
+         their identity readout entirely. */
+      .preview-bar .r .signin-label { display: none; }
       .preview-bar .ident em { display: none; }
     }
   </style>
@@ -82,7 +87,7 @@
     </div>
     <div></div>
     <div class="r">
-      <span>Signed in as <span id="who">…</span></span>
+      <span><span class="signin-label">Signed in as </span><span id="who">…</span></span>
       <button id="signout" type="button">Sign out</button>
     </div>
   </header>
