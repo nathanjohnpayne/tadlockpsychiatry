@@ -54,6 +54,22 @@ if [[ "${DRY_RUN:-}" == "1" ]]; then
   echo "[sync-protected] DRY_RUN=1 (no changes will be made)"
 fi
 
+# Verify CORS config exists BEFORE touching the bucket. Hard-failing
+# only after the rsync would leave a partial deploy: protected/*
+# updated, hosting predeploy aborted, version skew. Codex P1 on
+# PR #56. The actual CORS apply still happens after rsync (where
+# the network bucket-update lives), but the file-presence check is
+# hoisted here so a missing storage.cors.json never reaches the
+# rsync at all in non-DRY_RUN mode.
+CORS_FILE="${CORS_FILE:-storage.cors.json}"
+if [[ ! -f "$CORS_FILE" && "${DRY_RUN:-}" != "1" ]]; then
+  echo "[sync-protected] FAIL: $CORS_FILE missing; refusing to deploy without explicit CORS config" >&2
+  echo "[sync-protected]   missing CORS config recreates the blank-page outage from PR #14;" >&2
+  echo "[sync-protected]   abort BEFORE rsync to keep deploy atomic (no partial bucket write)." >&2
+  echo "[sync-protected]   set DRY_RUN=1 to bypass for non-deploy smoke testing" >&2
+  exit 1
+fi
+
 # rsync with --delete-unmatched-destination-objects so the bucket
 # strictly mirrors $SRC_DIR/. If a future commit removes a direction
 # file or renames the portrait, the deletion propagates.
@@ -83,7 +99,10 @@ gcloud storage rsync "$SRC_DIR" "gs://$BUCKET/protected" \
 # XMLHttpRequest calls to the bucket — the Firebase Storage SDK
 # attaches the user's auth token but the browser blocks the
 # response on the CORS preflight. Caught in the wild on PR #14.
-CORS_FILE="${CORS_FILE:-storage.cors.json}"
+#
+# The missing-file branch is reached only under DRY_RUN=1; in real
+# deploys the script aborts before rsync via the pre-rsync guard
+# hoisted above. CodeRabbit P1 on PR #14, Codex P1 on PR #56.
 if [[ -f "$CORS_FILE" ]]; then
   echo "[sync-protected] applying CORS from $CORS_FILE"
   if [[ "${DRY_RUN:-}" == "1" ]]; then
@@ -94,17 +113,8 @@ if [[ -f "$CORS_FILE" ]]; then
       --impersonate-service-account="" >/dev/null
     echo "[sync-protected] CORS applied"
   fi
-elif [[ "${DRY_RUN:-}" == "1" ]]; then
-  echo "[sync-protected] DRY_RUN=1 + no $CORS_FILE — skipping CORS check"
 else
-  # Hard-fail: a missing storage.cors.json in a real deploy ships a
-  # bucket with no allowed origins for the custom domain and
-  # recreates the blank-page outage observed on PR #14. Better to
-  # abort the deploy here than to push hosting + leave the bucket
-  # blocking XHR. CodeRabbit P1 on PR #14.
-  echo "[sync-protected] FAIL: $CORS_FILE missing; refusing to deploy without explicit CORS config" >&2
-  echo "[sync-protected]   set DRY_RUN=1 to bypass for non-deploy smoke testing" >&2
-  exit 1
+  echo "[sync-protected] DRY_RUN=1 + no $CORS_FILE — skipping CORS check"
 fi
 
 echo "[sync-protected] done"
