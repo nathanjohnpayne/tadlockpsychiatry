@@ -26,6 +26,15 @@ export default [
       ".astro/**",
       ".next/**",
       ".vercel/**",
+      // CONSUMER-LOCAL: tadlock's protected build assembles minified
+      // bundles into dist-protected/ via `npm run build:protected`
+      // (esbuild → dist-protected/*.js). Same rationale as the
+      // template's dist/ ignore: build artifacts, not source; linting
+      // them produces thousands of false positives on the minified
+      // output (no-unused-expressions, no-prototype-builtins, etc.).
+      // The mergepath template covers the common dist/ default;
+      // per-repo overrides land here.
+      "dist-protected/**",
     ],
   },
 
@@ -93,6 +102,53 @@ export default [
     },
     settings: {
       react: { version: "detect" },
+    },
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  // CONSUMER-LOCAL POLICY — TS + React-rule overrides. MUST be LAST.
+  //
+  // Same template policy as dpr#83 / ffb#274:
+  // - `react/prop-types`: off — modern React + TS, type-safety via
+  //   tsc not propTypes
+  // - `react/no-unescaped-entities`: cosmetic noise
+  // - `@typescript-eslint/no-unused-vars`: standard `_`-prefix
+  //   ignore convention
+  // - `@typescript-eslint/no-explicit-any`: demoted to warn — the
+  //   protected-src/direction-*.tsx files are exploratory design
+  //   alternatives with intentional `any` for WIP code. Surfacing
+  //   them as warnings keeps the signal without failing the build.
+  //   TODO: revisit when a design direction is chosen and the
+  //   non-selected directions are removed.
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    rules: {
+      "react/prop-types": "off",
+      "react/no-unescaped-entities": "off",
+      "@typescript-eslint/no-unused-vars": ["error", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+        destructuredArrayIgnorePattern: "^_",
+      }],
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
+
+  // CONSUMER-LOCAL: protected-src/direction-*.tsx are exploratory
+  // design alternatives — palette destructuring patterns
+  // (`({ fg, bg, faint, dim, card, mouse, inv, accent }) => ...`)
+  // intentionally destructure the full palette but each variant
+  // uses only a subset. 40+ sites across 3 files; the `^_`-prefix
+  // convention would force renaming at every callsite for code
+  // that may be removed entirely once a direction is selected.
+  // Demoting unused-vars to warn here surfaces the signal without
+  // blocking. TODO: tighten when a direction is chosen and the
+  // non-selected files are removed.
+  {
+    files: ["protected-src/direction-*.tsx"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "warn",
     },
   },
 ];
