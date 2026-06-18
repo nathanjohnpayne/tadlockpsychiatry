@@ -1,8 +1,9 @@
 // Direction-loader: shared boot for /d/1, /d/2, /d/3.
 //
 // Each direction page calls bootDirection({ id, tweaks }). This function:
-//   1. Runs the auth guard (redirects unauth/unallowlisted before any
-//      protected fetch).
+//   1. Runs the auth guard (redirects unauth/unauthorized visitors after
+//      a protected Storage metadata probe, before any protected UI is
+//      revealed or content module is fetched).
 //   2. Pulls protected/content.js from the project's Storage bucket
 //      (Storage SDK signs the request with the user's Firebase Auth
 //      token; storage.rules enforces the allowlist server-side).
@@ -209,9 +210,9 @@ export async function bootDirection({
   tweaks,
 }: BootDirectionArgs): Promise<void> {
   try {
-    // Guard runs first — unauthorized users never trigger any protected
-    // Storage request, so we never see a 403 in the console for the
-    // expected case.
+    // Guard runs first — unauthorized users can only reach the
+    // metadata probe in src/auth.ts, not the protected content/module
+    // fetches below.
     console.log(`[direction-loader] d/${id}: awaiting auth guard`);
     const user = await withTimeout(guardOrRedirect(), `auth guard for d/${id}`);
     console.log(`[direction-loader] d/${id}: auth guard cleared`);

@@ -215,7 +215,7 @@
           </svg>
           <span id="signinLabel">Continue with Google</span>
         </button>
-        <div class="meta">Allowlist enforced · <span>2 accounts</span></div>
+        <div class="meta">Access checked · <span>Firebase Storage</span></div>
         <div class="denied-msg" id="denied">
           <div class="label">Access not granted</div>
           <div class="body">This preview is invite-only. <em>If you believe you should have access, write to office@tadlockpsychiatry.com.</em></div>
@@ -283,17 +283,23 @@
   <script type="module">
     // Auth wiring. Three jobs:
     //   1. If a redirect-flow sign-in just completed, finish it.
-    //   2. If the user is already signed in & allowlisted, jump to /menu.
-    //   3. On button click, run startSignIn() → check allowlist → route or deny.
+    //   2. If the user is already signed in and Storage Rules allow the
+    //      protected probe, jump to /menu.
+    //   3. On button click, run startSignIn() → probe Storage Rules →
+    //      route or deny.
     // Also: read ?denied=1 from the URL on load so a redirect-from-protected
     // page surfaces the polite invite-only message.
     import {
-      auth, onAuthStateChanged, isAllowed, startSignIn, signOut, getRedirectResult,
+      auth,
+      onAuthStateChanged,
+      hasProtectedAccess,
+      startSignIn,
+      signOut,
+      getRedirectResult,
     } from "/src/auth.ts";
 
     const btn = document.getElementById("signin");
     const label = document.getElementById("signinLabel");
-    const deniedEl = document.getElementById("denied");
 
     function showDenied() {
       document.body.classList.add("denied");
@@ -304,6 +310,18 @@
     function setBusy(busy, text) {
       btn.disabled = !!busy;
       if (text) label.textContent = text;
+    }
+    async function routeOrDeny(user) {
+      if (!user) return;
+      if (await hasProtectedAccess(user)) {
+        location.replace("/menu");
+        return;
+      }
+      try { await signOut(auth); } catch (_) {}
+      // The user is signed in but Storage Rules denied the protected
+      // probe. Sign out locally and keep them on the gate with the
+      // denied panel; this avoids /?denied=1 redirect loops.
+      showDenied();
     }
 
     // Surface ?denied=1 on initial load (before auth state resolves).
@@ -316,17 +334,16 @@
       console.warn("[auth] getRedirectResult error:", err);
     });
 
-    // Auto-route allowlisted returning users.
+    // Auto-route returning users after Storage Rules allow the probe.
+    let interactiveSignIn = false;
     onAuthStateChanged(auth, async (user) => {
       if (!user) return;
-      if (isAllowed(user)) {
-        location.replace("/menu");
-        return;
+      if (interactiveSignIn) return;
+      try {
+        await routeOrDeny(user);
+      } catch (err) {
+        console.error("[auth] access check error:", err);
       }
-      try { await signOut(auth); } catch (_) {}
-      // The user just landed here signed in but not on the list—show the
-      // denied panel without a redirect loop.
-      showDenied();
     });
 
     btn.addEventListener("click", async (e) => {
@@ -338,15 +355,11 @@
       }
       hideDenied();
       setBusy(true, "Signing in…");
+      interactiveSignIn = true;
       try {
         const user = await startSignIn();
         if (!user) return; // redirect flow—page will reload
-        if (isAllowed(user)) {
-          location.replace("/menu");
-          return;
-        }
-        try { await signOut(auth); } catch (_) {}
-        showDenied();
+        await routeOrDeny(user);
       } catch (err) {
         console.error("[auth] sign-in error:", err);
         if (err && err.code === "auth/cancelled-popup-request") return;
@@ -354,6 +367,7 @@
         // can try again. The denied panel is reserved for the policy
         // case (signed in with the wrong account), not transport errors.
       } finally {
+        interactiveSignIn = false;
         setBusy(false, "Continue with Google");
       }
     });

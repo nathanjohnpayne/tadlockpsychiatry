@@ -13,8 +13,9 @@ build to pass (see `rules/repo_rules.md`).
 
 ## Current Tests
 
-- `tests/unit/auth.test.ts` — `isAllowed()` allowlist semantics
-  (case-insensitive, null-user, missing-email).
+- `tests/unit/auth.test.ts` — Storage-backed access-probe semantics
+  (null-user, server-side denial, non-policy probe failures, protected
+  blob pathing).
 - `tests/unit/build-protected.test.ts` — contract checks on the
   `dist-protected/` build artifact: ES module shape, default exports,
   no leftover `window.PRACTICE` / `window.D{N}` / `@babel/standalone`
