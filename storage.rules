@@ -7,9 +7,9 @@ rules_version = '2';
 // portrait used to be served from public Hosting; any unauthenticated
 // `curl` could pull them. Now they live in this bucket under
 // `protected/` and are only readable by an allowlisted Firebase Auth
-// session. The Hosting gate / menu / direction routes themselves are
-// still gated client-side by the in-page allowlist guard in
-// `src/auth.ts`; this is the *server-side* enforcement that follows.
+// session. The Hosting gate / menu / direction routes probe a protected
+// object through the Storage SDK before revealing protected UI, and this
+// file is the authoritative allowlist.
 //
 // Why Storage Rules instead of a Cloud Function (which issue #3
 // originally proposed): the GCP organization's Domain Restricted
@@ -23,11 +23,9 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Protected design-preview content. Mirrors the allowlist in
-    // src/auth.ts (kept in sync by hand for v1; the obvious follow-up
-    // is to move the list into Firestore + a small admin tool so the
-    // two locations can share a single source of truth). Lower-cased
-    // compare matches the client-side check.
+    // Protected design-preview content. This is the single shipped
+    // allowlist source; the client probes this rule by reading metadata
+    // for protected/content.js before revealing protected pages.
     match /protected/{file=**} {
       allow read: if request.auth != null
                    && request.auth.token.email != null

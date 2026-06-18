@@ -1,15 +1,14 @@
-// Firebase Auth + allowlist guard for the invite-only preview.
+// Firebase Auth + protected-content access guard for the invite-only preview.
 //
 // Two surfaces:
 //   - startSignIn() — used by the gate (/) on button click.
 //   - guardOrRedirect() — used at the top of every protected page (/menu,
 //     /d/1, /d/2, /d/3) to bounce unauthenticated/unauthorized visitors
-//     before any prototype chrome has a chance to flash.
-//
-// The allowlist is intentionally hard-coded for v1. The intent is
-// invitation, not security — there is no real data behind the gate,
-// only design previews. Moving the list to Firestore + a Cloud
-// Function is future hardening (see README.md).
+//     before any protected UI has a chance to flash.
+//   - hasProtectedAccess() — probes Firebase Storage Rules against an
+//     existing protected object. storage.rules is the authoritative
+//     allowlist; the browser bundle intentionally carries no invited
+//     email list.
 //
 // Phase 2 of the Vite migration: this file moved from src/auth.js (CDN
 // imports from https://www.gstatic.com/firebasejs/...) to src/auth.ts
@@ -36,6 +35,7 @@ import {
   getStorage,
   ref as storageRef,
   getBlob,
+  getMetadata,
   type FirebaseStorage,
 } from "firebase/storage";
 import { firebaseConfig } from "./firebase-config";
@@ -58,13 +58,22 @@ isAnalyticsSupported()
 export const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 
-const ALLOWED = new Set([
-  "nathan@nathanpayne.com",
-  "sterling.tadlock@gmail.com",
-]);
+const PROTECTED_ACCESS_PROBE = "content.js";
 
-export function isAllowed(user: User | null): boolean {
-  return !!(user && user.email && ALLOWED.has(user.email.toLowerCase()));
+function isStorageAccessDenied(err: unknown): boolean {
+  const code = (err as { code?: unknown } | null)?.code;
+  return code === "storage/unauthorized" || code === "storage/unauthenticated";
+}
+
+export async function hasProtectedAccess(user: User | null): Promise<boolean> {
+  if (!user) return false;
+  try {
+    await getMetadata(storageRef(storage, `protected/${PROTECTED_ACCESS_PROBE}`));
+    return true;
+  } catch (err) {
+    if (isStorageAccessDenied(err)) return false;
+    throw err;
+  }
 }
 
 export {
@@ -98,7 +107,10 @@ export async function startSignIn(): Promise<User | null> {
 }
 
 // Page-load guard. Call from /menu and /d/N. Resolves with the user
-// when allowlisted; otherwise navigates away and never resolves.
+// when Storage Rules allow the protected probe; otherwise navigates away
+// and never resolves. Non-policy probe failures reject so callers can
+// show a load failure instead of converting network/build problems into
+// "access denied."
 //
 // `unsub()` fires on every exit path (issue #29). The pre-#29 version
 // only unsubscribed on the happy path; on the unauthenticated and
@@ -109,14 +121,22 @@ export async function startSignIn(): Promise<User | null> {
 // becomes null) before the redirect committed, causing a redundant
 // `location.replace("/")` on top of the in-flight `/?denied=1` nav.
 export function guardOrRedirect(): Promise<User> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         unsub();
         location.replace("/");
         return;
       }
-      if (!isAllowed(user)) {
+      let allowed: boolean;
+      try {
+        allowed = await hasProtectedAccess(user);
+      } catch (err) {
+        unsub();
+        reject(err);
+        return;
+      }
+      if (!allowed) {
         unsub();
         try {
           await signOut(auth);

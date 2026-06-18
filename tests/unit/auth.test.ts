@@ -1,18 +1,33 @@
 // Unit tests for src/auth.ts.
 //
 // Mocks the firebase/* SDK modules so importing src/auth.ts doesn't
-// hit network or real Firebase init. The tests focus on isAllowed,
-// which is the only piece of pure business logic in the module —
-// startSignIn / guardOrRedirect / signOutAndGoHome / getProtectedBlob
-// are thin SDK wrappers whose value is integration testing in
-// scripts/smoke-protected.mjs (loader path) or future E2E.
-import { describe, it, expect, vi } from "vitest";
+// hit network or real Firebase init. The tests focus on
+// hasProtectedAccess(), which is the browser-bundle contract that keeps
+// the allowlist in Firebase Storage Rules instead of TypeScript.
+import { beforeEach, describe, it, expect, vi } from "vitest";
+
+const firebase = vi.hoisted(() => {
+  const app = {};
+  const auth = {};
+  const storage = {};
+  return {
+    app,
+    auth,
+    storage,
+    initializeApp: vi.fn(() => app),
+    getAuth: vi.fn(() => auth),
+    getStorage: vi.fn(() => storage),
+    storageRef: vi.fn((_storage: unknown, path: string) => ({ path })),
+    getBlob: vi.fn(),
+    getMetadata: vi.fn(),
+  };
+});
 
 vi.mock("firebase/app", () => ({
-  initializeApp: vi.fn(() => ({})),
+  initializeApp: firebase.initializeApp,
 }));
 vi.mock("firebase/auth", () => ({
-  getAuth: vi.fn(() => ({})),
+  getAuth: firebase.getAuth,
   GoogleAuthProvider: vi.fn(function () {
     this.setCustomParameters = vi.fn();
   }),
@@ -27,34 +42,84 @@ vi.mock("firebase/analytics", () => ({
   isSupported: vi.fn(() => Promise.resolve(false)),
 }));
 vi.mock("firebase/storage", () => ({
-  getStorage: vi.fn(() => ({})),
-  ref: vi.fn(),
-  getBlob: vi.fn(),
+  getStorage: firebase.getStorage,
+  ref: firebase.storageRef,
+  getBlob: firebase.getBlob,
+  getMetadata: firebase.getMetadata,
 }));
 
-const { isAllowed } = await import("../../src/auth");
+const { getProtectedBlob, hasProtectedAccess } = await import("../../src/auth");
 
-describe("isAllowed", () => {
-  it("accepts an allowlisted email", () => {
-    expect(isAllowed({ email: "nathan@nathanpayne.com" } as never)).toBe(true);
-    expect(isAllowed({ email: "sterling.tadlock@gmail.com" } as never)).toBe(true);
+beforeEach(() => {
+  firebase.storageRef.mockClear();
+  firebase.getBlob.mockReset();
+  firebase.getMetadata.mockReset();
+  firebase.getBlob.mockResolvedValue(new Blob(["ok"]));
+  firebase.getMetadata.mockResolvedValue({ path: "protected/content.js" });
+});
+
+describe("hasProtectedAccess", () => {
+  it("rejects a null user without probing Storage", async () => {
+    await expect(hasProtectedAccess(null)).resolves.toBe(false);
+
+    expect(firebase.storageRef).not.toHaveBeenCalled();
+    expect(firebase.getMetadata).not.toHaveBeenCalled();
   });
 
-  it("is case-insensitive on the email", () => {
-    expect(isAllowed({ email: "NATHAN@nathanpayne.com" } as never)).toBe(true);
-    expect(isAllowed({ email: "Sterling.Tadlock@Gmail.COM" } as never)).toBe(true);
+  it("allows a signed-in user when the protected probe is readable", async () => {
+    await expect(hasProtectedAccess({ uid: "user-1" } as never)).resolves.toBe(true);
+
+    expect(firebase.storageRef).toHaveBeenCalledWith(
+      firebase.storage,
+      "protected/content.js",
+    );
+    expect(firebase.getMetadata).toHaveBeenCalledWith({
+      path: "protected/content.js",
+    });
   });
 
-  it("rejects an unallowlisted email", () => {
-    expect(isAllowed({ email: "someone@example.com" } as never)).toBe(false);
+  it("denies a signed-in user when Storage Rules reject the probe", async () => {
+    firebase.getMetadata.mockRejectedValueOnce(
+      Object.assign(new Error("denied"), { code: "storage/unauthorized" }),
+    );
+
+    await expect(hasProtectedAccess({ uid: "user-2" } as never)).resolves.toBe(false);
   });
 
-  it("rejects a null user", () => {
-    expect(isAllowed(null)).toBe(false);
+  it("denies a signed-in user when Storage sees no auth token", async () => {
+    firebase.getMetadata.mockRejectedValueOnce(
+      Object.assign(new Error("unauthenticated"), {
+        code: "storage/unauthenticated",
+      }),
+    );
+
+    await expect(hasProtectedAccess({ uid: "user-3" } as never)).resolves.toBe(false);
   });
 
-  it("rejects a user with no email", () => {
-    expect(isAllowed({ email: null } as never)).toBe(false);
-    expect(isAllowed({} as never)).toBe(false);
+  it("surfaces non-policy probe failures", async () => {
+    firebase.getMetadata.mockRejectedValueOnce(
+      Object.assign(new Error("missing probe"), {
+        code: "storage/object-not-found",
+      }),
+    );
+
+    await expect(hasProtectedAccess({ uid: "user-4" } as never)).rejects.toMatchObject({
+      code: "storage/object-not-found",
+    });
+  });
+});
+
+describe("getProtectedBlob", () => {
+  it("fetches blobs from the protected prefix", async () => {
+    const blob = new Blob(["protected"]);
+    firebase.getBlob.mockResolvedValueOnce(blob);
+
+    await expect(getProtectedBlob("asset.js")).resolves.toBe(blob);
+
+    expect(firebase.storageRef).toHaveBeenCalledWith(
+      firebase.storage,
+      "protected/asset.js",
+    );
+    expect(firebase.getBlob).toHaveBeenCalledWith({ path: "protected/asset.js" });
   });
 });

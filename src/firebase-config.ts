@@ -1,9 +1,10 @@
 // Firebase web config for tadlockpsychiatry.com.
 //
 // The apiKey here is a public client identifier — not a secret. Real
-// access controls are the Auth allowlist enforced in src/auth.ts plus
-// storage.rules and (future) App Check. Server-side credentials (deploy
-// auth) are 1Password-backed via op-firebase-deploy.
+// access control is the Auth email allowlist enforced by storage.rules;
+// src/auth.ts only probes those rules through the Firebase Storage SDK.
+// Server-side credentials (deploy auth) are 1Password-backed via
+// op-firebase-deploy.
 import type { FirebaseOptions } from "firebase/app";
 
 export const firebaseConfig: FirebaseOptions = {
