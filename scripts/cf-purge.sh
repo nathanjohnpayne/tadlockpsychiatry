@@ -95,7 +95,7 @@ echo "[cf-purge] purging Cloudflare cache for $DOMAIN (zone $ZONE_ID)"
 # Cloudflare's purge endpoint returns 200 + JSON {success:true,...} on
 # OK. We grab the HTTP status separately so transport errors are
 # distinguishable from API rejections.
-RESP_BODY="$(mktemp -t cf-purge-resp.XXXXXX)"
+RESP_BODY="$(mktemp "${TMPDIR:-/tmp}/cf-purge-resp.XXXXXX")"
 HTTP_CODE="$(curl -sS \
   --connect-timeout 5 --max-time 30 \
   -o "$RESP_BODY" -w '%{http_code}' \
