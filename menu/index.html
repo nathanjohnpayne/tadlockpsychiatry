@@ -372,7 +372,15 @@
         document.body.classList.add("ready");
         document.body.style.cssText += "background:#0A0A0A; color:#fff; font-family:'JetBrains Mono', ui-monospace, monospace;";
         var pre = document.createElement("pre");
-        pre.style.cssText = "position:fixed; inset:0; padding:32px; margin:0; white-space:pre-wrap; overflow:auto; font-size:12px; color:#FF5C2A;";
+        // Opaque background is load-bearing: showFatal() runs before
+        // guardOrRedirect() has confirmed the signed-in account is
+        // allowlisted, and adding `body.ready` above reveals the menu
+        // markup. Without a solid background the fixed <pre> is
+        // transparent and the private cards stay visible underneath, so a
+        // transient probe failure would expose the protected menu to any
+        // signed-in user (issue #98). The z-index keeps it above the
+        // sticky topbar (z-index:10).
+        pre.style.cssText = "position:fixed; inset:0; z-index:1000; padding:32px; margin:0; white-space:pre-wrap; overflow:auto; font-size:12px; color:#FF5C2A; background:#0A0A0A;";
         pre.textContent = "[menu] " + label + "\n\n" + detail + "\n\nReload the page to try again.";
         document.body.appendChild(pre);
       }
@@ -411,8 +419,29 @@
       return local || user.displayName || email;
     }
 
+    // Hard timeout on the guard probe. guardOrRedirect()'s `.catch` below
+    // only fires on a *rejected* probe; a probe that hangs without
+    // settling (CORS preflight stall, network promise that never
+    // resolves) would leave the body permanently `visibility:hidden` —
+    // the original blank-page failure mode (issue #87), just triggered by
+    // a stall instead of a rejection. Racing it against a timeout
+    // converts a hang into the visible fatal-error path (issue #98).
+    // Mirrors the 15s STEP_TIMEOUT_MS wrapper in src/direction-loader.ts.
+    const GUARD_TIMEOUT_MS = 15000;
+    function withTimeout(promise, label) {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error(label + " timed out after " + GUARD_TIMEOUT_MS + "ms")),
+            GUARD_TIMEOUT_MS,
+          ),
+        ),
+      ]);
+    }
+
     (async () => {
-      const user = await guardOrRedirect();
+      const user = await withTimeout(guardOrRedirect(), "menu auth guard");
       document.getElementById("who").textContent = shortName(user);
       document.body.classList.add("ready");
     })().catch((err) => {
