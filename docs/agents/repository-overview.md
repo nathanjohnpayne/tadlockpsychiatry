@@ -53,3 +53,5 @@ expansion beyond current product needs.
 See `.ai_context.md` for hosting identifiers and deploy tooling.
 
 The repository enables current-head external-review enforcement through `codex.external_review_gate.enabled`; see [the local review policy](../../REVIEW_POLICY.md#external-clearance-enforcement-in-this-repository) for activation and approval-count rollout requirements.
+
+When an ordinary Codex-enabled external-clearance check blocks, it reports informational author/freshness request evidence, its linked acknowledgement, age and configured budgets, and existing provider observations ([mergepath#1276](https://github.com/nathanjohnpayne/mergepath/issues/1276)). This does not change clearance, blocked exits, or the agent's responsibility to request review.
