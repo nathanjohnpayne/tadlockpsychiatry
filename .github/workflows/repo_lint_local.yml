@@ -1,0 +1,44 @@
+name: repo-lint-local
+
+# Consumer-local CI (mergepath#601 annex). repo_lint.yml is manifest-
+# canonical: it is propagated byte-for-byte from mergepath and only runs the
+# fleet scripts/ci/check_* policy checks, so it cannot carry this repo's
+# application checks. This OPTIONAL, never-propagated annex runs the site's
+# own toolchain on every push and PR: npm ci, typecheck (public + protected
+# projects), eslint, the Vitest unit suite (its pretest hook builds
+# dist-protected/), and the Vite production build.
+#
+# The Storage rules suite (npm run test:rules) needs the Firebase emulator +
+# Java and is run locally; it is not wired here.
+#
+# agent-review.yml and codex-review-check.sh already scan this annex's check
+# runs (mergepath#655), so a red run here blocks auto-merge.
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  repo-lint-local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: npm ci
+        run: npm ci
+      - name: typecheck
+        run: npm run typecheck
+      - name: lint
+        run: npm run lint
+      - name: test
+        run: npm test
+      - name: build
+        run: npm run build
