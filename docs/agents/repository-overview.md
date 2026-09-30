@@ -41,7 +41,7 @@ Firebase Hosting serves).
   CDN imports left are the Google Fonts stylesheets.
 - Firebase Hosting + Firebase Storage (storage.rules gates
   `protected/`).
-- No analytics. Firebase Analytics / GA4 was removed: Google Analytics has no HIPAA BAA and the prototypes contain intake and consultation flows. Do not add analytics or third-party trackers to intake, contact, or consultation routes (or anywhere else) without a privacy review; `tests/unit/auth.test.ts` guards the public bundle sources.
+- No analytics. Firebase Analytics / GA4 was removed: Google Analytics has no HIPAA BAA and the prototypes contain intake and consultation flows. Do not add analytics or third-party trackers to any page, including intake, contact, or consultation routes; `tests/unit/auth.test.ts` guards `src/`, `protected-src/` and the HTML entries.
 - Hosting headers (`firebase.json`): hashed `/assets/**` are `immutable`; clean-URL documents and `*.html` are `no-cache`; a `Content-Security-Policy-Report-Only` header and a restrictive `Permissions-Policy` apply to every response. `tests/unit/hosting-headers.test.ts` checks the CSP script hashes against the inline scripts in the HTML entries — update the hash in `firebase.json` when you edit one.
 
 ## Agent Role

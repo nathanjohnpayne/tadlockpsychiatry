@@ -42,7 +42,7 @@ Storage security-rules tests run against the Firebase Storage emulator (needs th
 npm run test:rules
 ```
 
-No analytics: this is a psychiatry practice site and the prototypes include intake and consultation flows. Do not add Google Analytics / Firebase Analytics / gtag or other third-party trackers to any page, and never to intake, contact, or consultation routes, without a privacy review (Google Analytics is not covered by a HIPAA BAA).
+No analytics: this is a psychiatry practice site and the prototypes include intake and consultation flows. Do not add Google Analytics / Firebase Analytics / gtag or other third-party trackers to any page, including intake, contact, or consultation routes (Google Analytics is not covered by a HIPAA BAA).
 
 Note: `vite preview` does not apply Firebase Hosting's `cleanUrls`
 rewrite, so multi-page entries need a trailing slash locally

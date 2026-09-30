@@ -100,4 +100,9 @@ describe("default deny", () => {
     const storage = storageFor({ email: ALLOWED, email_verified: true });
     await assertFails(getMetadata(ref(storage, "public/other.txt")));
   });
+
+  it("denies writes outside protected/ even for an allowlisted account", async () => {
+    const storage = storageFor({ email: ALLOWED, email_verified: true });
+    await assertFails(uploadBytes(ref(storage, "public/new.txt"), new Uint8Array([1])));
+  });
 });
