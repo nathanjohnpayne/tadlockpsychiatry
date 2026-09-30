@@ -105,7 +105,9 @@ describe("Content-Security-Policy", () => {
     it(`allows every classic inline script in ${entry} by hash`, () => {
       const html = readFileSync(resolve(root, entry), "utf8");
       const scriptSrc = directives.get("script-src") ?? [];
-      const re = /<script\b([^>]*)>([\s\S]*?)<\/script\b[^>]*>/gi;
+      // Tag name must end at whitespace, "/" or ">" (so <script-foo> and
+      // </script-foo> are not tags); end tags may carry whitespace/junk.
+      const re = /<script(?=[\s/>])([^>]*)>([\s\S]*?)<\/script(?:[\s/][^>]*)?>/gi;
       let m: RegExpExecArray | null;
       let inlineCount = 0;
       while ((m = re.exec(html))) {
