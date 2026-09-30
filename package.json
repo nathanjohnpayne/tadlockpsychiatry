@@ -14,7 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:rules": "firebase emulators:exec --only storage --project demo-tadlockpsychiatry 'vitest run --config vitest.rules.config.ts'",
-    "lint": "eslint ."
+    "lint": "eslint . --ignore-pattern \"dist-protected/**\""
   },
   "dependencies": {
     "firebase": "^12.19.0",
