@@ -5,8 +5,11 @@
 // <style> element per direction root (`.d-root`). Controls must NOT set
 // `outline: "none"` inline, or the inline style would win over this rule.
 //
-// `.d-on-accent` marks regions whose background IS the accent color
-// (e.g. the D3 waitlist band), where an accent ring would be invisible.
+// Callers pass the direction's foreground color: it is the page's text
+// color, so it contrasts with the page background in both dark and light
+// themes (an accent ring can fall below 3:1, e.g. D3 light's orange on
+// #EFEDE7). `.d-on-accent` marks regions whose background IS the accent
+// color (the D3 waitlist band), where the ring is forced to near-black.
 
 export const FocusStyles = ({ color }: { color: string }) => (
   <style>{`

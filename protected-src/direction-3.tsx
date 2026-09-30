@@ -59,7 +59,7 @@ const D3: DirectionComponent = ({ tweaks, practice: P }) => {
       background: bg, color: fg, fontFamily: sans,
       scrollbarWidth: "thin", scrollbarColor: `${faint} transparent`,
     }}>
-      <FocusStyles color={accent} />
+      <FocusStyles color={fg} />
       <NavBarD3 bp={bp} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} bg={bg} />
       <HeroD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg} inv={inv}
         gridRef={gridRef} variant={heroVariant} mouse={mouse} dark={dark} />
@@ -533,11 +533,10 @@ const WaitlistD3 = ({ P, fg, accent, mono, bp }: any) => {
         </div>
         <div>
           <form onSubmit={(e: any) => { e.preventDefault(); e.currentTarget.reset(); setAttempted(true); }}
-            aria-describedby="d3-waitlist-note"
             style={{ border: "1px solid #0A0A0A" }}>
             <div style={{ padding: "16px 18px", borderBottom: "1px solid #0A0A0A" }}>
               <label htmlFor="d3-waitlist-email" style={{ fontFamily: mono, fontSize: 10, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 6, fontWeight: 700 }}>Email</label>
-              <input id="d3-waitlist-email" type="email" required placeholder="you@domain.com" autoComplete="off"
+              <input id="d3-waitlist-email" aria-describedby="d3-waitlist-note" type="email" required placeholder="you@domain.com" autoComplete="off"
                 style={{
                   width: "100%", padding: 0, border: "none", background: "transparent",
                   color: "#0A0A0A", fontSize: 16, fontFamily: mono, boxSizing: "border-box",

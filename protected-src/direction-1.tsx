@@ -108,7 +108,7 @@ const D1: DirectionComponent = ({ tweaks, practice: P }) => {
 
   return (
     <div ref={rootRef} className="d-root" style={styles.root}>
-      <FocusStyles color={accent} />
+      <FocusStyles color={fg} />
       <div ref={spotRef} style={styles.spot} />
       <div style={styles.grain} />
 
@@ -674,12 +674,11 @@ const WaitlistD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => {
         </p>
 
         <form onSubmit={(e: any) => { e.preventDefault(); e.currentTarget.reset(); setAttempted(true); }}
-          aria-describedby="d1-waitlist-note"
           style={{ marginTop: 56, display: "flex", maxWidth: 540, marginInline: "auto", border: `1px solid ${faint}`, borderRadius: 0 }}>
           <label htmlFor="d1-waitlist-email" style={{
             position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap",
           }}>Email</label>
-          <input id="d1-waitlist-email" type="email" placeholder="you@domain.com" required autoComplete="off"
+          <input id="d1-waitlist-email" aria-describedby="d1-waitlist-note" type="email" placeholder="you@domain.com" required autoComplete="off"
             style={{
               flex: 1, padding: "18px 22px", border: "none", background: "transparent",
               color: fg, fontSize: 15, fontFamily: mono,

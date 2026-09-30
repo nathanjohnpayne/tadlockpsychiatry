@@ -58,7 +58,7 @@ const D2: DirectionComponent = ({ tweaks, practice: P }) => {
       background: bg, color: fg, fontFamily: sans,
       scrollbarWidth: "thin", scrollbarColor: `${faint} transparent`,
     }}>
-      <FocusStyles color={accent} />
+      <FocusStyles color={fg} />
       <NavBarD2 bp={bp} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} bg={bg} />
       <HeroD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg}
         scrollY={scrollY} mouse={mouse} variant={heroVariant} dark={dark} />
@@ -537,10 +537,9 @@ const WaitlistD2 = ({ fg, dim, faint, accent, mono, card, bp }: any) => {
             </p>
           </div>
           <div>
-            <form onSubmit={(e: any) => { e.preventDefault(); e.currentTarget.reset(); setAttempted(true); }}
-              aria-describedby="d2-waitlist-note">
+            <form onSubmit={(e: any) => { e.preventDefault(); e.currentTarget.reset(); setAttempted(true); }}>
               <label htmlFor="d2-waitlist-email" style={{ fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 8 }}>Email</label>
-              <input id="d2-waitlist-email" type="email" required placeholder="you@domain.com" autoComplete="off"
+              <input id="d2-waitlist-email" aria-describedby="d2-waitlist-note" type="email" required placeholder="you@domain.com" autoComplete="off"
                 style={{
                   width: "100%", padding: "14px 16px", border: `1px solid ${faint}`,
                   background: "transparent", color: fg, fontSize: 15, borderRadius: 4,

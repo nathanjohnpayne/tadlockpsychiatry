@@ -86,6 +86,10 @@ describe.skipIf(!buildExists)("direction prototypes (a11y + form copy)", () => {
         const root = await mount();
         expect(root.textContent).not.toMatch(/application received/i);
         expect(root.textContent).toMatch(/preview only—this form does not submit/i);
+        // The note must be announced when the field itself is focused.
+        const described = root.querySelector("form input")!.getAttribute("aria-describedby");
+        expect(described).toBeTruthy();
+        expect(root.querySelector(`#${described}`)?.textContent).toMatch(/preview only/i);
 
         const form = root.querySelector("form")!;
         const input = form.querySelector("input")!;
