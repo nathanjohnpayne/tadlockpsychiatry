@@ -19,6 +19,13 @@ import {
   h3FontSize,
   sectionPadding,
 } from "./shared/use-viewport";
+import {
+  APPLY_ID,
+  FocusStyles,
+  PREVIEW_FORM_ATTEMPT,
+  PREVIEW_FORM_NOTE,
+  sectionId,
+} from "./shared/a11y";
 
 const D3: DirectionComponent = ({ tweaks, practice: P }) => {
   const t = getD3Theme(tweaks);
@@ -52,14 +59,25 @@ const D3: DirectionComponent = ({ tweaks, practice: P }) => {
       background: bg, color: fg, fontFamily: sans,
       scrollbarWidth: "thin", scrollbarColor: `${faint} transparent`,
     }}>
+      <FocusStyles color={accent} />
       <NavBarD3 bp={bp} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} bg={bg} />
       <HeroD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg} inv={inv}
         gridRef={gridRef} variant={heroVariant} mouse={mouse} dark={dark} />
-      <PrincipleD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
-      <SpecialtiesD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
-      <ProcessD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} inv={inv} />
-      <AboutD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
-      <WaitlistD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} bg={bg} inv={inv} />
+      <div id={sectionId("Practice")}>
+        <PrincipleD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      </div>
+      <div id={sectionId("Specialties")}>
+        <SpecialtiesD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      </div>
+      <div id={sectionId("Process")}>
+        <ProcessD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} inv={inv} />
+      </div>
+      <div id={sectionId("About")}>
+        <AboutD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      </div>
+      <div id={APPLY_ID}>
+        <WaitlistD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} bg={bg} inv={inv} />
+      </div>
       <FooterD3 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} />
     </div>
   );
@@ -110,15 +128,16 @@ const NavBarD3 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => {
       <>
         <div style={{ display: "flex", justifyContent: "center", gap: 28 }}>
           {links.map((l, i) => (
-            <a key={l} style={{ color: i === 0 ? fg : dim, textDecoration: "none", cursor: "pointer" }}>{l}</a>
+            <a key={l} href={`#${sectionId(l)}`} style={{ color: i === 0 ? fg : dim, textDecoration: "none", cursor: "pointer" }}>{l}</a>
           ))}
         </div>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 18, alignItems: "center" }}>
           <span style={{ color: dim }}>SF · 37.7951°N</span>
-          <button style={{
+          <a href={`#${APPLY_ID}`} style={{
+            display: "inline-block", textDecoration: "none",
             padding: "8px 14px", background: accent, color: "#0A0A0A", border: "none",
             fontFamily: mono, fontSize: 11, letterSpacing: 0.6, textTransform: "uppercase", fontWeight: 700, cursor: "pointer",
-          }}>Apply →</button>
+          }}>Apply →</a>
         </div>
       </>
     )}
@@ -134,6 +153,7 @@ const NavBarD3 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => {
         {links.map((l) => (
           <a
             key={l}
+            href={`#${sectionId(l)}`}
             onClick={() => setOpen(false)}
             style={{
               display: "block",
@@ -145,6 +165,7 @@ const NavBarD3 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => {
           >{l}</a>
         ))}
         <a
+          href={`#${APPLY_ID}`}
           onClick={() => setOpen(false)}
           style={{
             marginTop: 16, padding: "12px 14px",
@@ -168,7 +189,7 @@ const HeroD3 = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef, varia
   return <HeroD3Blocks bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg} inv={inv} gridRef={gridRef} mouse={mouse} dark={dark} />;
 };
 
-const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef, mouse, dark, bp }: any) => (
+const HeroD3Blocks = ({ P, fg, dim, accent, mono, bg, inv, gridRef, dark, bp }: any) => (
   <section style={{ position: "relative", borderBottom: `1px solid ${fg}` }}>
     {/* generative line-grid that follows the cursor */}
     <div ref={gridRef} style={{
@@ -224,20 +245,22 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
           {P.heroSub}
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 0, border: `1px solid ${fg}` }}>
-          <button style={{
+          <a href={`#${APPLY_ID}`} style={{
+            textDecoration: "none",
             padding: "16px 20px", background: fg, color: inv, border: "none",
             fontFamily: mono, fontSize: 12, letterSpacing: 0.8, textTransform: "uppercase", fontWeight: 700, cursor: "pointer",
             display: "flex", justifyContent: "space-between", alignItems: "center",
           }}>
-            <span>Request a consultation</span><span>→</span>
-          </button>
-          <button style={{
+            <span>Request a consultation</span><span aria-hidden="true">→</span>
+          </a>
+          <a href={`#${sectionId("Practice")}`} style={{
+            textDecoration: "none",
             padding: "16px 20px", background: "transparent", color: fg, border: "none", borderTop: `1px solid ${fg}`,
             fontFamily: mono, fontSize: 12, letterSpacing: 0.8, textTransform: "uppercase", fontWeight: 600, cursor: "pointer",
             display: "flex", justifyContent: "space-between", alignItems: "center",
           }}>
-            <span>Read the practice brief</span><span>↗</span>
-          </button>
+            <span>Read the practice brief</span><span aria-hidden="true">↗</span>
+          </a>
         </div>
       </div>
     </div>
@@ -284,7 +307,7 @@ const HeroD3Blocks = ({ P, fg, dim, faint, accent, mono, card, bg, inv, gridRef,
   </section>
 );
 
-const HeroD3Manifesto = ({ P, fg, dim, accent, mono, card, inv, bp }: any) => (
+const HeroD3Manifesto = ({ P, fg, accent, mono, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "80px 40px 60px"), borderBottom: `1px solid ${fg}` }}>
     <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase", marginBottom: 40 }}>
       ▦ Manifesto · {P.heroEyebrow}
@@ -298,16 +321,17 @@ const HeroD3Manifesto = ({ P, fg, dim, accent, mono, card, inv, bp }: any) => (
     <div style={{ marginTop: 56, display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1fr"), gap: collapseGridGap(bp, 60) }}>
       <p style={{ fontSize: 18, lineHeight: 1.55, color: fg, margin: 0, fontWeight: 500, textWrap: "pretty" }}>{P.heroSub}</p>
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
-        <button style={{
+        <a href={`#${APPLY_ID}`} style={{
+          display: "inline-block", textDecoration: "none",
           padding: "16px 22px", background: accent, color: "#0A0A0A", border: "none",
           fontFamily: mono, fontSize: 12.5, letterSpacing: 0.8, textTransform: "uppercase", fontWeight: 700, cursor: "pointer",
-        }}>Apply →</button>
+        }}>Apply →</a>
       </div>
     </div>
   </section>
 );
 
-const HeroD3Stats = ({ P, fg, dim, faint, accent, mono, card, inv, bp }: any) => (
+const HeroD3Stats = ({ P, fg, dim, accent, mono, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "60px 40px 40px"), borderBottom: `1px solid ${fg}`, position: "relative" }}>
     <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase", marginBottom: 32 }}>
       ▦ Practice Profile · {P.established}
@@ -332,7 +356,7 @@ const HeroD3Stats = ({ P, fg, dim, faint, accent, mono, card, inv, bp }: any) =>
   </section>
 );
 
-const PrincipleD3 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
+const PrincipleD3 = ({ P, fg, dim, accent, mono, card, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "60px 40px"), borderBottom: `1px solid ${fg}` }}>
     <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "240px 1fr"), gap: collapseGridGap(bp, 40), marginBottom: 40 }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase" }}>
@@ -362,7 +386,7 @@ const PrincipleD3 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
   </section>
 );
 
-const SpecialtiesD3 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => {
+const SpecialtiesD3 = ({ P, fg, dim, accent, mono, bp }: any) => {
   const [hover, setHover] = React.useState(null);
   return (
     <section style={{ padding: sectionPadding(bp, "60px 40px"), borderBottom: `1px solid ${fg}` }}>
@@ -405,7 +429,7 @@ const SpecialtiesD3 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => {
   );
 };
 
-const ProcessD3 = ({ P, fg, dim, faint, accent, mono, card, inv, bp }: any) => (
+const ProcessD3 = ({ P, fg, accent, mono, inv, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "60px 40px"), borderBottom: `1px solid ${fg}`, background: fg, color: inv }}>
     <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "240px 1fr"), gap: collapseGridGap(bp, 40), marginBottom: 48, alignItems: "end" }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase" }}>
@@ -436,7 +460,7 @@ const ProcessD3 = ({ P, fg, dim, faint, accent, mono, card, inv, bp }: any) => (
   </section>
 );
 
-const AboutD3 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
+const AboutD3 = ({ P, fg, dim, faint, accent, mono, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "60px 40px"), borderBottom: `1px solid ${fg}` }}>
     <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "240px 1fr"), gap: collapseGridGap(bp, 40), marginBottom: 40, alignItems: "end" }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1, textTransform: "uppercase" }}>
@@ -489,11 +513,12 @@ const AboutD3 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
   </section>
 );
 
-const WaitlistD3 = ({ P, fg, dim, faint, accent, mono, bg, inv, bp }: any) => {
-  const [email, setEmail] = React.useState("");
-  const [submitted, setSubmitted] = React.useState(false);
+const WaitlistD3 = ({ P, fg, accent, mono, bp }: any) => {
+  // Prototype only: no backend. Submitting never stores or sends the
+  // input and never shows a "received" confirmation.
+  const [attempted, setAttempted] = React.useState(false);
   return (
-    <section style={{ padding: sectionPadding(bp, "80px 40px"), borderBottom: `1px solid ${fg}`, background: accent, color: "#0A0A0A" }}>
+    <section className="d-on-accent" style={{ padding: sectionPadding(bp, "80px 40px"), borderBottom: `1px solid ${fg}`, background: accent, color: "#0A0A0A" }}>
       <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1.4fr 1fr"), gap: collapseGridGap(bp, 60), alignItems: "end" }}>
         <div>
           <div style={{ fontFamily: mono, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", marginBottom: 32, fontWeight: 700 }}>
@@ -507,38 +532,35 @@ const WaitlistD3 = ({ P, fg, dim, faint, accent, mono, bg, inv, bp }: any) => {
           </h2>
         </div>
         <div>
-          {!submitted ? (
-            <form onSubmit={(e: any) => { e.preventDefault(); if (email) setSubmitted(true); }}
-              style={{ border: "1px solid #0A0A0A" }}>
-              <div style={{ padding: "16px 18px", borderBottom: "1px solid #0A0A0A" }}>
-                <label style={{ fontFamily: mono, fontSize: 10, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 6, fontWeight: 700 }}>Email</label>
-                <input type="email" required value={email} onChange={(e: any) => setEmail(e.target.value)} placeholder="you@domain.com"
-                  style={{
-                    width: "100%", padding: 0, border: "none", background: "transparent",
-                    color: "#0A0A0A", fontSize: 16, fontFamily: mono, outline: "none", boxSizing: "border-box",
-                  }} />
-              </div>
-              <button type="submit" style={{
-                width: "100%", padding: "18px 22px", border: "none", background: "#0A0A0A", color: accent,
-                fontFamily: mono, fontSize: 13, letterSpacing: 1, textTransform: "uppercase", fontWeight: 800, cursor: "pointer",
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-              }}>
-                <span>Begin application</span><span>→</span>
-              </button>
-            </form>
-          ) : (
-            <div style={{ padding: 28, border: "2px solid #0A0A0A", fontFamily: mono, fontSize: 13, letterSpacing: 0.6, fontWeight: 700, textTransform: "uppercase" }}>
-              ✓ Application received<br />
-              <span style={{ fontWeight: 400, textTransform: "none" }}>We'll be in touch within two business days.</span>
+          <form onSubmit={(e: any) => { e.preventDefault(); e.currentTarget.reset(); setAttempted(true); }}
+            aria-describedby="d3-waitlist-note"
+            style={{ border: "1px solid #0A0A0A" }}>
+            <div style={{ padding: "16px 18px", borderBottom: "1px solid #0A0A0A" }}>
+              <label htmlFor="d3-waitlist-email" style={{ fontFamily: mono, fontSize: 10, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 6, fontWeight: 700 }}>Email</label>
+              <input id="d3-waitlist-email" type="email" required placeholder="you@domain.com" autoComplete="off"
+                style={{
+                  width: "100%", padding: 0, border: "none", background: "transparent",
+                  color: "#0A0A0A", fontSize: 16, fontFamily: mono, boxSizing: "border-box",
+                }} />
             </div>
-          )}
+            <button type="submit" style={{
+              width: "100%", padding: "18px 22px", border: "none", background: "#0A0A0A", color: accent,
+              fontFamily: mono, fontSize: 13, letterSpacing: 1, textTransform: "uppercase", fontWeight: 800, cursor: "pointer",
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+            }}>
+              <span>Begin application</span><span aria-hidden="true">→</span>
+            </button>
+          </form>
+          <p id="d3-waitlist-note" role="status" style={{ marginTop: 12, marginBottom: 0, fontFamily: mono, fontSize: 12, letterSpacing: 0.4, fontWeight: attempted ? 700 : 400 }}>
+            {attempted ? PREVIEW_FORM_ATTEMPT : PREVIEW_FORM_NOTE}
+          </p>
         </div>
       </div>
     </section>
   );
 };
 
-const FooterD3 = ({ P, fg, dim, faint, accent, mono, bp }: any) => {
+const FooterD3 = ({ P, fg, dim, mono, bp }: any) => {
   const isMobile = bp === "mobile";
   return (
   // Padding compresses on mobile so the 4-col grid (collapsed to 1col)
