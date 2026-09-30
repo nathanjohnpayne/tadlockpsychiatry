@@ -549,7 +549,7 @@ Or use Firebase Console → Hosting → Release History → Roll back.
 
 ## CI/CD Integration
 
-Deploys are manual via `op-firebase-deploy`. CI workflows (repo linting, review policy enforcement) run on push/PR via GitHub Actions — see `.github/workflows/`.
+Deploys are manual via `op-firebase-deploy`. CI workflows (repo linting, review policy enforcement) run on push/PR via GitHub Actions — see `.github/workflows/`. The site's own toolchain (`npm ci`, typecheck, lint, unit tests, `vite build`) runs in the consumer-local `.github/workflows/repo_lint_local.yml` annex; the canonical `repo_lint.yml` is hub-propagated and must not be edited here.
 
 When connecting CI, prefer Workload Identity Federation or another `external_account` credential as the source credential. If CI already exposes `GOOGLE_APPLICATION_CREDENTIALS` pointing at an `external_account` file, `op-firebase-deploy` can reuse it to impersonate the deployer service account and attribute quota to the target project.
 
