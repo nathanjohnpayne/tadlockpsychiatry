@@ -5,6 +5,13 @@
 // emulator + a Java runtime. Mirrors the two client reads in src/auth.ts:
 // getMetadata() on protected/content.js (the access probe) and getBlob()
 // on protected/* (content + direction modules + portrait).
+//
+// The media download is exercised with getBytes(), not getBlob(): the
+// Storage SDK's getBlob() throws "only available in Browser-like
+// environments" under Node, and running this suite in jsdom breaks the
+// emulator seeding. Both functions issue the same object-media GET
+// (`?alt=media`), which Storage Rules evaluate as the same `read` (get),
+// so the rule outcome is identical.
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterAll, beforeAll, describe, it } from "vitest";

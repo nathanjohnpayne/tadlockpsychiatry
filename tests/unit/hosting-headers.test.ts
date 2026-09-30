@@ -105,14 +105,14 @@ describe("Content-Security-Policy", () => {
     it(`allows every classic inline script in ${entry} by hash`, () => {
       const html = readFileSync(resolve(root, entry), "utf8");
       const scriptSrc = directives.get("script-src") ?? [];
-      const re = /<script(\s[^>]*)?>([\s\S]*?)<\/script>/g;
+      const re = /<script(\s[^>]*)?>([\s\S]*?)<\/script\s*>/gi;
       let m: RegExpExecArray | null;
       let inlineCount = 0;
       while ((m = re.exec(html))) {
         const attrs = m[1] ?? "";
         // External scripts are covered by 'self'; inline module scripts
         // are bundled by Vite into /assets and never ship inline.
-        if (/\bsrc=/.test(attrs) || /type=["']module["']/.test(attrs)) continue;
+        if (/\bsrc=/i.test(attrs) || /type=["']module["']/i.test(attrs)) continue;
         inlineCount++;
         const hash = `'sha256-${createHash("sha256").update(m[2], "utf8").digest("base64")}'`;
         expect(scriptSrc, `${entry} inline script needs ${hash}`).toContain(hash);

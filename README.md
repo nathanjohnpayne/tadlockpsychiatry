@@ -51,8 +51,11 @@ rewrite, so multi-page entries need a trailing slash locally
 ## Deploy
 
 ```bash
-op-firebase-deploy --only hosting
+scripts/deploy.sh                      # all targets: Hosting + storage.rules, then Cloudflare purge
+scripts/deploy.sh -- --only storage    # storage.rules only
 ```
+
+`scripts/deploy.sh` wraps `op-firebase-deploy` with the main-only / up-to-date guards. A `--only hosting` deploy does NOT publish `storage.rules`; any change to `storage.rules` must ship with a full deploy or `-- --only storage`.
 
 `firebase.json`'s `hosting.predeploy` runs `npm run build` (writing
 `dist/`, which Hosting serves), then `npm run build:protected` (esbuild

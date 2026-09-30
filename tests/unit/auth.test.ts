@@ -140,6 +140,20 @@ describe("no analytics in the public bundle sources", () => {
     }
   });
 
+  it("does not load gtag / GA from any HTML entry", () => {
+    const root = resolve(__dirname, "../..");
+    for (const entry of [
+      "index.html",
+      "menu/index.html",
+      "d/1/index.html",
+      "d/2/index.html",
+      "d/3/index.html",
+    ]) {
+      const html = readFileSync(join(root, entry), "utf8");
+      expect(html, entry).not.toMatch(/googletagmanager\.com|google-analytics\.com|gtag\(|firebase\/analytics/i);
+    }
+  });
+
   it("does not configure a GA4 measurementId", async () => {
     const { firebaseConfig } = await import("../../src/firebase-config");
     expect(firebaseConfig).not.toHaveProperty("measurementId");
