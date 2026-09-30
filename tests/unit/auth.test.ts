@@ -126,19 +126,31 @@ describe("getProtectedBlob", () => {
 // protected prototypes contain intake / consultation flows. Google
 // Analytics (Firebase Analytics / gtag) has no BAA, so it must not be
 // initialized on any page. These assertions keep it from creeping back
-// into the public bundle.
-describe("no analytics in the public bundle sources", () => {
-  const srcDir = resolve(__dirname, "../../src");
-  const sources = readdirSync(srcDir)
-    .filter((f) => /\.(ts|tsx|js|mjs)$/.test(f))
-    .map((f) => ({ name: f, text: readFileSync(join(srcDir, f), "utf8") }));
+// into the public bundle or the protected prototypes (protected-src/ is
+// what renders the intake / consultation routes /d/1..3).
+const ANALYTICS_PATTERN =
+  /["']firebase\/analytics["']|googletagmanager\.com|google-analytics\.com|gtag\(/i;
 
-  it("does not import firebase/analytics or load gtag", () => {
-    for (const { name, text } of sources) {
-      expect(text, name).not.toMatch(/from\s+["']firebase\/analytics["']/);
-      expect(text, name).not.toMatch(/googletagmanager\.com|gtag\(/);
-    }
-  });
+function sourceFiles(dir: string): { name: string; text: string }[] {
+  const root = resolve(__dirname, "../..");
+  return (readdirSync(join(root, dir), { recursive: true }) as string[])
+    .filter((f) => /\.(ts|tsx|js|jsx|mjs|html)$/.test(f))
+    .map((f) => ({
+      name: `${dir}/${f}`,
+      text: readFileSync(join(root, dir, f), "utf8"),
+    }));
+}
+
+describe("no analytics in the public or protected sources", () => {
+  for (const dir of ["src", "protected-src"]) {
+    it(`does not import firebase/analytics or load GA/gtag anywhere in ${dir}/`, () => {
+      const files = sourceFiles(dir);
+      expect(files.length).toBeGreaterThan(0);
+      for (const { name, text } of files) {
+        expect(text, name).not.toMatch(ANALYTICS_PATTERN);
+      }
+    });
+  }
 
   it("does not load gtag / GA from any HTML entry", () => {
     const root = resolve(__dirname, "../..");
@@ -150,7 +162,7 @@ describe("no analytics in the public bundle sources", () => {
       "d/3/index.html",
     ]) {
       const html = readFileSync(join(root, entry), "utf8");
-      expect(html, entry).not.toMatch(/googletagmanager\.com|google-analytics\.com|gtag\(|firebase\/analytics/i);
+      expect(html, entry).not.toMatch(ANALYTICS_PATTERN);
     }
   });
 
