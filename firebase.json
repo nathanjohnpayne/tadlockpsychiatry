@@ -21,11 +21,20 @@
     ],
     "headers": [
       {
-        "source": "**/*.@(js|css)",
+        "source": "/assets/**",
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "public, max-age=300, must-revalidate"
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
+        "regex": "^[^.]*$",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
           }
         ]
       },
@@ -34,7 +43,7 @@
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "public, max-age=300, must-revalidate"
+            "value": "no-cache"
           }
         ]
       },
@@ -52,6 +61,14 @@
           {
             "key": "Referrer-Policy",
             "value": "strict-origin-when-cross-origin"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "accelerometer=(), autoplay=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), hid=(), magnetometer=(), microphone=(), midi=(), payment=(), serial=(), usb=(), xr-spatial-tracking=()"
+          },
+          {
+            "key": "Content-Security-Policy-Report-Only",
+            "value": "default-src 'self'; script-src 'self' blob: https://apis.google.com 'sha256-ua52Nt7eSMedosFudkf4Q4S8LIYZlS01ab3Gb8Wx7+8=' 'sha256-Eej90d4mLbtzNB4DjBnHGS9U0TxJOr9My+d3MxxodrY=' 'sha256-oPP2ZjcY/WMUzIbv+4OfDT2tbdR9PQrXHPYhmLiJF80=' 'sha256-rzsptVhUlBYpSRR5bGWUkGt+L7AAnUWcjf+C7UzkAjo=' 'sha256-X9bkJLMPp20igfWL+DBrwhHE1bNNrDJVF313JDX04ag='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.googleapis.com; frame-src https://tadlockpsychiatry.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
           }
         ]
       }

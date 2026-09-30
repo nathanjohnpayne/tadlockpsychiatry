@@ -15,6 +15,17 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    # Toolchain holds (see the fix(deps) pin commit): eslint-plugin-react
+    # 7.x has no eslint 10 peer range (npm ci ERESOLVE), and
+    # typescript-eslint 8.x supports typescript <6.1. Remove each ignore
+    # once upstream ships support.
+    ignore:
+      - dependency-name: "eslint"
+        versions: [">=10.0.0"]
+      - dependency-name: "@eslint/js"
+        versions: [">=10.0.0"]
+      - dependency-name: "typescript"
+        versions: [">=6.1.0"]
     groups:
       dev-dependencies:
         dependency-type: "development"
