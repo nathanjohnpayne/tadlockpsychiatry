@@ -3,7 +3,7 @@
 Marketing/information website for the practice at
 [tadlockpsychiatry.com](https://tadlockpsychiatry.com).
 
-Static site hosted on Firebase Hosting with Firebase Analytics. Built from
+Static site hosted on Firebase Hosting (no analytics — see below). Built from
 the AI Agent Tooling Standard template ([Mergepath](https://github.com/nathanjohnpayne/mergepath)).
 
 ## For AI Agents
@@ -35,6 +35,14 @@ npm run dev      # Vite dev server (defaults to http://localhost:5173)
 # or
 npm run build && npm run preview   # production build served from dist/
 ```
+
+Storage security-rules tests run against the Firebase Storage emulator (needs the Firebase CLI and a Java runtime, e.g. `brew install openjdk@21`):
+
+```bash
+npm run test:rules
+```
+
+No analytics: this is a psychiatry practice site and the prototypes include intake and consultation flows. Do not add Google Analytics / Firebase Analytics / gtag or other third-party trackers to any page, and never to intake, contact, or consultation routes, without a privacy review (Google Analytics is not covered by a HIPAA BAA).
 
 Note: `vite preview` does not apply Firebase Hosting's `cleanUrls`
 rewrite, so multi-page entries need a trailing slash locally
