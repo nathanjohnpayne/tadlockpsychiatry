@@ -104,3 +104,61 @@ describe.skipIf(!buildExists)("direction prototypes (a11y + form copy)", () => {
     });
   }
 });
+
+// D1 hard-codes a near-black nav bar + mobile menu panel in BOTH themes,
+// so in the light theme the default ring color (fg, #1A1815) would be
+// invisible on it. Every focusable in that chrome must sit under
+// `.d-on-dark`, whose ring color must reach 3:1 against the panel.
+describe.skipIf(!buildExists)("direction-1 light theme: mobile nav focus ring", () => {
+  const hexToRgb = (hex: string) => {
+    const n = parseInt(hex.replace("#", ""), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+  const luminance = ([r, g, b]: number[]) => {
+    const lin = (c: number) => {
+      const s = c / 255;
+      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    };
+    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  };
+  const contrast = (a: number[], b: number[]) => {
+    const [l1, l2] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (l1 + 0.05) / (l2 + 0.05);
+  };
+  // Panel is rgba(14,15,18,0.96) over the light page bg #F5F1EA.
+  const panel = [14, 15, 18].map((c, i) => Math.round(0.96 * c + 0.04 * [245, 241, 234][i]));
+
+  it("gives panel links and the hamburger a ring that contrasts with the panel", async () => {
+    const original = Object.getOwnPropertyDescriptor(window, "innerWidth");
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 400 });
+    try {
+      const practice = await load("content.js");
+      const mountFn = await load("direction-1.js");
+      const root = document.createElement("div");
+      document.body.appendChild(root);
+      mountFn(root, { tweaks: { dark: false }, practice });
+      await settle();
+
+      const toggle = root.querySelector<HTMLButtonElement>('nav button[aria-label="Open menu"]');
+      expect(toggle).not.toBeNull();
+      toggle!.click();
+      await settle();
+
+      const focusables = [...root.querySelectorAll<HTMLElement>("nav a, nav button")];
+      // hamburger + 4 section links + "Request consult"
+      expect(focusables.length).toBeGreaterThanOrEqual(6);
+      for (const el of focusables) {
+        expect(el.closest(".d-on-dark"), el.textContent ?? "").not.toBeNull();
+      }
+
+      const css = [...root.querySelectorAll("style")].map((s) => s.textContent).join("\n");
+      const ring = css.match(/\.d-on-dark :focus-visible \{ outline-color: (#[0-9A-Fa-f]{6}); \}/);
+      expect(ring, "missing .d-on-dark focus override").not.toBeNull();
+      expect(contrast(hexToRgb(ring![1]), panel)).toBeGreaterThanOrEqual(3);
+      // Sanity: the default light-theme ring (fg) would fail here.
+      expect(contrast(hexToRgb("#1A1815"), panel)).toBeLessThan(3);
+    } finally {
+      if (original) Object.defineProperty(window, "innerWidth", original);
+    }
+  });
+});

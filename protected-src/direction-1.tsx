@@ -151,7 +151,9 @@ const NavBarD1 = ({ dim, faint, accent, mono, bp }: any) => {
   const isMobile = bp === "mobile" || bp === "tablet";
   const links = ["Practice", "Specialties", "Process", "About"];
   return (
-    <nav style={{
+    // d-on-dark: this bar and its mobile panel are near-black in both
+    // themes, so focus rings inside use a light color (shared/a11y.tsx).
+    <nav className="d-on-dark" style={{
       position: "sticky", top: 0, zIndex: 10,
       padding: bp === "mobile" ? "14px 16px" : "20px 56px",
       display: "flex", alignItems: "center", justifyContent: "space-between",
