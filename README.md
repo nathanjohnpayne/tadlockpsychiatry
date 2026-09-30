@@ -51,7 +51,7 @@ rewrite, so multi-page entries need a trailing slash locally
 ## Deploy
 
 ```bash
-scripts/deploy.sh                      # all targets: Hosting + storage.rules, then Cloudflare purge
+scripts/deploy.sh                      # all targets: Hosting + storage.rules, then Cloudflare purge when CF_API_TOKEN + CF_ZONE_ID are set
 scripts/deploy.sh -- --only storage    # storage.rules only
 ```
 

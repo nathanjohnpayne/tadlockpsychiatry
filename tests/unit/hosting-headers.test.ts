@@ -105,7 +105,7 @@ describe("Content-Security-Policy", () => {
     it(`allows every classic inline script in ${entry} by hash`, () => {
       const html = readFileSync(resolve(root, entry), "utf8");
       const scriptSrc = directives.get("script-src") ?? [];
-      const re = /<script(\s[^>]*)?>([\s\S]*?)<\/script\s*>/gi;
+      const re = /<script\b([^>]*)>([\s\S]*?)<\/script\b[^>]*>/gi;
       let m: RegExpExecArray | null;
       let inlineCount = 0;
       while ((m = re.exec(html))) {
