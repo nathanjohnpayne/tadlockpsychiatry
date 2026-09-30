@@ -28,10 +28,6 @@ import {
   type User,
 } from "firebase/auth";
 import {
-  getAnalytics,
-  isSupported as isAnalyticsSupported,
-} from "firebase/analytics";
-import {
   getStorage,
   ref as storageRef,
   getBlob,
@@ -44,16 +40,12 @@ export const app = initializeApp(firebaseConfig);
 export const auth: Auth = getAuth(app);
 export const storage: FirebaseStorage = getStorage(app);
 
-// Initialize Firebase Analytics on every page that imports auth (which
-// is every page in this preview). Wrapped in isSupported() so SSR /
-// non-browser environments / browsers without IndexedDB don't throw.
-isAnalyticsSupported()
-  .then((ok) => {
-    if (ok) getAnalytics(app);
-  })
-  .catch(() => {
-    // Analytics is non-essential — swallow init errors.
-  });
+// No Firebase Analytics / GA4. This site is for a psychiatry practice and
+// the protected prototypes include intake and consultation flows; Google
+// Analytics is not covered by a BAA and was loading on every page with no
+// consent step. Do not add analytics (Firebase Analytics, gtag, or any
+// third-party tracker) to this module or to any page that renders intake,
+// contact, or consultation UI. tests/unit/auth.test.ts guards this.
 
 export const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });

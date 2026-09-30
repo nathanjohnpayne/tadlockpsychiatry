@@ -3,7 +3,7 @@
 Marketing/information website for the practice at
 [tadlockpsychiatry.com](https://tadlockpsychiatry.com).
 
-Static site hosted on Firebase Hosting with Firebase Analytics. Built from
+Static site hosted on Firebase Hosting (no analytics — see below). Built from
 the AI Agent Tooling Standard template ([Mergepath](https://github.com/nathanjohnpayne/mergepath)).
 
 ## For AI Agents
@@ -36,6 +36,14 @@ npm run dev      # Vite dev server (defaults to http://localhost:5173)
 npm run build && npm run preview   # production build served from dist/
 ```
 
+Storage security-rules tests run against the Firebase Storage emulator (needs the Firebase CLI and a Java runtime, e.g. `brew install openjdk@21`):
+
+```bash
+npm run test:rules
+```
+
+No analytics: this is a psychiatry practice site and the prototypes include intake and consultation flows. Do not add Google Analytics / Firebase Analytics / gtag or other third-party trackers to any page, including intake, contact, or consultation routes (Google Analytics is not covered by a HIPAA BAA).
+
 Note: `vite preview` does not apply Firebase Hosting's `cleanUrls`
 rewrite, so multi-page entries need a trailing slash locally
 (`/menu/`, `/d/1/`). Hosting rewrites them in production.
@@ -43,8 +51,11 @@ rewrite, so multi-page entries need a trailing slash locally
 ## Deploy
 
 ```bash
-op-firebase-deploy --only hosting
+scripts/deploy.sh                      # all targets: Hosting + storage.rules, then Cloudflare purge when CF_API_TOKEN + CF_ZONE_ID are set
+scripts/deploy.sh -- --only storage    # storage.rules only
 ```
+
+`scripts/deploy.sh` wraps `op-firebase-deploy` with the main-only / up-to-date guards. A `--only hosting` deploy does NOT publish `storage.rules`; any change to `storage.rules` must ship with a full deploy or `-- --only storage`.
 
 `firebase.json`'s `hosting.predeploy` runs `npm run build` (writing
 `dist/`, which Hosting serves), then `npm run build:protected` (esbuild
