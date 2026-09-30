@@ -26,9 +26,15 @@ service firebase.storage {
     // Protected design-preview content. This is the single shipped
     // allowlist source; the client probes this rule by reading metadata
     // for protected/content.js before revealing protected pages.
+    //
+    // email_verified is required so the allowlist only matches an email
+    // address the identity provider has actually verified (Google
+    // sign-in sets it to true for Google accounts). An unverified token
+    // carrying an allowlisted address is denied.
     match /protected/{file=**} {
       allow read: if request.auth != null
                    && request.auth.token.email != null
+                   && request.auth.token.email_verified == true
                    && request.auth.token.email.lower() in [
                         'nathan@nathanpayne.com',
                         'sterling.tadlock@gmail.com'
