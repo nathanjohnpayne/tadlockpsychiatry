@@ -38,11 +38,11 @@
 //
 // Risk: blob-URL dynamic import has historically been a Safari sharp
 // edge. Smoke on iOS Safari before merging — the Chromium-based
-// preview server can't catch this. CSP is currently empty in
-// firebase.json; if a Cloudflare-injected CSP enforces script-src
-// without `blob:`, the blob-URL import fails. No CSP is set today,
-// so this works in production as written; if a CSP gets added later,
-// the directive needs `script-src 'self' blob:`.
+// preview server can't catch this. firebase.json ships a
+// Content-Security-Policy-Report-Only header whose script-src includes
+// `blob:` for exactly this import (and img-src `blob:` for the
+// portrait). Keep `blob:` in both if the policy is ever switched to
+// enforcing, or the protected modules will fail to load.
 import type { User } from "firebase/auth";
 import {
   guardOrRedirect,
