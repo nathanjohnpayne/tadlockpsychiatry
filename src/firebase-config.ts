@@ -14,5 +14,6 @@ export const firebaseConfig: FirebaseOptions = {
   storageBucket: "tadlockpsychiatry.firebasestorage.app",
   messagingSenderId: "621650794003",
   appId: "1:621650794003:web:552e74976c74cebb08d1e6",
-  measurementId: "G-R8TK2SVVS0",
+  // measurementId intentionally omitted: Firebase Analytics is not used
+  // (see the note in src/auth.ts).
 };

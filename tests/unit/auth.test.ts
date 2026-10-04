@@ -5,6 +5,8 @@
 // hasProtectedAccess(), which is the browser-bundle contract that keeps
 // the allowlist in Firebase Storage Rules instead of TypeScript.
 import { beforeEach, describe, it, expect, vi } from "vitest";
+import { readdirSync, readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 
 const firebase = vi.hoisted(() => {
   const app = {};
@@ -36,10 +38,6 @@ vi.mock("firebase/auth", () => ({
   getRedirectResult: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChanged: vi.fn(),
-}));
-vi.mock("firebase/analytics", () => ({
-  getAnalytics: vi.fn(),
-  isSupported: vi.fn(() => Promise.resolve(false)),
 }));
 vi.mock("firebase/storage", () => ({
   getStorage: firebase.getStorage,
@@ -121,5 +119,55 @@ describe("getProtectedBlob", () => {
       "protected/asset.js",
     );
     expect(firebase.getBlob).toHaveBeenCalledWith({ path: "protected/asset.js" });
+  });
+});
+
+// Privacy guard: this site belongs to a psychiatry practice and the
+// protected prototypes contain intake / consultation flows. Google
+// Analytics (Firebase Analytics / gtag) has no BAA, so it must not be
+// initialized on any page. These assertions keep it from creeping back
+// into the public bundle or the protected prototypes (protected-src/ is
+// what renders the intake / consultation routes /d/1..3).
+const ANALYTICS_PATTERN =
+  /["']firebase\/analytics["']|googletagmanager\.com|google-analytics\.com|gtag\(/i;
+
+function sourceFiles(dir: string): { name: string; text: string }[] {
+  const root = resolve(__dirname, "../..");
+  return (readdirSync(join(root, dir), { recursive: true }) as string[])
+    .filter((f) => /\.(ts|tsx|js|jsx|mjs|html)$/.test(f))
+    .map((f) => ({
+      name: `${dir}/${f}`,
+      text: readFileSync(join(root, dir, f), "utf8"),
+    }));
+}
+
+describe("no analytics in the public or protected sources", () => {
+  for (const dir of ["src", "protected-src"]) {
+    it(`does not import firebase/analytics or load GA/gtag anywhere in ${dir}/`, () => {
+      const files = sourceFiles(dir);
+      expect(files.length).toBeGreaterThan(0);
+      for (const { name, text } of files) {
+        expect(text, name).not.toMatch(ANALYTICS_PATTERN);
+      }
+    });
+  }
+
+  it("does not load gtag / GA from any HTML entry", () => {
+    const root = resolve(__dirname, "../..");
+    for (const entry of [
+      "index.html",
+      "menu/index.html",
+      "d/1/index.html",
+      "d/2/index.html",
+      "d/3/index.html",
+    ]) {
+      const html = readFileSync(join(root, entry), "utf8");
+      expect(html, entry).not.toMatch(ANALYTICS_PATTERN);
+    }
+  });
+
+  it("does not configure a GA4 measurementId", async () => {
+    const { firebaseConfig } = await import("../../src/firebase-config");
+    expect(firebaseConfig).not.toHaveProperty("measurementId");
   });
 });

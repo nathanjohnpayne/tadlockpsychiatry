@@ -2,7 +2,7 @@
 
 This repository is **Tadlock Psychiatry** — the marketing/information
 website at [tadlockpsychiatry.com](https://tadlockpsychiatry.com), hosted
-on Firebase Hosting with Firebase Analytics.
+on Firebase Hosting (no analytics).
 
 It was scaffolded from the AI Agent Tooling Standard template
 ([Mergepath](https://github.com/nathanjohnpayne/mergepath)), so the
@@ -41,7 +41,8 @@ Firebase Hosting serves).
   CDN imports left are the Google Fonts stylesheets.
 - Firebase Hosting + Firebase Storage (storage.rules gates
   `protected/`).
-- Firebase Analytics (GA4 measurement id `G-R8TK2SVVS0`).
+- No analytics. Firebase Analytics / GA4 was removed: Google Analytics has no HIPAA BAA and the prototypes contain intake and consultation flows. Do not add analytics or third-party trackers to any page, including intake, contact, or consultation routes; `tests/unit/auth.test.ts` guards `src/`, `protected-src/` and the HTML entries.
+- Hosting headers (`firebase.json`): hashed `/assets/**` are `immutable`; clean-URL documents and `*.html` are `no-cache`; a `Content-Security-Policy-Report-Only` header and a restrictive `Permissions-Policy` apply to every response. `tests/unit/hosting-headers.test.ts` checks the CSP script hashes against the inline scripts in the HTML entries — update the hash in `firebase.json` when you edit one.
 
 ## Agent Role
 

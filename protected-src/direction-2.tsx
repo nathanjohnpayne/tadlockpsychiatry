@@ -19,6 +19,13 @@ import {
   h3FontSize,
   sectionPadding,
 } from "./shared/use-viewport";
+import {
+  APPLY_ID,
+  FocusStyles,
+  PREVIEW_FORM_ATTEMPT,
+  PREVIEW_FORM_NOTE,
+  sectionId,
+} from "./shared/a11y";
 
 const D2: DirectionComponent = ({ tweaks, practice: P }) => {
   const t = getD2Theme(tweaks);
@@ -51,14 +58,25 @@ const D2: DirectionComponent = ({ tweaks, practice: P }) => {
       background: bg, color: fg, fontFamily: sans,
       scrollbarWidth: "thin", scrollbarColor: `${faint} transparent`,
     }}>
+      <FocusStyles color={fg} />
       <NavBarD2 bp={bp} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} bg={bg} />
       <HeroD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg}
         scrollY={scrollY} mouse={mouse} variant={heroVariant} dark={dark} />
-      <PrincipleD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
-      <SpecialtiesD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
-      <ProcessD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
-      <AboutD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
-      <WaitlistD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      <div id={sectionId("Practice")}>
+        <PrincipleD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      </div>
+      <div id={sectionId("Specialties")}>
+        <SpecialtiesD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      </div>
+      <div id={sectionId("Process")}>
+        <ProcessD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      </div>
+      <div id={sectionId("About")}>
+        <AboutD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      </div>
+      <div id={APPLY_ID}>
+        <WaitlistD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} />
+      </div>
       <FooterD2 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} />
     </div>
   );
@@ -112,13 +130,14 @@ const NavBarD2 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => {
       <>
         <div style={{ display: "flex", gap: 32, fontSize: 13.5 }}>
           {links.map((l, i) => (
-            <a key={l} style={{ color: i === 0 ? fg : dim, textDecoration: "none", cursor: "pointer", fontWeight: i === 0 ? 500 : undefined }}>{l}</a>
+            <a key={l} href={`#${sectionId(l)}`} style={{ color: i === 0 ? fg : dim, textDecoration: "none", cursor: "pointer", fontWeight: i === 0 ? 500 : undefined }}>{l}</a>
           ))}
         </div>
-        <button style={{
+        <a href={`#${APPLY_ID}`} style={{
+          display: "inline-block", textDecoration: "none",
           padding: "9px 18px", borderRadius: 999, border: "none", background: accent, color: "#fff",
           fontSize: 13, fontWeight: 500, cursor: "pointer", letterSpacing: -0.1,
-        }}>Request consult →</button>
+        }}>Request consult →</a>
       </>
     )}
     {isMobile && open && (
@@ -134,6 +153,7 @@ const NavBarD2 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => {
         {links.map((l) => (
           <a
             key={l}
+            href={`#${sectionId(l)}`}
             onClick={() => setOpen(false)}
             style={{
               display: "block",
@@ -146,6 +166,7 @@ const NavBarD2 = ({ fg, dim, faint, accent, mono, bg, bp }: any) => {
           >{l}</a>
         ))}
         <a
+          href={`#${APPLY_ID}`}
           onClick={() => setOpen(false)}
           style={{
             marginTop: 16, padding: "12px 18px",
@@ -168,7 +189,7 @@ const HeroD2 = ({ P, fg, dim, faint, accent, mono, card, bg, scrollY, mouse, var
   return <HeroD2Metrics bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} mono={mono} card={card} bg={bg} scrollY={scrollY} mouse={mouse} dark={dark} />;
 };
 
-const HeroD2Metrics = ({ P, fg, dim, faint, accent, mono, card, bg, scrollY, mouse, dark, bp }: any) => {
+const HeroD2Metrics = ({ P, fg, dim, faint, accent, mono, card, scrollY, mouse, dark, bp }: any) => {
   // ambient wireframe sphere parallax
   const ax = (mouse.x - 0.5) * 24;
   const ay = (mouse.y - 0.5) * 24;
@@ -243,14 +264,16 @@ const HeroD2Metrics = ({ P, fg, dim, faint, accent, mono, card, bg, scrollY, mou
         </div>
 
         <div style={{ marginTop: 56, display: "flex", alignItems: "center", gap: 14 }}>
-          <button style={{
+          <a href={`#${APPLY_ID}`} style={{
+            display: "inline-block", textDecoration: "none",
             padding: "16px 26px", border: "none", background: accent, color: "#fff",
             fontSize: 14.5, fontWeight: 500, cursor: "pointer", borderRadius: 4, letterSpacing: -0.1,
-          }}>Request a consultation</button>
-          <button style={{
+          }}>Request a consultation</a>
+          <a href={`#${sectionId("Practice")}`} style={{
+            display: "inline-block", textDecoration: "none",
             padding: "16px 22px", border: `1px solid ${faint}`, background: "transparent", color: fg,
             fontSize: 14.5, fontWeight: 500, cursor: "pointer", borderRadius: 4, letterSpacing: -0.1,
-          }}>Read the practice brief</button>
+          }}>Read the practice brief</a>
         </div>
       </div>
     </section>
@@ -270,13 +293,13 @@ const HeroD2Stack = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
     </h1>
     <p style={{ marginTop: 36, fontSize: 18, lineHeight: 1.6, color: dim, maxWidth: 720, margin: "36px 0 0" }}>{P.heroSub}</p>
     <div style={{ marginTop: 56, display: "flex", gap: 12 }}>
-      <button style={{ padding: "14px 24px", border: "none", background: accent, color: "#fff", borderRadius: 4, fontSize: 14, fontWeight: 500, cursor: "pointer" }}>Request a consult</button>
-      <button style={{ padding: "14px 22px", border: `1px solid ${faint}`, background: card, color: fg, borderRadius: 4, fontSize: 14, fontWeight: 500, cursor: "pointer" }}>Practice brief</button>
+      <a href={`#${APPLY_ID}`} style={{ display: "inline-block", textDecoration: "none", padding: "14px 24px", border: "none", background: accent, color: "#fff", borderRadius: 4, fontSize: 14, fontWeight: 500, cursor: "pointer" }}>Request a consult</a>
+      <a href={`#${sectionId("Practice")}`} style={{ display: "inline-block", textDecoration: "none", padding: "14px 22px", border: `1px solid ${faint}`, background: card, color: fg, borderRadius: 4, fontSize: 14, fontWeight: 500, cursor: "pointer" }}>Practice brief</a>
     </div>
   </section>
 );
 
-const HeroD2Wide = ({ P, fg, dim, faint, accent, mono, card, scrollY, bp }: any) => (
+const HeroD2Wide = ({ P, dim, faint, accent, mono, card, scrollY, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "100px 48px"), minHeight: "90vh", display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1.5fr 1fr"), gap: collapseGridGap(bp, 64), alignItems: "center" }}>
     <div>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 36 }}>
@@ -287,7 +310,7 @@ const HeroD2Wide = ({ P, fg, dim, faint, accent, mono, card, scrollY, bp }: any)
       </h1>
       <p style={{ marginTop: 32, fontSize: 17, lineHeight: 1.6, color: dim, maxWidth: 580 }}>{P.heroSub}</p>
       <div style={{ marginTop: 40, display: "flex", gap: 12 }}>
-        <button style={{ padding: "14px 22px", border: "none", background: accent, color: "#fff", borderRadius: 4, fontSize: 14, fontWeight: 500, cursor: "pointer" }}>Request a consult</button>
+        <a href={`#${APPLY_ID}`} style={{ display: "inline-block", textDecoration: "none", padding: "14px 22px", border: "none", background: accent, color: "#fff", borderRadius: 4, fontSize: 14, fontWeight: 500, cursor: "pointer" }}>Request a consult</a>
       </div>
     </div>
     <div style={{
@@ -325,7 +348,7 @@ const PrincipleD2 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
   </section>
 );
 
-const PrincipleCardD2 = ({ c, fg, dim, faint, accent, mono, card, bp }: any) => {
+const PrincipleCardD2 = ({ c, dim, faint, accent, mono, card, bp }: any) => {
   const [hover, setHover] = React.useState(false);
   return (
     <div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
@@ -369,7 +392,7 @@ const SpecialtiesD2 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
   </section>
 );
 
-const SpecCardD2 = ({ s, fg, dim, faint, accent, mono, card, bp }: any) => {
+const SpecCardD2 = ({ s, dim, faint, accent, mono, card, bp }: any) => {
   const [hover, setHover] = React.useState(false);
   return (
     <div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
@@ -439,7 +462,7 @@ const ProcessD2 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
   </section>
 );
 
-const AboutD2 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
+const AboutD2 = ({ P, dim, faint, accent, mono, card, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "120px 48px"), borderTop: `0.5px solid ${faint}` }}>
     <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1.4fr"), gap: collapseGridGap(bp, 80), alignItems: "start" }}>
       <div>
@@ -487,9 +510,10 @@ const AboutD2 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => (
   </section>
 );
 
-const WaitlistD2 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => {
-  const [email, setEmail] = React.useState("");
-  const [submitted, setSubmitted] = React.useState(false);
+const WaitlistD2 = ({ fg, dim, faint, accent, mono, card, bp }: any) => {
+  // Prototype only: no backend. Submitting never stores or sends the
+  // input and never shows a "received" confirmation.
+  const [attempted, setAttempted] = React.useState(false);
   return (
     <section style={{ padding: sectionPadding(bp, "120px 48px"), borderTop: `0.5px solid ${faint}` }}>
       <div style={{
@@ -513,31 +537,22 @@ const WaitlistD2 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => {
             </p>
           </div>
           <div>
-            {!submitted ? (
-              <form onSubmit={(e: any) => { e.preventDefault(); if (email) setSubmitted(true); }}>
-                <label style={{ fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 8 }}>Email</label>
-                <input type="email" required value={email} onChange={(e: any) => setEmail(e.target.value)} placeholder="you@domain.com"
-                  style={{
-                    width: "100%", padding: "14px 16px", border: `1px solid ${faint}`,
-                    background: "transparent", color: fg, fontSize: 15, borderRadius: 4, outline: "none",
-                    fontFamily: "inherit", marginBottom: 12, boxSizing: "border-box",
-                  }} />
-                <button type="submit" style={{
-                  width: "100%", padding: "14px 22px", border: "none", background: accent, color: "#fff",
-                  fontSize: 14.5, fontWeight: 500, cursor: "pointer", borderRadius: 4, letterSpacing: -0.1,
-                }}>Begin application →</button>
-                <div style={{ fontSize: 11.5, color: dim, marginTop: 12, lineHeight: 1.5 }}>
-                  By submitting, you'll receive a brief intake form. Not for emergencies—if in crisis, call 988.
-                </div>
-              </form>
-            ) : (
-              <div style={{
-                padding: 24, border: `1px solid ${accent}`, borderRadius: 6,
-                fontFamily: mono, fontSize: 13, color: fg,
-              }}>
-                ✓ Application received. We'll be in touch within two business days.
+            <form onSubmit={(e: any) => { e.preventDefault(); e.currentTarget.reset(); setAttempted(true); }}>
+              <label htmlFor="d2-waitlist-email" style={{ fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 8 }}>Email</label>
+              <input id="d2-waitlist-email" aria-describedby="d2-waitlist-note" type="email" required placeholder="you@domain.com" autoComplete="off"
+                style={{
+                  width: "100%", padding: "14px 16px", border: `1px solid ${faint}`,
+                  background: "transparent", color: fg, fontSize: 15, borderRadius: 4,
+                  fontFamily: "inherit", marginBottom: 12, boxSizing: "border-box",
+                }} />
+              <button type="submit" style={{
+                width: "100%", padding: "14px 22px", border: "none", background: accent, color: "#fff",
+                fontSize: 14.5, fontWeight: 500, cursor: "pointer", borderRadius: 4, letterSpacing: -0.1,
+              }}>Begin application →</button>
+              <div id="d2-waitlist-note" role="status" style={{ fontSize: 11.5, color: attempted ? accent : dim, marginTop: 12, lineHeight: 1.5 }}>
+                {attempted ? PREVIEW_FORM_ATTEMPT : PREVIEW_FORM_NOTE} Not for emergencies—if in crisis, call 988.
               </div>
-            )}
+            </form>
           </div>
         </div>
       </div>
@@ -545,7 +560,7 @@ const WaitlistD2 = ({ P, fg, dim, faint, accent, mono, card, bp }: any) => {
   );
 };
 
-const FooterD2 = ({ P, fg, dim, faint, accent, mono, bp }: any) => (
+const FooterD2 = ({ P, dim, faint, accent, mono, bp }: any) => (
   <footer style={{ padding: sectionPadding(bp, "56px 48px 32px"), borderTop: `0.5px solid ${faint}` }}>
     <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "2fr 1fr 1fr 1fr"), gap: collapseGridGap(bp, 40), marginBottom: 48, alignItems: "start" }}>
       <div>
@@ -570,7 +585,7 @@ const FooterD2 = ({ P, fg, dim, faint, accent, mono, bp }: any) => (
   </footer>
 );
 
-const FootCol = ({ mono, dim, title, items, bp }: any) => (
+const FootCol = ({ mono, dim, title, items }: any) => (
   <div>
     <div style={{ fontFamily: mono, fontSize: 10, color: dim, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>{title}</div>
     {items.map((it, i) => <div key={i} style={{ fontSize: 13, marginBottom: 4 }}>{it}</div>)}

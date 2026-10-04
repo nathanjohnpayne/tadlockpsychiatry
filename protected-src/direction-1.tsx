@@ -32,6 +32,13 @@ import {
   h3FontSize,
   sectionPadding,
 } from "./shared/use-viewport";
+import {
+  APPLY_ID,
+  FocusStyles,
+  PREVIEW_FORM_ATTEMPT,
+  PREVIEW_FORM_NOTE,
+  sectionId,
+} from "./shared/a11y";
 
 const D1: DirectionComponent = ({ tweaks, practice: P }) => {
   const t = getD1Theme(tweaks);
@@ -101,6 +108,7 @@ const D1: DirectionComponent = ({ tweaks, practice: P }) => {
 
   return (
     <div ref={rootRef} className="d-root" style={styles.root}>
+      <FocusStyles color={fg} />
       <div ref={spotRef} style={styles.spot} />
       <div style={styles.grain} />
 
@@ -113,27 +121,39 @@ const D1: DirectionComponent = ({ tweaks, practice: P }) => {
         scrollY={scrollY} glyphRef={glyphRef} variant={heroVariant}
       />
 
-      <PositioningD1 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} serif={serif} mono={mono} />
+      <div id={sectionId("Practice")}>
+        <PositioningD1 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} serif={serif} mono={mono} />
+      </div>
 
-      <SpecialtiesD1 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} serif={serif} mono={mono} />
+      <div id={sectionId("Specialties")}>
+        <SpecialtiesD1 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} serif={serif} mono={mono} />
+      </div>
 
-      <ProcessD1 bp={bp} P={P} fg={fg} dim={dim} faint={faint} veryFaint={veryFaint} accent={accent} serif={serif} mono={mono} />
+      <div id={sectionId("Process")}>
+        <ProcessD1 bp={bp} P={P} fg={fg} dim={dim} faint={faint} veryFaint={veryFaint} accent={accent} serif={serif} mono={mono} />
+      </div>
 
-      <AboutD1 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} serif={serif} mono={mono} />
+      <div id={sectionId("About")}>
+        <AboutD1 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} serif={serif} mono={mono} />
+      </div>
 
-      <WaitlistD1 bp={bp} P={P} fg={fg} dim={dim} faint={faint} bg={bg} accent={accent} serif={serif} mono={mono} />
+      <div id={APPLY_ID}>
+        <WaitlistD1 bp={bp} P={P} fg={fg} dim={dim} faint={faint} bg={bg} accent={accent} serif={serif} mono={mono} />
+      </div>
 
       <FooterD1 bp={bp} P={P} fg={fg} dim={dim} faint={faint} accent={accent} serif={serif} mono={mono} />
     </div>
   );
 };
 
-const NavBarD1 = ({ fg, dim, faint, accent, mono, bp }: any) => {
+const NavBarD1 = ({ dim, faint, accent, mono, bp }: any) => {
   const [open, setOpen] = React.useState(false);
   const isMobile = bp === "mobile" || bp === "tablet";
   const links = ["Practice", "Specialties", "Process", "About"];
   return (
-    <nav style={{
+    // d-on-dark: this bar and its mobile panel are near-black in both
+    // themes, so focus rings inside use a light color (shared/a11y.tsx).
+    <nav className="d-on-dark" style={{
       position: "sticky", top: 0, zIndex: 10,
       padding: bp === "mobile" ? "14px 16px" : "20px 56px",
       display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -178,19 +198,19 @@ const NavBarD1 = ({ fg, dim, faint, accent, mono, bp }: any) => {
         <>
           <div style={{ display: "flex", gap: 36, fontSize: 12.5, color: dim, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase" }}>
             {links.map((l) => (
-              <a key={l} style={{ color: "inherit", textDecoration: "none", cursor: "pointer" }}>{l}</a>
+              <a key={l} href={`#${sectionId(l)}`} style={{ color: "inherit", textDecoration: "none", cursor: "pointer" }}>{l}</a>
             ))}
           </div>
-          <div style={{
+          <a href={`#${APPLY_ID}`} style={{
             padding: "9px 18px", borderRadius: 999,
-            border: `1px solid ${accent}`, color: accent,
+            border: `1px solid ${accent}`, color: accent, textDecoration: "none",
             fontSize: 12.5, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase",
             cursor: "pointer", transition: "all 0.2s",
           }}
           onMouseEnter={(e: any) => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "#0E0F12"; }}
           onMouseLeave={(e: any) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = accent; }}>
             Request consult
-          </div>
+          </a>
         </>
       )}
       {/* Mobile panel — slides down below the sticky nav. */}
@@ -207,6 +227,7 @@ const NavBarD1 = ({ fg, dim, faint, accent, mono, bp }: any) => {
           {links.map((l) => (
             <a
               key={l}
+              href={`#${sectionId(l)}`}
               onClick={() => setOpen(false)}
               style={{
                 display: "block",
@@ -220,6 +241,7 @@ const NavBarD1 = ({ fg, dim, faint, accent, mono, bp }: any) => {
             >{l}</a>
           ))}
           <a
+            href={`#${APPLY_ID}`}
             onClick={() => setOpen(false)}
             style={{
               marginTop: 16, padding: "12px 18px",
@@ -313,12 +335,13 @@ const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyph
       </p>
 
       <div style={{ marginTop: isMobile ? 32 : 40, display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap" }}>
-        <button style={{
+        <a href={`#${APPLY_ID}`} style={{
+          display: "inline-block", textDecoration: "none",
           padding: "16px 30px", border: "none", background: accent, color: "#0E0F12",
           fontFamily: mono, fontSize: 12.5, letterSpacing: 1, textTransform: "uppercase",
           cursor: "pointer", fontWeight: 600,
-        }}>Request a consultation</button>
-        <a style={{
+        }}>Request a consultation</a>
+        <a href={`#${sectionId("Practice")}`} style={{
           color: fg, fontSize: 13, fontFamily: mono, letterSpacing: 1, textTransform: "uppercase",
           textDecoration: "none", borderBottom: `1px solid ${faint}`, paddingBottom: 4, cursor: "pointer",
         }}>Read the practice brief →</a>
@@ -361,7 +384,7 @@ const HeroD1Monogram = ({ P, fg, dim, faint, accent, serif, mono, scrollY, glyph
   );
 };
 
-const HeroD1Split = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
+const HeroD1Split = ({ P, dim, faint, accent, serif, mono, bp }: any) => (
   <section style={{
     padding: sectionPadding(bp, "100px 56px"),
     display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1.4fr 1fr"), gap: collapseGridGap(bp, 64),
@@ -379,10 +402,11 @@ const HeroD1Split = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
       </h1>
       <p style={{ marginTop: 32, fontSize: 17, lineHeight: 1.55, color: dim, maxWidth: 540 }}>{P.heroSub}</p>
       <div style={{ marginTop: 40, display: "flex", gap: 24 }}>
-        <button style={{
+        <a href={`#${APPLY_ID}`} style={{
+          display: "inline-block", textDecoration: "none",
           padding: "14px 26px", border: "none", background: accent, color: "#0E0F12",
           fontFamily: mono, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", cursor: "pointer", fontWeight: 600,
-        }}>Request a consult</button>
+        }}>Request a consult</a>
       </div>
     </div>
     <div style={{
@@ -401,7 +425,7 @@ const HeroD1Split = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
   </section>
 );
 
-const HeroD1Marquee = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
+const HeroD1Marquee = ({ P, fg, dim, accent, serif, mono, bp }: any) => (
   <section style={{ padding: "100px 0 80px", position: "relative", zIndex: 3, minHeight: "82vh" }}>
     <div style={{ padding: "0 56px", marginBottom: 64 }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase" }}>
@@ -443,16 +467,17 @@ const HeroD1Marquee = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
       </div>
       <div>
         <p style={{ fontSize: 16, lineHeight: 1.6, color: dim, margin: 0 }}>{P.heroSub}</p>
-        <button style={{
+        <a href={`#${APPLY_ID}`} style={{
+          display: "inline-block", textDecoration: "none",
           marginTop: 32, padding: "14px 26px", border: "none", background: accent, color: "#0E0F12",
           fontFamily: mono, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", cursor: "pointer", fontWeight: 600,
-        }}>Request a consult</button>
+        }}>Request a consult</a>
       </div>
     </div>
   </section>
 );
 
-const PositioningD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
+const PositioningD1 = ({ P, dim, faint, accent, serif, mono, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "140px 56px 120px"), borderTop: `0.5px solid ${faint}`, position: "relative", zIndex: 3 }}>
     <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 2.4fr"), gap: collapseGridGap(bp, 80), marginBottom: 80, alignItems: "start" }}>
       <div style={{ fontFamily: mono, fontSize: 11, color: accent, letterSpacing: 1.4, textTransform: "uppercase" }}>
@@ -536,7 +561,7 @@ const SpecialtiesD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => {
   );
 };
 
-const ProcessD1 = ({ P, fg, dim, faint, veryFaint, accent, serif, mono, bp }: any) => (
+const ProcessD1 = ({ P, dim, faint, veryFaint, accent, serif, mono, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "140px 56px"), borderTop: `0.5px solid ${faint}`, background: veryFaint, position: "relative", zIndex: 3 }}>
     <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 2fr"), gap: collapseGridGap(bp, 80), marginBottom: 80, alignItems: "start" }}>
       <div>
@@ -574,7 +599,7 @@ const ProcessD1 = ({ P, fg, dim, faint, veryFaint, accent, serif, mono, bp }: an
   </section>
 );
 
-const AboutD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
+const AboutD1 = ({ P, dim, faint, accent, serif, mono, bp }: any) => (
   <section style={{ padding: sectionPadding(bp, "140px 56px"), borderTop: `0.5px solid ${faint}`, position: "relative", zIndex: 3 }}>
     <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "1fr 1.6fr"), gap: collapseGridGap(bp, 96), alignItems: "start" }}>
       <div>
@@ -630,9 +655,10 @@ const AboutD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
   </section>
 );
 
-const WaitlistD1 = ({ P, fg, dim, faint, bg, accent, serif, mono, bp }: any) => {
-  const [email, setEmail] = React.useState("");
-  const [submitted, setSubmitted] = React.useState(false);
+const WaitlistD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => {
+  // Prototype only: no backend. Submitting never stores or sends the
+  // input and never shows a "received" confirmation.
+  const [attempted, setAttempted] = React.useState(false);
   return (
     <section style={{ padding: sectionPadding(bp, "160px 56px"), borderTop: `0.5px solid ${faint}`, position: "relative", zIndex: 3 }}>
       <div style={{ maxWidth: 980, margin: "0 auto", textAlign: "center" }}>
@@ -649,29 +675,27 @@ const WaitlistD1 = ({ P, fg, dim, faint, bg, accent, serif, mono, bp }: any) => 
           A short application opens a 20-minute fit call. If we agree the practice is the right place for you, we proceed to the initial consultation.
         </p>
 
-        {!submitted ? (
-          <form onSubmit={(e: any) => { e.preventDefault(); if (email) setSubmitted(true); }}
-            style={{ marginTop: 56, display: "flex", maxWidth: 540, marginInline: "auto", border: `1px solid ${faint}`, borderRadius: 0 }}>
-            <input type="email" placeholder="you@domain.com" required
-              value={email} onChange={(e: any) => setEmail(e.target.value)}
-              style={{
-                flex: 1, padding: "18px 22px", border: "none", background: "transparent",
-                color: fg, fontSize: 15, fontFamily: mono, outline: "none",
-              }} />
-            <button type="submit" style={{
-              padding: "0 28px", border: "none", borderLeft: `1px solid ${faint}`,
-              background: accent, color: "#0E0F12",
-              fontFamily: mono, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", cursor: "pointer", fontWeight: 600,
-            }}>Apply →</button>
-          </form>
-        ) : (
-          <div style={{
-            marginTop: 56, padding: "24px 32px", border: `1px solid ${accent}`,
-            display: "inline-block", fontFamily: mono, fontSize: 12.5, color: accent, letterSpacing: 1, textTransform: "uppercase",
-          }}>
-            ✓ Application received—we'll be in touch within two business days.
-          </div>
-        )}
+        <form onSubmit={(e: any) => { e.preventDefault(); e.currentTarget.reset(); setAttempted(true); }}
+          style={{ marginTop: 56, display: "flex", maxWidth: 540, marginInline: "auto", border: `1px solid ${faint}`, borderRadius: 0 }}>
+          <label htmlFor="d1-waitlist-email" style={{
+            position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap",
+          }}>Email</label>
+          <input id="d1-waitlist-email" aria-describedby="d1-waitlist-note" type="email" placeholder="you@domain.com" required autoComplete="off"
+            style={{
+              flex: 1, padding: "18px 22px", border: "none", background: "transparent",
+              color: fg, fontSize: 15, fontFamily: mono,
+            }} />
+          <button type="submit" style={{
+            padding: "0 28px", border: "none", borderLeft: `1px solid ${faint}`,
+            background: accent, color: "#0E0F12",
+            fontFamily: mono, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", cursor: "pointer", fontWeight: 600,
+          }}>Apply →</button>
+        </form>
+        <p id="d1-waitlist-note" role="status" style={{
+          marginTop: 16, fontFamily: mono, fontSize: 11, color: attempted ? accent : dim, letterSpacing: 0.6,
+        }}>
+          {attempted ? PREVIEW_FORM_ATTEMPT : PREVIEW_FORM_NOTE}
+        </p>
 
         <div style={{ marginTop: 40, fontFamily: mono, fontSize: 10.5, color: dim, letterSpacing: 1, textTransform: "uppercase" }}>
           {P.location} · {P.format} · Out-of-network
@@ -681,7 +705,7 @@ const WaitlistD1 = ({ P, fg, dim, faint, bg, accent, serif, mono, bp }: any) => 
   );
 };
 
-const FooterD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
+const FooterD1 = ({ P, fg, dim, faint, serif, mono, bp }: any) => (
   <footer style={{ padding: sectionPadding(bp, "56px 56px 36px"), borderTop: `0.5px solid ${faint}`, position: "relative", zIndex: 3 }}>
     <div style={{ display: "grid", gridTemplateColumns: collapseGridColumns(bp, "2fr 1fr 1fr 1fr"), gap: collapseGridGap(bp, 40), marginBottom: 64, alignItems: "start" }}>
       <div>
@@ -708,7 +732,7 @@ const FooterD1 = ({ P, fg, dim, faint, accent, serif, mono, bp }: any) => (
   </footer>
 );
 
-const FooterCol = ({ mono, dim, faint, fg, title, items, bp }: any) => (
+const FooterCol = ({ mono, dim, fg, title, items }: any) => (
   <div>
     <div style={{ fontFamily: mono, fontSize: 10, color: dim, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>{title}</div>
     {items.map((it, i) => (

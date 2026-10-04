@@ -22,7 +22,10 @@
       --mono: "JetBrains Mono", ui-monospace, monospace;
     }
     * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); min-height: 100vh; overflow: hidden; }
+    /* overflow-x only: the grid/grain/frame layers are position:fixed, so
+       hiding vertical overflow was never needed, and it made the sign-in
+       button unreachable on short viewports (landscape phones, 400% zoom). */
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; }
     body { -webkit-font-smoothing: antialiased; min-height: 100vh; }
 
     /* Generative line grid driven by --mx/--my (0..1) */
