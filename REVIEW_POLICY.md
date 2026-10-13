@@ -34,7 +34,7 @@ To add a new agent, register a GitHub account following the pattern `nathanpayne
 
 ### Reviewer PAT Quick Start
 
-When posting a PR review, use the identity-checked `scripts/gh-as-reviewer.sh` wrapper with the running agent's registered reviewer identity after local credential preflight or approved cloud credential provisioning. Do not rely on the GitHub connector session or on the account shown by `gh auth status`.
+When posting a PR review, use the identity-checked `scripts/gh-as-reviewer.sh` wrapper with the running agent's registered reviewer identity after local credential preflight or approved cloud credential provisioning. The `gh pr` / `gh issue` examples in this policy are local CLI forms; Codex cloud uses only transports its capability probe confirms. Claude cloud uses wrapper-invoked `gh api` REST forms in [Cloud Agent Environments](docs/agents/cloud-environments.md), or hands blocked operations to a capable local session. Do not rely on the GitHub connector session or on the account shown by `gh auth status`.
 
 #### PAT lookup table
 
@@ -54,7 +54,7 @@ GH_AS_REVIEWER_IDENTITY=nathanpayne-claude \
   scripts/gh-as-reviewer.sh -- gh api user --jq '.login'
 # expected: nathanpayne-claude
 
-# Apply this PR's existing approval scope:
+# Local CLI example: apply this PR's existing approval scope.
 GH_AS_REVIEWER_IDENTITY=nathanpayne-claude \
   scripts/gh-as-reviewer.sh -- gh pr review <PR#> --repo <owner/repo> --approve --body "Review comment"
 ```
