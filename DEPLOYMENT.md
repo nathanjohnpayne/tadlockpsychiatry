@@ -246,11 +246,7 @@ gh secret set REVIEWER_ASSIGNMENT_TOKEN --repo {owner}/{repo} --body "$(op read 
 
 **Reviewer identity PATs (`nathanpayne-claude`, `nathanpayne-codex`,
 `nathanpayne-cursor`) are intentionally NOT stored as repo CI secrets.**
-Phase 2 internal self-peer review runs in the agent's own session: the
-agent switches its Git identity to its reviewer account with a PAT
-read directly from 1Password (`op read 'op://Private/<item-id>/token'`)
-and posts the review with that PAT. See REVIEW_POLICY.md § Phase 2 and
-each repo's `CLAUDE.md` / `AGENTS.md` for the identity-switch procedure.
+Phase 2 internal self-peer review runs in the agent's own session. Git commits retain the human author identity, `nathanjohnpayne`, and Claude cloud retains its approved signed committer. Reviewer API activity selects the registered reviewer credentials through `scripts/gh-as-reviewer.sh`; author-attributed API writes use `scripts/gh-as-author.sh`. Local PR sessions use canonical review-mode preflight and cached credentials, while cloud sessions use provisioned credentials and the capability probe in [Cloud Agent Environments](docs/agents/cloud-environments.md). See REVIEW_POLICY.md § Phase 2 and AGENTS.md for the governing reading order; no Git identity switch or direct token-read fallback is required.
 
 **Do NOT add `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `CLAUDE_PAT` /
 `CODEX_PAT` / `CURSOR_PAT` as repo secrets.** An earlier iteration of
@@ -371,27 +367,27 @@ in 1Password with the field name `token` (not `credential` or `password`).
 Use the item ID (not the item title) to avoid shell issues with parentheses in
 1Password item names like `GitHub PAT (pr-review-claude)`.
 
+The table's `op read` forms are inventory references for separately authorized, attended initial setup. They are not routine review commands or recovery after an authentication failure. Routine local review uses canonical preflight; cloud review uses provisioned credentials. After an authentication failure, stop for fresh human readiness before one canonical refresh.
+
 ### Reviewer PAT quick check
 
-Before asking a reviewer identity to approve a PR, verify the token with
-`gh api user` and then reuse the same explicit `GH_TOKEN` override for
-`gh pr review`:
+In a local PR session, run canonical review-mode preflight once, then verify the reviewer through the same identity-checked wrapper used for the write. Cloud sessions use provisioned credentials and only transports confirmed by their capability probe; Claude cloud uses the documented wrapper-invoked REST forms or hands the operation to a capable session.
 
 ```bash
-# Example: verify the Claude reviewer identity before approving a PR
-GH_TOKEN="$(op read 'op://Private/pvbq24vl2h6gl7yjclxy2hbote/token')" \
-  gh api user --jq '.login'
+# Local example: canonical preflight at session start, then wrapped writes.
+eval "$(scripts/op-preflight.sh --agent claude --mode review)"
+GH_AS_REVIEWER_IDENTITY=nathanpayne-claude \
+  scripts/gh-as-reviewer.sh -- gh api user --jq '.login'
 # expected: nathanpayne-claude
 
-GH_TOKEN="$(op read 'op://Private/pvbq24vl2h6gl7yjclxy2hbote/token')" \
-  gh pr review <PR#> --repo <owner/repo> --approve --body "Review comment"
+GH_AS_REVIEWER_IDENTITY=nathanpayne-claude \
+  scripts/gh-as-reviewer.sh -- gh pr review <PR#> --repo <owner/repo> --comment --body "Review comment"
 ```
 
 - Use the item ID from the table above for your agent identity. Do not use the 1Password item title.
-- If `gh auth status` still shows `nathanjohnpayne`, that is okay.
-  `GH_TOKEN=...` overrides the ambient login for that command.
-- On local interactive machines, the `op read` command itself may trigger the
-  1Password biometric prompt even if `op whoami` says you are not signed in.
+- The wrapper verifies the effective reviewer token; ambient `gh auth status` is not attribution proof. Cached PAT overrides are for read-only API calls, not bare review writes.
+- Use `--approve` only in the approval lane allowed by REVIEW_POLICY.md. The comment example grants no self-approval or external-clearance waiver.
+- On a sign-in or signing failure, stop and follow the task-specific readiness procedure in `docs/agents/operating-rules.md`; do not retry individual reads or switch credentials.
 - `Review Can not approve your own pull request` means the wrong GitHub
   identity is still being used. Check the table above and verify you are using
   your agent's item ID, not the author identity's.
@@ -405,11 +401,10 @@ a reviewer identity PAT (`nathanpayne-claude`, `nathanpayne-codex`,
 1. Generate a new **classic** PAT with `repo` scope for the machine user account
 2. Update the `token` field on the corresponding 1Password item
 3. Revoke the old token in GitHub
-4. Verify agent access still works: `GH_TOKEN="$(op read 'op://Private/<item-id>/token')" gh api user`
+4. After the separately authorized rotation and fresh local human readiness, refresh canonical review-mode preflight once and verify the reviewer with `GH_AS_REVIEWER_IDENTITY=nathanpayne-<agent> scripts/gh-as-reviewer.sh -- gh api user --jq .login`.
 
 Note: reviewer identity PATs are NOT stored as repo CI secrets. They are
-read from 1Password per-session by the authoring agent for the in-session
-identity switch, so rotation does not require updating any repo secrets.
+loaded through canonical local review preflight or provisioned in cloud sessions and selected for API writes by the identity-checked wrappers, so reviewer rotation does not require updating any repo secrets. Git commit identity is not switched.
 
 The `REVIEWER_ASSIGNMENT_TOKEN` repo secret (Nathan's PAT used by the
 Agent Review Pipeline workflow) follows a similar process but also

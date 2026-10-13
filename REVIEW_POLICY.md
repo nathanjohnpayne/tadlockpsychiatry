@@ -85,11 +85,12 @@ Replace `claude` with `cursor` or `codex` depending on which agent is running. T
 | `deploy` | GCP ADC credential |
 | `all` | Everything; use only for separately authorized local work requiring both review and deploy credentials |
 
-After preflight, these environment variables are set:
-- `OP_PREFLIGHT_REVIEWER_PAT` — use with `GH_TOKEN=` for read-only API calls; use `scripts/gh-as-reviewer.sh` for reviewer writes
-- `OP_PREFLIGHT_AUTHOR_PAT` — use with `GH_TOKEN=` for read-only API calls; use `scripts/gh-as-author.sh` for author writes
-- `GOOGLE_APPLICATION_CREDENTIALS` — used automatically by gcloud/Firebase scripts
-- `OP_PREFLIGHT_DONE=1` — flag indicating preflight has been run
+The mode controls which credentials preflight attempts to acquire:
+- Review credential acquisition in `review` or `all` mode provides `OP_PREFLIGHT_REVIEWER_PAT` and `OP_PREFLIGHT_AUTHOR_PAT` for read-only API calls; reviewer and author writes use their respective identity-checked wrappers.
+- Deployment acquisition in `deploy` or `all` mode provides `GOOGLE_APPLICATION_CREDENTIALS` only when acquired successfully. An `all` run may report degraded deployment acquisition and finish without that export; verify the required credential before the authorized task.
+- `OP_PREFLIGHT_DONE=1` records that preflight ran; it does not prove every credential was acquired or authorize a deployment.
+
+Cached, ambient or explicit operator credential exports can survive a mode change. Mode selection is not credential isolation or proof that prior shell credentials vanished. Verify the required exports for the authorized task; an absent export does not authorize acquiring additional credentials or expanding that task.
 
 Resolved credentials are also persisted to a chmod-600 session file at `$XDG_CACHE_HOME/mergepath/op-preflight-<agent>.env` (default `$HOME/.cache/mergepath/`). Re-running the preflight command within the TTL window (4h default, override via `OP_PREFLIGHT_TTL_SECONDS`) short-circuits to the cached values — **no new biometric prompt**. This is what lets agent drivers (Claude Code, Cursor, Codex CLI) re-run preflight at the top of every tool call without repeatedly re-unlocking 1Password; each tool call spawns a fresh subshell that cannot see env vars exported by a prior call, so the session file is the only persistence layer that survives. See nathanjohnpayne/mergepath#139 for the failure mode that motivated this design.
 
