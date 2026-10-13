@@ -5,7 +5,7 @@ Agent instructions are organized into focused sub-files under `docs/agents/`. Re
 ## Sections
 
 1. **[Repository Overview](docs/agents/repository-overview.md)** --- Project description, tech stack, agent role
-2. **[Agent Operating Rules](docs/agents/operating-rules.md)** --- Reading order, conflict resolution
+2. **[Agent Operating Rules](docs/agents/operating-rules.md)** --- Reading order, conflict resolution, PR-body and CI verification requirements
 3. **[Code Modification Rules](docs/agents/code-modification-rules.md)** --- File creation, duplication, directory constraints
 4. **[Documentation Rules](docs/agents/documentation-rules.md)** --- When and what to update
 5. **[Testing Requirements](docs/agents/testing-requirements.md)** --- Coverage expectations, test deletion policy
@@ -23,10 +23,6 @@ This repository uses a multi-identity AI agent code review system. The full poli
 - Only nathanjohnpayne merges to the target branch.
 
 ### Workflow Summary
-
-Before opening a PR, include `Authoring-Agent: <your-agent>` and a `## Self-Review` section covering correctness, regression risk, style, test coverage, and security/dependency hygiene. The author wrapper enforces the PR-body contract; delegating CLAUDE.md to this reading order preserves these requirements.
-
-Before claiming "CI passes," confirm each required workflow actually ran and succeeded. A `SKIPPED` result means the job was not executed and is not a verification signal. For a changed job that did not run, arrange a valid run through its existing workflow events or acknowledge in the PR body that the change has not been live-tested; do not claim the skipped job passed.
 
 0. In local sessions, run credential preflight at the start of every PR session (and safely
    at the top of every subsequent tool call — re-running within the TTL

@@ -238,10 +238,10 @@ Go to the new repo → Settings → Secrets and variables → Actions → New re
 |---|---|---|
 | `REVIEWER_ASSIGNMENT_TOKEN` | PAT for `nathanjohnpayne` | Fine-grained OK (owns repo) |
 
-Or use the CLI (faster):
+For separately authorized local repository setup, use the author wrapper with the author PAT acquired by canonical review-mode preflight. These examples do not authorize setting secrets or changing repository settings, and are not an authentication-recovery path. Cloud sessions must use a confirmed supported transport or hand the setup to a capable local session.
 
 ```bash
-gh secret set REVIEWER_ASSIGNMENT_TOKEN --repo {owner}/{repo} --body "$(op read 'op://Private/sm5kopwk6t6p3xmu2igesndzhe/token')"
+scripts/gh-as-author.sh -- gh secret set REVIEWER_ASSIGNMENT_TOKEN --repo {owner}/{repo} --body "$OP_PREFLIGHT_AUTHOR_PAT"
 ```
 
 **Reviewer identity PATs (`nathanpayne-claude`, `nathanpayne-codex`,
@@ -271,7 +271,7 @@ Go to the new repo → Settings → Branches → Add branch protection rule for 
 Or use the CLI:
 
 ```bash
-gh api --method PUT "repos/{owner}/{repo}/branches/main/protection" \
+scripts/gh-as-author.sh -- gh api --method PUT "repos/{owner}/{repo}/branches/main/protection" \
   --input - <<'EOF'
 {
   "required_status_checks": {
@@ -296,23 +296,17 @@ EOF
 **Known issue:** The `Self-Review Required` and `Label Gate` status checks are
 configured as required but may never report if the CI workflows that post them
 (`pr-review-policy.yml`) fail silently due to misconfigured repository secrets.
-This blocks all merges. Workarounds:
-- Fix the CI secrets so status checks report, **or**
-- Use the GitHub web UI "Merge without waiting for requirements" bypass checkbox
-
-The `--admin` flag on `gh pr merge` does **not** bypass required status checks —
-it only bypasses review requirements. The break-glass hook (`BREAK_GLASS_ADMIN=1`)
-only bypasses the Claude Code PreToolUse guard, not GitHub's branch protection API.
+Missing required reports block normal merges. Repair the workflow or its authorized configuration so the checks report. Any break-glass merge requires explicit human authorization and the governing REVIEW_POLICY.md step 17a; this troubleshooting note grants no bypass authority. A local guard override does not itself change GitHub's branch-protection enforcement.
 
 ### 5. Create required labels
 
 The workflows expect these labels to exist. Create them if they don't:
 
 ```bash
-gh label create "needs-external-review" --color "D93F0B" --description "Blocks merge until external reviewer approves" --repo {owner}/{repo}
-gh label create "needs-human-review" --color "B60205" --description "Agent disagreement — requires human review" --repo {owner}/{repo}
-gh label create "policy-violation" --color "000000" --description "Review policy violation detected" --repo {owner}/{repo}
-gh label create "audit" --color "FBCA04" --description "Weekly PR audit report" --repo {owner}/{repo}
+scripts/gh-as-author.sh -- gh label create "needs-external-review" --color "D93F0B" --description "Blocks merge until external reviewer approves" --repo {owner}/{repo}
+scripts/gh-as-author.sh -- gh label create "needs-human-review" --color "B60205" --description "Agent disagreement — requires human review" --repo {owner}/{repo}
+scripts/gh-as-author.sh -- gh label create "policy-violation" --color "000000" --description "Review policy violation detected" --repo {owner}/{repo}
+scripts/gh-as-author.sh -- gh label create "audit" --color "FBCA04" --description "Weekly PR audit report" --repo {owner}/{repo}
 ```
 
 ### 6. Verify setup
@@ -408,7 +402,7 @@ loaded through canonical local review preflight or provisioned in cloud sessions
 
 The `REVIEWER_ASSIGNMENT_TOKEN` repo secret (Nathan's PAT used by the
 Agent Review Pipeline workflow) follows a similar process but also
-needs a `gh secret set REVIEWER_ASSIGNMENT_TOKEN --repo {owner}/{repo}`
+needs a separately authorized `scripts/gh-as-author.sh -- gh secret set REVIEWER_ASSIGNMENT_TOKEN --repo {owner}/{repo}`
 call on every repo after rotating the 1Password item.
 
 ---

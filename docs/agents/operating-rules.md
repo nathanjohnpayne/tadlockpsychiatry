@@ -26,6 +26,12 @@ Conflict resolution:
 - If `AGENTS.md` or its sub-files are missing required sections: flag
   the gap and do not assume behavior for missing sections.
 
+## PR-body and CI verification requirements
+
+Before opening a PR, include `Authoring-Agent: <your-agent>` and a `## Self-Review` section covering correctness, regression risk, style, test coverage, and security/dependency hygiene. Use `scripts/gh-as-author.sh -- gh pr create ...`; that supported create path validates the effective PR body, including `--body-file` contents. Do not use direct PR creation. Delegating CLAUDE.md to the AGENTS.md reading order preserves these requirements.
+
+Before claiming "CI passes," confirm each required workflow actually ran and succeeded. A `SKIPPED` result means the job was not executed and is not a verification signal. For a changed job that did not run, arrange a valid run through its existing workflow events or acknowledge in the PR body that the change has not been live-tested; do not claim the skipped job passed.
+
 ## 1Password CLI authentication failures
 
 If any `op` command (`op read`, `op inject`, `op run`, `op document get`,
@@ -38,7 +44,7 @@ error — including but not limited to:
 - `authorization prompt dismissed`
 - `error initializing client: authorization`
 
-In a local session, follow the procedure below using the mode required by the authorized task: `review` for PR work, or `deploy` for an explicitly authorized deployment. The example uses review mode; for authorized deploy recovery, substitute `--mode deploy` so a review-only refresh does not discard the required deployment credentials. An authentication failure does not authorize acquiring additional credentials or expanding the task. Cloud sessions use provisioned credentials and the capability probe in [Cloud Agent Environments](cloud-environments.md), without local 1Password preflight.
+In a local session, follow the procedure below using the mode required by the authorized task: `review` for PR work, or `deploy` for an explicitly authorized deployment. The example uses review mode; for authorized deploy recovery, substitute `--mode deploy` and verify that the task's required credential is available. Replace `{your-agent}` with the running agent's name (`claude`, `codex` or `cursor`), never another agent's cache. Mode selection does not prove that prior shell credential exports were removed. An authentication failure does not authorize acquiring additional credentials or expanding the task. Cloud sessions use provisioned credentials and the capability probe in [Cloud Agent Environments](cloud-environments.md), without local 1Password preflight.
 
 1. **Stop immediately.** Do not retry the command, do not attempt
    workarounds (manual token entry, environment variable overrides,
@@ -47,7 +53,7 @@ In a local session, follow the procedure below using the mode required by the au
    suggest running the preflight script:
    > "1Password auth failed. Would you like to run credential preflight
    > to refresh credentials for the authorized task?
-   > `eval \"$(scripts/op-preflight.sh --agent claude --mode review)\"`"
+   > `eval \"$(scripts/op-preflight.sh --agent {your-agent} --mode review)\"`"
 3. **If preflight was already run** but credentials expired (rare —
    only after 1Password locks or the 12-hour hard limit), prompt
    the human and suggest re-running preflight:
