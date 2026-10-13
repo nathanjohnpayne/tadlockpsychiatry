@@ -11,7 +11,7 @@ This policy governs how AI coding agents author, review, and merge code across r
 All agents commit and push code under a single shared author identity:
 
 - **GitHub ID:** `nathanjohnpayne`
-- **Role:** Author, committer, and merger for all code changes
+- **Role:** Author and merger for all code changes; local sessions also use the human committer. Claude cloud preserves its approved signed committer separately, as described in [Cloud Agent Environments](docs/agents/cloud-environments.md).
 - **Used by:** Whichever agent is currently writing or fixing code
 
 ### Reviewer Identities
