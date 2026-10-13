@@ -24,6 +24,8 @@ This repository uses a multi-identity AI agent code review system. The full poli
 
 ### Workflow Summary
 
+Before opening a PR, include `Authoring-Agent: <your-agent>` and a `## Self-Review` section covering correctness, regression risk, style, test coverage, and security/dependency hygiene. The author wrapper enforces the PR-body contract; delegating CLAUDE.md to this reading order preserves these requirements.
+
 Before claiming "CI passes," confirm each required workflow actually ran and succeeded. A `SKIPPED` result means the job was not executed and is not a verification signal. For a changed job that did not run, arrange a valid run through its existing workflow events or acknowledge in the PR body that the change has not been live-tested; do not claim the skipped job passed.
 
 0. In local sessions, run credential preflight at the start of every PR session (and safely

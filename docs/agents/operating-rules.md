@@ -38,7 +38,7 @@ error — including but not limited to:
 - `authorization prompt dismissed`
 - `error initializing client: authorization`
 
-Then follow this procedure:
+In a local session, follow the procedure below using the mode required by the authorized task: `review` for PR work, or `deploy` for an explicitly authorized deployment. The example uses review mode; for authorized deploy recovery, substitute `--mode deploy` so a review-only refresh does not discard the required deployment credentials. An authentication failure does not authorize acquiring additional credentials or expanding the task. Cloud sessions use provisioned credentials and the capability probe in [Cloud Agent Environments](cloud-environments.md), without local 1Password preflight.
 
 1. **Stop immediately.** Do not retry the command, do not attempt
    workarounds (manual token entry, environment variable overrides,
@@ -46,16 +46,16 @@ Then follow this procedure:
 2. **Check if preflight was run.** If `OP_PREFLIGHT_DONE` is not set,
    suggest running the preflight script:
    > "1Password auth failed. Would you like to run credential preflight
-   > to cache review credentials at once?
+   > to refresh credentials for the authorized task?
    > `eval \"$(scripts/op-preflight.sh --agent claude --mode review)\"`"
 3. **If preflight was already run** but credentials expired (rare —
    only after 1Password locks or the 12-hour hard limit), prompt
    the human and suggest re-running preflight:
    > "Preflight credentials appear to have expired. Could you re-run
-   > preflight when you're back? I need to resume the review."
+   > preflight in the authorized task's mode when you're back?"
 4. **Wait for the human to confirm** they are present and ready before
    re-running preflight (not individual `op read` commands).
-5. After confirmation, re-run preflight. If it fails again, report the
+5. After confirmation, re-run preflight in that task's mode. If it fails again, report the
    full error output and wait — do not loop.
 
 This rule applies only to 1Password CLI sign-in and authentication
