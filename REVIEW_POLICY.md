@@ -71,10 +71,10 @@ GH_AS_REVIEWER_IDENTITY=nathanpayne-claude \
 
 ### Phase 0: Credential Preflight
 
-> Run this once at the start of every PR review or deploy session. It front-loads all 1Password credential reads and SSH key authorization into a single burst of biometric prompts (~15 seconds), so the human can step away for the rest of the session.
+> In a local PR review session, run review-mode preflight once to load the reviewer and author credentials and authorize SSH signing. Cloud sessions use provisioned credentials and the capability probe in [Cloud Agent Environments](docs/agents/cloud-environments.md); they must not invoke local 1Password preflight. Deployment credential loading belongs to a separately authorized local deploy session.
 
 ```bash
-eval "$(scripts/op-preflight.sh --agent claude --mode all)"
+eval "$(scripts/op-preflight.sh --agent claude --mode review)"
 ```
 
 Replace `claude` with `cursor` or `codex` depending on which agent is running. The `--mode` flag controls what is loaded:
@@ -83,7 +83,7 @@ Replace `claude` with `cursor` or `codex` depending on which agent is running. T
 |------|--------------|
 | `review` | Reviewer PAT + author PAT + SSH keys |
 | `deploy` | GCP ADC credential |
-| `all` | Everything (recommended) |
+| `all` | Everything; use only for separately authorized local work requiring both review and deploy credentials |
 
 After preflight, these environment variables are set:
 - `OP_PREFLIGHT_REVIEWER_PAT` — use with `GH_TOKEN=` for read-only API calls; use `scripts/gh-as-reviewer.sh` for reviewer writes
