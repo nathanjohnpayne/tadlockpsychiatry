@@ -11,7 +11,7 @@ This policy governs how AI coding agents author, review, and merge code across r
 All agents commit and push code under a single shared author identity:
 
 - **GitHub ID:** `nathanjohnpayne`
-- **Role:** Author, committer, and merger for all code changes
+- **Role:** Author and merger for all code changes; local sessions also use the human committer. Claude cloud preserves its approved signed committer separately, as described in [Cloud Agent Environments](docs/agents/cloud-environments.md).
 - **Used by:** Whichever agent is currently writing or fixing code
 
 ### Reviewer Identities
@@ -34,9 +34,7 @@ To add a new agent, register a GitHub account following the pattern `nathanpayne
 
 ### Reviewer PAT Quick Start
 
-When posting a PR review as a reviewer identity, always pass a PAT from 1Password
-to `gh` explicitly. Do not rely on the GitHub connector session or on the
-account shown by `gh auth status`.
+When posting a PR review, use the identity-checked `scripts/gh-as-reviewer.sh` wrapper with the running agent's registered reviewer identity after local credential preflight or approved cloud credential provisioning. The `gh pr` / `gh issue` examples in this policy are local CLI forms; Codex cloud uses only transports its capability probe confirms. Claude cloud uses wrapper-invoked `gh api` REST forms in [Cloud Agent Environments](docs/agents/cloud-environments.md), or hands blocked operations to a capable local session. Do not rely on the GitHub connector session or on the account shown by `gh auth status`.
 
 #### PAT lookup table
 
@@ -51,21 +49,20 @@ account shown by `gh auth status`.
 > **A 1Password item ID is not a stable identity.** On 2026-08-21 the item `o6ekjxjjl5gq6rmcneomrjahpu` was repurposed from Codex to the `nathanpayne-robot` CI account and Codex was recreated at `etak327mpz4drd4byxszfex4vm`; every row above still pointed at the old ID, so `--agent codex` silently resolved a **robot** token and posted reviews under the CI byline. Nothing in the table catches that on its own — after any PAT rotation or item edit, re-verify each row by resolving **that row's** `op://` reference into `GH_TOKEN` and checking it: `GH_TOKEN="$(op read 'op://Private/<item-id>/token')" scripts/identity-check.sh --expect-token-identity <login>`. The bare `scripts/identity-check.sh --expect-token-identity <login>` form does **not** verify a table row: it checks whatever is already in `$GH_TOKEN`. **Origin:** the robot PAT was created that day by repurposing the existing Codex 1Password item rather than minting a fresh one, so the id every doc and lookup already named silently changed identity while nothing referencing it changed — create a new item for a new identity. The map correction (mergepath#1073) landed on the hub the same day but had not reached the consumers when a Codex session hit it ~5.5h later, so treat a canonical-manifest fix as unshipped until it reaches the consumers.
 
 ```bash
-# Example: verify the Claude reviewer identity before approving a PR
-GH_TOKEN="$(op read 'op://Private/pvbq24vl2h6gl7yjclxy2hbote/token')" \
-  gh api user --jq '.login'
+# With cached local or provisioned cloud credentials for Claude, verify reviewer identity:
+GH_AS_REVIEWER_IDENTITY=nathanpayne-claude \
+  scripts/gh-as-reviewer.sh -- gh api user --jq '.login'
 # expected: nathanpayne-claude
 
-GH_TOKEN="$(op read 'op://Private/pvbq24vl2h6gl7yjclxy2hbote/token')" \
-  gh pr review <PR#> --repo <owner/repo> --approve --body "Review comment"
+# Local CLI example: apply this PR's existing approval scope.
+GH_AS_REVIEWER_IDENTITY=nathanpayne-claude \
+  scripts/gh-as-reviewer.sh -- gh pr review <PR#> --repo <owner/repo> --approve --body "Review comment"
 ```
 
 - Use the item ID from the lookup table above for your agent identity. Do not use the 1Password item title.
 - If `gh auth status` still shows `nathanjohnpayne`, that is okay.
   `GH_TOKEN=...` overrides the ambient login for that command.
-- If `op whoami` says you are not signed in, still run the `op read ...`
-  command in an interactive TTY. That is what triggers the 1Password biometric
-  prompt on local machines.
+- If 1Password reports a sign-in or biometric failure, stop and follow the pause-and-prompt procedure; wait for human readiness confirmation before one canonical preflight refresh.
 - If GitHub returns `Review Can not approve your own pull request`, the wrong
   reviewer identity is still being used. Check the lookup table and verify you
   are using your agent's item ID, not the author identity's.
@@ -74,10 +71,10 @@ GH_TOKEN="$(op read 'op://Private/pvbq24vl2h6gl7yjclxy2hbote/token')" \
 
 ### Phase 0: Credential Preflight
 
-> Run this once at the start of every PR review or deploy session. It front-loads all 1Password credential reads and SSH key authorization into a single burst of biometric prompts (~15 seconds), so the human can step away for the rest of the session.
+> In a local PR review session, run review-mode preflight once to load the reviewer and author credentials and authorize SSH signing. Cloud sessions use provisioned credentials and the capability probe in [Cloud Agent Environments](docs/agents/cloud-environments.md); they must not invoke local 1Password preflight. Deployment credential loading belongs to a separately authorized local deploy session.
 
 ```bash
-eval "$(scripts/op-preflight.sh --agent claude --mode all)"
+eval "$(scripts/op-preflight.sh --agent claude --mode review)"
 ```
 
 Replace `claude` with `cursor` or `codex` depending on which agent is running. The `--mode` flag controls what is loaded:
@@ -86,13 +83,14 @@ Replace `claude` with `cursor` or `codex` depending on which agent is running. T
 |------|--------------|
 | `review` | Reviewer PAT + author PAT + SSH keys |
 | `deploy` | GCP ADC credential |
-| `all` | Everything (recommended) |
+| `all` | Everything; use only for separately authorized local work requiring both review and deploy credentials |
 
-After preflight, these environment variables are set:
-- `OP_PREFLIGHT_REVIEWER_PAT` — use with `GH_TOKEN=` for reviewer commands
-- `OP_PREFLIGHT_AUTHOR_PAT` — use with `GH_TOKEN=` for author commands
-- `GOOGLE_APPLICATION_CREDENTIALS` — used automatically by gcloud/Firebase scripts
-- `OP_PREFLIGHT_DONE=1` — flag indicating preflight has been run
+The mode controls which credentials preflight attempts to acquire:
+- Review credential acquisition in `review` or `all` mode provides `OP_PREFLIGHT_REVIEWER_PAT` and `OP_PREFLIGHT_AUTHOR_PAT` for read-only API calls; reviewer and author writes use their respective identity-checked wrappers.
+- Deployment acquisition in `deploy` or `all` mode provides `GOOGLE_APPLICATION_CREDENTIALS` only when acquired successfully. An `all` run may report degraded deployment acquisition and finish without that export; verify the required credential before the authorized task.
+- `OP_PREFLIGHT_DONE=1` records that preflight ran; it does not prove every credential was acquired or authorize a deployment.
+
+Cached, ambient or explicit operator credential exports can survive a mode change. Mode selection is not credential isolation or proof that prior shell credentials vanished. Verify the required exports for the authorized task; an absent export does not authorize acquiring additional credentials or expanding that task.
 
 Resolved credentials are also persisted to a chmod-600 session file at `$XDG_CACHE_HOME/mergepath/op-preflight-<agent>.env` (default `$HOME/.cache/mergepath/`). Re-running the preflight command within the TTL window (4h default, override via `OP_PREFLIGHT_TTL_SECONDS`) short-circuits to the cached values — **no new biometric prompt**. This is what lets agent drivers (Claude Code, Cursor, Codex CLI) re-run preflight at the top of every tool call without repeatedly re-unlocking 1Password; each tool call spawns a fresh subshell that cannot see env vars exported by a prior call, so the session file is the only persistence layer that survives. See nathanjohnpayne/mergepath#139 for the failure mode that motivated this design.
 
@@ -103,7 +101,7 @@ Session-cache maintenance:
 
 The session file contains plaintext PATs guarded only by filesystem permissions (0600) and is readable by any process running as your user — equivalent to the protection `op` itself provides for its unlocked session. Rotate the PATs in 1Password and purge the cache if you suspect the machine was compromised.
 
-If any `op` command fails mid-session (rare — only if 1Password locks or the 12-hour hard limit is reached), re-run the preflight command with `--refresh` to force a fresh fetch.
+If a 1Password authentication or signing prompt fails mid-session, stop and follow the pause-and-prompt procedure in `docs/agents/operating-rules.md`. Wait for the human to confirm they are present and ready before one canonical preflight refresh; do not retry individual credential reads or refresh automatically.
 
 ### Phase 1: Authoring
 
@@ -113,9 +111,9 @@ If any `op` command fails mid-session (rare — only if 1Password locks or the 1
 
 ### Phase 2: Internal Review (Self-Peer Review)
 
-4. The agent switches its Git identity to its reviewer account (e.g., `nathanpayne-claude`).
-5. The reviewer identity checks out the PR branch, reviews the diff, and posts review comments on the PR with specific, actionable feedback.
-6. The agent switches back to `nathanjohnpayne` and addresses each comment—pushing fix commits to the same branch.
+4. For GitHub API review writes, the agent selects its reviewer PAT through the identity-checked `scripts/gh-as-reviewer.sh` wrapper (e.g., `nathanpayne-claude`). Commit author identity remains `nathanjohnpayne`; Claude cloud sessions retain the approved signed committer.
+5. The agent checks out the PR branch, reviews the diff, and posts specific, actionable review comments through that reviewer wrapper.
+6. The agent addresses each comment and pushes fix commits to the same branch as `nathanjohnpayne`; author-attributed GitHub API writes use the identity-checked `scripts/gh-as-author.sh` wrapper.
 7. Steps 4–6 repeat until the reviewer identity approves the PR with no outstanding issues.
 
 **All review rounds are captured as GitHub PR comments and commits.** The back-and-forth should read like two developers collaborating.
@@ -155,7 +153,7 @@ Before moving past Phase 2.5, confirm all of the following:
 > **Note on automation timing:** CI workflows may apply the `needs-external-review` label automatically when a PR is opened or updated, as an early advisory based on line count and protected paths. The label blocks merge via the label-gate until external review clears. When the label is present, the agent's responsibility after internal review passes is to proceed to [Phase 4](#phase-4-external-review) — which routes the PR to Phase 4a (automated via the Codex GitHub App) or Phase 4b (manual handoff) depending on `codex.enabled` and on whether 4a converges. The label itself does NOT imply immediate human mediation; Phase 4b only posts the handoff message when the fallback path is actually taken.
 
 8. After internal review passes, the agent evaluates whether the PR meets the external review threshold (see [Review Policy Configuration](#review-policy-configuration)).
-9. If the threshold is **not** met, the agent merges the PR as `nathanjohnpayne` with the same head-pinned command as step 17a (`gh pr merge <n> --squash --delete-branch --match-head-commit <full-current-head-sha>`). The outstanding-reviewer-disagreement rule in step 17a applies to every merge, including this one. Done.
+9. If the threshold is **not** met, the agent merges the PR as `nathanjohnpayne` with the same head-pinned command as step 17a (`scripts/gh-as-author.sh -- gh pr merge <n> --repo <owner/repo> --squash --delete-branch --match-head-commit <full-current-head-sha>`). The outstanding-reviewer-disagreement rule in step 17a applies to every merge, including this one. Done.
 10. If the threshold **is** met, the agent proceeds to [Phase 4: External Review](#phase-4-external-review). Phase 4 itself routes the PR to Phase 4a (automated, via the Codex GitHub App) or Phase 4b (manual handoff) based on `codex.enabled` in `.github/review-policy.yml` and on whether 4a's automated loop converges. The agent does NOT post a handoff message directly from this step — Phase 4b posts its own handoff message if and when the fallback path is taken.
 
 ### Phase 4: External Review
@@ -204,7 +202,7 @@ An agent proceeds to 4a first. If 4a escalates, times out, or is disabled, the a
 
      **The merge gate must never require an `APPROVED` review state from `chatgpt-codex-connector[bot]` — the app does not emit that state.** This point is load-bearing; a merge gate that looks for Codex APPROVED will never be satisfied and the Phase 4a happy path will be unreachable.
 
-17a. On a passing merge gate, `nathanjohnpayne` merges the PR with `gh pr merge <n> --squash --delete-branch --match-head-commit <full-current-head-sha>`. Never `--admin` unless the human explicitly authorizes a break-glass override in chat. `BREAK_GLASS_ADMIN` and `BREAK_GLASS_MERGE_STATE` do not release an outstanding non-author `CHANGES_REQUESTED`, including one on an older head or a summary-only review with no threads. The guard reads all review pages and retains each reviewer's latest opinion, ignoring `COMMENTED`, `PENDING` and `DISMISSED` records as replacing opinions. Release requires that reviewer to approve, dismissal of the blocking review itself, or a separate explicit owner tiebreak naming `BREAK_GLASS_REVIEW_DISAGREEMENT=<canonical-https-PR-URL>@<full-current-head-sha>`. This scoped variable releases only the disagreement gate and never `human-hold`. The local guard refuses deferred `--auto` or implicit native merge-queue merging, which would outlive its review snapshot; `--disable-auto` remains an attributed safety retraction and does not need a disagreement override. An immediate merge requires exactly one `--match-head-commit <full-current-head-sha>` on the merge command so GitHub rejects a head changed after the guard checked it. Nullable/deleted reviewer accounts and garbage-collected review commits are accepted: non-blocking reviews are ignored and an anonymous outstanding change request still needs dismissal or this scoped tiebreak. Review order follows the endpoint's chronological response order, not review IDs.
+17a. On a passing merge gate, `nathanjohnpayne` merges the PR with `scripts/gh-as-author.sh -- gh pr merge <n> --repo <owner/repo> --squash --delete-branch --match-head-commit <full-current-head-sha>`. Never `--admin` unless the human explicitly authorizes a break-glass override in chat. `BREAK_GLASS_ADMIN` and `BREAK_GLASS_MERGE_STATE` do not release an outstanding non-author `CHANGES_REQUESTED`, including one on an older head or a summary-only review with no threads. The guard reads all review pages and retains each reviewer's latest opinion, ignoring `COMMENTED`, `PENDING` and `DISMISSED` records as replacing opinions. Release requires that reviewer to approve, dismissal of the blocking review itself, or a separate explicit owner tiebreak naming `BREAK_GLASS_REVIEW_DISAGREEMENT=<canonical-https-PR-URL>@<full-current-head-sha>`. This scoped variable releases only the disagreement gate and never `human-hold`. The local guard refuses deferred `--auto` or implicit native merge-queue merging, which would outlive its review snapshot; `--disable-auto` remains an attributed safety retraction and does not need a disagreement override. An immediate merge requires exactly one `--match-head-commit <full-current-head-sha>` on the merge command so GitHub rejects a head changed after the guard checked it. Nullable/deleted reviewer accounts and garbage-collected review commits are accepted: non-blocking reviews are ignored and an anonymous outstanding change request still needs dismissal or this scoped tiebreak. Review order follows the endpoint's chronological response order, not review IDs.
 
 #### Phase 4b: Manual CLI Fallback (Human Handoff)
 
@@ -239,9 +237,9 @@ Phase 4b is invoked when Phase 4a escalates to disagreement or runaway, times ou
                              ▼
   ┌─────────────────────────────────────────────────────────┐
   │  PHASE 2: INTERNAL REVIEW                                │
-  │  Agent switches to nathanpayne-{agent}                   │
-  │  Reviews PR → posts comments                             │
-  │  Agent switches to nathanjohnpayne → fixes               │
+  │  Reviewer API writes → gh-as-reviewer.sh                │
+  │  Reviews PR → posts comments                            │
+  │  Fix commits retain human author nathanjohnpayne        │
   │  ↻ Repeat until approved                                 │
   └──────────────────────────┬──────────────────────────────┘
                              │
@@ -472,23 +470,26 @@ The agent evaluates this after internal review passes, before merging. CI workfl
 
 ## Git Identity Switching
 
-Agents must automate identity switching so that commits and PR activity are attributed to the correct GitHub account. The mechanism depends on the agent's environment, but the result must be:
+Agents select the GitHub API or SSH transport identity for each operation while keeping Git commit attribution with the verified human author. The result must be:
 
-- Commits during authoring use `nathanjohnpayne`'s name and email.
+- All commits during authoring and review use the verified human author identity, `nathanjohnpayne`.
 - Review comments and PR reviews are posted via `nathanpayne-{agent}`'s GitHub credentials.
-- The switch is fully automated within the agent session—no human intervention required for internal review.
+- GitHub API identity selection uses the token-verified author/reviewer wrappers within the session; SSH transport identity selection follows the guidance below. Neither changes Git commit identity.
 
 ### Git commit identity (user.name / user.email)
 
-```bash
-# Switch to author identity
-git config user.name "nathanjohnpayne"
-git config user.email "nathan@nathanjohnpayne.example"
+In local sessions, commit identity stays with the real human author in the machine's global Git configuration; GitHub API review writes use reviewer credentials through the identity-checked GitHub PAT wrapper. Do not switch commit identity during a review or add a repository-local identity override shared by all worktrees.
 
-# Switch to reviewer identity
-git config user.name "nathanpayne-claude"
-git config user.email "claude@nathanpayne-claude.example"
+```bash
+# Inspect configured origins and signing key, then verify effective commit identities.
+git config --show-origin --get user.name
+git config --show-origin --get user.email
+git config --show-origin --get user.signingkey
+git var GIT_AUTHOR_IDENT
+git var GIT_COMMITTER_IDENT
 ```
+
+Confirm the effective author matches the verified human author; environment overrides can replace configured name/email values. In a local session, also confirm the effective committer matches that identity. In Claude cloud, retain the approved signed cloud committer and author environment variables described in [Cloud Agent Environments](docs/agents/cloud-environments.md); the configured `user.name` and `user.email` describe the cloud committer and are not proof of the effective author. If the effective identity or signing setup is absent or wrong for the session, stop and use the approved setup flow rather than writing placeholder identities into local or global configuration. Fixture repositories retain their test identity and signing settings through explicit `git -C` targets; the shared instruction-shape guard is delivered from Mergepath under [mergepath#1195](https://github.com/nathanjohnpayne/mergepath/issues/1195).
 
 ### SSH identity switching (push / pull)
 
@@ -521,41 +522,25 @@ git remote set-url origin git@github.com:nathanjohnpayne/repo-name.git
 
 ### GitHub API authentication (gh CLI)
 
-For posting PR reviews and comments under a reviewer identity, use `gh` with an
-explicit PAT from 1Password. Do not rely on the GitHub connector session or on
-the ambient `gh` login. Refer to the [PAT lookup table](#pat-lookup-table) for
-your agent's 1Password item ID.
+Select the running agent's reviewer identity using cached local or provisioned cloud credentials. Read-only API calls may use the cached reviewer PAT explicitly; every reviewer or author write goes through the corresponding identity-checked wrapper. The wrappers select and verify the effective token without changing the gh keyring. Refer to the [PAT lookup table](#pat-lookup-table) for the agent's configured identity; the examples below use Claude's reviewer account.
 
 ```bash
-# ── Preferred: use preflight-cached PATs (no biometric prompts) ──
-
-# As reviewer (after running op-preflight.sh):
+# Read path with cached local or provisioned cloud credentials:
 GH_TOKEN="$OP_PREFLIGHT_REVIEWER_PAT" gh api user --jq '.login'
-# expected: nathanpayne-claude
+# expected for Claude: nathanpayne-claude
 
-GH_TOKEN="$OP_PREFLIGHT_REVIEWER_PAT" \
-  gh pr review <PR#> --repo <owner/repo> --approve --body "Review comment"
+# Reviewer write path; apply the existing approval scope for this PR:
+GH_AS_REVIEWER_IDENTITY=nathanpayne-claude \
+  scripts/gh-as-reviewer.sh -- gh pr review <PR#> --repo <owner/repo> --approve --body "Review comment"
 
-# As author (merge, address comments, etc.):
-GH_TOKEN="$OP_PREFLIGHT_AUTHOR_PAT" gh pr merge <PR#> --merge --match-head-commit <full-current-head-sha>
-
-# ── Fallback: inline op read (triggers biometric if session expired) ──
-
-GH_TOKEN="$(op read 'op://Private/pvbq24vl2h6gl7yjclxy2hbote/token')" \
-  gh pr review <PR#> --repo <owner/repo> --approve --body "Review comment"
+# Author write path after every existing merge gate passes:
+scripts/gh-as-author.sh -- gh pr merge <PR#> --repo <owner/repo> --merge --match-head-commit <full-current-head-sha>
 ```
 
-- Use the item ID from the [PAT lookup table](#pat-lookup-table) for your agent identity. Do not use the 1Password item title.
-- If `gh auth status` shows `nathanjohnpayne`, that is fine.
-  `GH_TOKEN=...` overrides the ambient login for that command.
-- If `op whoami` says you are not signed in, still run the `op read ...`
-  command in an interactive TTY. That is what triggers the 1Password biometric
-  prompt on local machines.
-- If GitHub returns `Review Can not approve your own pull request`, the wrong
-  reviewer identity is still being used. Check the [PAT lookup table](#pat-lookup-table)
-  and verify you are using your agent's item ID, not the author identity's.
-
-> **If `op read` fails with a sign-in or biometric error here**, follow the pause-and-prompt procedure in `docs/agents/operating-rules.md` under "1Password CLI authentication failures." Do not hardcode tokens, skip review, or retry in a loop.
+- Use the registered reviewer identity for the running agent; verify it against the [PAT lookup table](#pat-lookup-table).
+- `gh auth status` is not an attribution proof. The wrappers verify the effective write identity immediately before the operation.
+- In cloud sessions without 1Password, follow [Cloud Agent Environments](docs/agents/cloud-environments.md): use the provisioned author/reviewer PATs through the same identity-checked wrappers and do not invoke local credential preflight. If local 1Password authentication or a signing prompt fails, stop and follow the pause-and-prompt procedure in `docs/agents/operating-rules.md` under "1Password CLI authentication failures." Do not fall back to inline credential reads, hardcoded tokens, skipped review or automatic retries.
+- If GitHub reports `Review Can not approve your own pull request`, recheck the live author, reviewer identity and existing approval scope before retrying through the wrapper.
 
 ### PAT requirements for reviewer identities
 
@@ -614,7 +599,7 @@ done
 7. Export the public key: `ssh-add -L | grep "{Agent}" > ~/.ssh/id_nathanpayne_{agent}.pub`
 8. Add a `Host github-{agent}` block to `~/.ssh/config` pointing at the new public key file.
 9. Add the identity to `available_reviewers` in each relevant repo's `.github/review-policy.yml`.
-10. Add the PAT as a repository secret (e.g., `{AGENT}_PAT`) for CI workflows.
+10. Reviewer PATs belong in the agent session, not repository CI secrets. Local sessions use canonical review-mode preflight; cloud sessions use provisioned credentials and the capability probe in [Cloud Agent Environments](docs/agents/cloud-environments.md), as described in DEPLOYMENT.md.
 11. Configure the new agent's environment with both the `nathanjohnpayne` author credentials and the `nathanpayne-{agent}` reviewer credentials.
 12. The new agent follows the same workflow described above.
 
