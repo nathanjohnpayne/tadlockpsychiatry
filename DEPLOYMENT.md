@@ -381,7 +381,7 @@ GH_AS_REVIEWER_IDENTITY=nathanpayne-claude \
 - Use the item ID from the table above for your agent identity. Do not use the 1Password item title.
 - The wrapper verifies the effective reviewer token; ambient `gh auth status` is not attribution proof. Cached PAT overrides are for read-only API calls, not bare review writes.
 - Use `--approve` only in the approval lane allowed by REVIEW_POLICY.md. The comment example grants no self-approval or external-clearance waiver.
-- On a sign-in or signing failure, stop and follow the task-specific readiness procedure in `docs/agents/operating-rules.md`; do not retry individual reads or switch credentials.
+- On a sign-in or signing failure, stop and follow the pause-and-prompt procedure in `docs/agents/shared-operating-rules.md` under "1Password CLI authentication failures"; do not retry individual reads or switch credentials.
 - `Review Can not approve your own pull request` means the wrong GitHub
   identity is still being used. Check the table above and verify you are using
   your agent's item ID, not the author identity's.
